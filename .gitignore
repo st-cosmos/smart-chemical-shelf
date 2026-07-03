@@ -19,3 +19,15 @@ $RECYCLE.BIN/
 *.lnk
 *.sys
 *.tmp
+
+# Android App Build and IDE Configs
+android-app/*.iml
+android-app/.gradle/
+android-app/local.properties
+android-app/.idea/
+android-app/build/
+android-app/captures/
+android-app/.externalNativeBuild/
+android-app/.cxx/
+android-app/app/build/
+android-app/*.apk

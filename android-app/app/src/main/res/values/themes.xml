@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 앱의 기본 테마. 액션바가 없는(NoActionBar) Material3 테마를 사용합니다. -->
+    <style name="Theme.CameraMessage" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+</resources>
