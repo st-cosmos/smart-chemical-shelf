@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT LED & Weight Scale Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="dashboard-header">
+      <div class="logo-area">
+        <span class="pulse-indicator"></span>
+        <h1>IoT Smart LED & Weight Scale</h1>
+      </div>
+      <p class="subtitle">
+        Real-time status monitoring for ESP32/ESP8266 and web clients.
+      </p>
+    </header>
+
+    <div class="dashboard-grid">
+      <!-- LED Status Section -->
+      <section class="card led-panel" id="led-card">
+        <div class="card-header">
+          <h2>💡 LED Status Panel</h2>
+          <span class="badge badge-indigo">Output</span>
+        </div>
+
+        <div class="leds-container">
+          <!-- LED 1 Status -->
+          <div class="led-control-group" id="led1-group">
+            <h3>LED 1</h3>
+            <div class="lamp-container">
+              <div id="lamp-1" class="lamp off">OFF</div>
+            </div>
+            <p id="status-1" class="status">Initializing...</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Weight Scale Section -->
+      <section class="card weight-panel" id="weight-card">
+        <div class="card-header">
+          <h2>⚖️ Smart Weight Scale</h2>
+          <span class="badge badge-cyan">Input (Analog)</span>
+        </div>
+        
+        <div class="weight-display-container">
+          <div class="weight-value-wrapper">
+            <span id="weight-value">0.0</span>
+            <span class="weight-unit">kg</span>
+          </div>
+          <div id="weight-status-badge" class="weight-status-badge status-stable">
+            <span class="status-dot"></span>
+            <span id="weight-status-text">유지</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div class="progress-bar-label">
+            <span>Raw: <strong id="raw-val">0</strong> / 1023</span>
+            <span id="weight-time" class="time-stamp">-</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+      </section>
+
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

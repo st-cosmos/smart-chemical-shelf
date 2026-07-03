@@ -31,3 +31,12 @@ android-app/.externalNativeBuild/
 android-app/.cxx/
 android-app/app/build/
 android-app/*.apk
+
+# PlatformIO / Firmware
+firmware/include/config.h
+firmware/.pio/
+
+# Python / FastAPI Web Server
+web/.venv/
+web/__pycache__/
+web/*.pyc
