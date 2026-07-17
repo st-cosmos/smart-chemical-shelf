@@ -3,76 +3,448 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IoT LED & Weight Scale Dashboard</title>
+  <title>Smart Chemical Shelf - IoT Dashboard</title>
+  
+  <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <header class="dashboard-header">
-      <div class="logo-area">
+  <!-- Toast Notification System Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
         <span class="pulse-indicator"></span>
-        <h1>IoT Smart LED & Weight Scale</h1>
+        <h2>스마트 시약장</h2>
       </div>
-      <p class="subtitle">
-        Real-time status monitoring for ESP32/ESP8266 and web clients.
-      </p>
-    </header>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="dashboard-tab" id="btn-tab-dashboard">
+          <span class="icon">📊</span> 대시보드
+        </button>
+        <button class="nav-btn" data-tab="register-tab" id="btn-tab-register">
+          <span class="icon">👤</span> 사용자 등록
+        </button>
+        <button class="nav-btn" data-tab="checkin-tab" id="btn-tab-checkin">
+          <span class="icon">📥</span> 시약 반입 (Scan)
+        </button>
+        <button class="nav-btn" data-tab="checkout-tab" id="btn-tab-checkout">
+          <span class="icon">📤</span> 시약 반출 (Scan/검색)
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-badge" id="current-user-badge">
+          <span class="user-avatar">💻</span>
+          <span id="active-user-name">Guest Mode</span>
+        </div>
+      </div>
+    </aside>
 
-    <div class="dashboard-grid">
-      <!-- LED Status Section -->
-      <section class="card led-panel" id="led-card">
-        <div class="card-header">
-          <h2>💡 LED Status Panel</h2>
-          <span class="badge badge-indigo">Output</span>
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-bar">
+        <div class="system-status">
+          <span class="status-item">
+            <span class="dot dot-green"></span>
+            Server: Online
+          </span>
+          <span class="status-item">
+            <span class="dot dot-purple"></span>
+            Boards: 3 ESPs Configured
+          </span>
+        </div>
+        <div class="time-display" id="clock-display">-</div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="dashboard-tab" class="tab-pane active">
+        <div class="welcome-header">
+          <h1>실시간 시약장 대시보드</h1>
+          <p>3개의 ESP 스마트 선반의 상태와 무게, 수납된 시약을 실시간으로 확인하고 관리합니다.</p>
         </div>
 
-        <div class="leds-container">
-          <!-- LED 1 Status -->
-          <div class="led-control-group" id="led1-group">
-            <h3>LED 1</h3>
-            <div class="lamp-container">
-              <div id="lamp-1" class="lamp off">OFF</div>
+        <!-- ESP Boards Grid (3 ESPs) -->
+        <div class="esp-grid">
+          <!-- ESP-01 -->
+          <div class="card esp-card" id="card-ESP-01">
+            <div class="esp-header">
+              <div class="esp-title-group">
+                <h3>Shelf 1 (ESP-01)</h3>
+                <span class="esp-ip">192.168.1.101</span>
+              </div>
+              <div class="esp-led-indicator" id="led-indicator-ESP-01">
+                <span class="led-bulb"></span>
+                <span class="led-text">LED OFF</span>
+              </div>
             </div>
-            <p id="status-1" class="status">Initializing...</p>
+            
+            <div class="esp-body">
+              <div class="weight-gauge-wrapper">
+                <div class="weight-label">수납 무게</div>
+                <div class="weight-value"><span id="weight-ESP-01">0.0</span> <span class="unit">kg</span></div>
+              </div>
+              <div class="shelf-contents">
+                <div class="contents-label">현재 수납 시약</div>
+                <div class="chemical-badge" id="chem-badge-ESP-01">비어 있음</div>
+              </div>
+            </div>
+            
+            <div class="esp-footer">
+              <span class="update-time">Last update: <span id="time-ESP-01">-</span></span>
+            </div>
           </div>
 
+          <!-- ESP-02 -->
+          <div class="card esp-card" id="card-ESP-02">
+            <div class="esp-header">
+              <div class="esp-title-group">
+                <h3>Shelf 2 (ESP-02)</h3>
+                <span class="esp-ip">192.168.1.102</span>
+              </div>
+              <div class="esp-led-indicator" id="led-indicator-ESP-02">
+                <span class="led-bulb"></span>
+                <span class="led-text">LED OFF</span>
+              </div>
+            </div>
+            
+            <div class="esp-body">
+              <div class="weight-gauge-wrapper">
+                <div class="weight-label">수납 무게</div>
+                <div class="weight-value"><span id="weight-ESP-02">0.0</span> <span class="unit">kg</span></div>
+              </div>
+              <div class="shelf-contents">
+                <div class="contents-label">현재 수납 시약</div>
+                <div class="chemical-badge" id="chem-badge-ESP-02">비어 있음</div>
+              </div>
+            </div>
+            
+            <div class="esp-footer">
+              <span class="update-time">Last update: <span id="time-ESP-02">-</span></span>
+            </div>
+          </div>
+
+          <!-- ESP-03 -->
+          <div class="card esp-card" id="card-ESP-03">
+            <div class="esp-header">
+              <div class="esp-title-group">
+                <h3>Shelf 3 (ESP-03)</h3>
+                <span class="esp-ip">192.168.1.103</span>
+              </div>
+              <div class="esp-led-indicator" id="led-indicator-ESP-03">
+                <span class="led-bulb"></span>
+                <span class="led-text">LED OFF</span>
+              </div>
+            </div>
+            
+            <div class="esp-body">
+              <div class="weight-gauge-wrapper">
+                <div class="weight-label">수납 무게</div>
+                <div class="weight-value"><span id="weight-ESP-03">0.0</span> <span class="unit">kg</span></div>
+              </div>
+              <div class="shelf-contents">
+                <div class="contents-label">현재 수납 시약</div>
+                <div class="chemical-badge" id="chem-badge-ESP-03">비어 있음</div>
+              </div>
+            </div>
+            
+            <div class="esp-footer">
+              <span class="update-time">Last update: <span id="time-ESP-03">-</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-details">
+          <!-- Active Chemicals List -->
+          <div class="card details-card main-list-panel">
+            <div class="card-header">
+              <h2>🌿 현재 반입된 시약 목록</h2>
+              <span class="badge badge-indigo" id="chemical-count-badge">0개 수납됨</span>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="chemicals-table">
+                <thead>
+                  <tr>
+                    <th>시약명</th>
+                    <th>ESP 위치</th>
+                    <th>무게 (kg)</th>
+                    <th>상태</th>
+                    <th>반입 일시</th>
+                    <th>조작</th>
+                  </tr>
+                </thead>
+                <tbody id="chemicals-list-body">
+                  <tr>
+                    <td colspan="6" class="table-placeholder">반입된 시약이 없습니다.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ESP Board Simulator (weight & LED controller) -->
+          <div class="card details-card simulator-panel">
+            <div class="card-header">
+              <h2>⚡ ESP 스마트 선반 시뮬레이터</h2>
+              <span class="badge badge-cyan">테스트 도구</span>
+            </div>
+            <p class="simulator-desc">실제 ESP 보드가 없어도 슬라이더로 무게 변동을 주어 반입/반출 시나리오를 테스트할 수 있습니다.</p>
+            
+            <div class="sim-controls">
+              <!-- Sim ESP-01 -->
+              <div class="sim-group">
+                <div class="sim-header">
+                  <span class="sim-name">ESP-01 무게</span>
+                  <span class="sim-val" id="sim-val-ESP-01">0.0 kg</span>
+                </div>
+                <input type="range" class="sim-slider" id="sim-slider-ESP-01" min="0" max="10" step="0.1" value="0">
+                <div class="sim-btn-group">
+                  <button class="btn btn-sm btn-off" onclick="toggleSimLed('ESP-01')">LED 토글</button>
+                  <button class="btn btn-sm btn-on" onclick="addSimWeight('ESP-01', 1.5)">+1.5kg (시약 올리기)</button>
+                  <button class="btn btn-sm btn-off" onclick="resetSimWeight('ESP-01')">비우기</button>
+                </div>
+              </div>
+
+              <!-- Sim ESP-02 -->
+              <div class="sim-group">
+                <div class="sim-header">
+                  <span class="sim-name">ESP-02 무게</span>
+                  <span class="sim-val" id="sim-val-ESP-02">0.0 kg</span>
+                </div>
+                <input type="range" class="sim-slider" id="sim-slider-ESP-02" min="0" max="10" step="0.1" value="0">
+                <div class="sim-btn-group">
+                  <button class="btn btn-sm btn-off" onclick="toggleSimLed('ESP-02')">LED 토글</button>
+                  <button class="btn btn-sm btn-on" onclick="addSimWeight('ESP-02', 2.0)">+2.0kg (시약 올리기)</button>
+                  <button class="btn btn-sm btn-off" onclick="resetSimWeight('ESP-02')">비우기</button>
+                </div>
+              </div>
+
+              <!-- Sim ESP-03 -->
+              <div class="sim-group">
+                <div class="sim-header">
+                  <span class="sim-name">ESP-03 무게</span>
+                  <span class="sim-val" id="sim-val-ESP-03">0.0 kg</span>
+                </div>
+                <input type="range" class="sim-slider" id="sim-slider-ESP-03" min="0" max="10" step="0.1" value="0">
+                <div class="sim-btn-group">
+                  <button class="btn btn-sm btn-off" onclick="toggleSimLed('ESP-03')">LED 토글</button>
+                  <button class="btn btn-sm btn-on" onclick="addSimWeight('ESP-03', 0.8)">+0.8kg (시약 올리기)</button>
+                  <button class="btn btn-sm btn-off" onclick="resetSimWeight('ESP-03')">비우기</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Weight Scale Section -->
-      <section class="card weight-panel" id="weight-card">
-        <div class="card-header">
-          <h2>⚖️ Smart Weight Scale</h2>
-          <span class="badge badge-cyan">Input (Analog)</span>
-        </div>
-        
-        <div class="weight-display-container">
-          <div class="weight-value-wrapper">
-            <span id="weight-value">0.0</span>
-            <span class="weight-unit">kg</span>
-          </div>
-          <div id="weight-status-badge" class="weight-status-badge status-stable">
-            <span class="status-dot"></span>
-            <span id="weight-status-text">유지</span>
-          </div>
+      <!-- TAB 2: USER REGISTRATION -->
+      <section id="register-tab" class="tab-pane">
+        <div class="welcome-header">
+          <h1>사용자 등록 관리</h1>
+          <p>스마트 시약장 시스템을 관리할 관리자 및 연구원 계정을 등록합니다.</p>
         </div>
 
-        <div class="progress-bar-container">
-          <div class="progress-bar-label">
-            <span>Raw: <strong id="raw-val">0</strong> / 1023</span>
-            <span id="weight-time" class="time-stamp">-</span>
+        <div class="split-layout">
+          <!-- Registration Form -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>👤 신규 사용자 생성</h2>
+            </div>
+            
+            <form id="register-form" onsubmit="handleUserRegistration(event)">
+              <div class="form-group">
+                <label for="reg-username">사용자 이름 (ID)</label>
+                <div class="input-wrapper">
+                  <input type="text" id="reg-username" class="form-control" placeholder="아이디 입력" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-password">비밀번호</label>
+                <div class="input-wrapper">
+                  <input type="password" id="reg-password" class="form-control" placeholder="비밀번호 입력" required />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-on" id="btn-save-user">계정 생성 및 저장</button>
+            </form>
           </div>
-          <div class="progress-bar-track">
-            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+
+          <!-- Users List -->
+          <div class="card list-card">
+            <div class="card-header">
+              <h2>📋 등록된 사용자 목록</h2>
+            </div>
+            <div class="users-list-wrapper">
+              <ul class="users-list" id="registered-users-list">
+                <!-- User items will load here -->
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
+      <!-- TAB 3: CHECK-IN (반입) -->
+      <section id="checkin-tab" class="tab-pane">
+        <div class="welcome-header">
+          <h1>📥 시약 반입 등록 (Check-in)</h1>
+          <p>카메라 스캔 및 OCR 처리를 한 후, 시약을 스마트 선반에 올리면 자동으로 무게를 감지하여 위치를 등록합니다.</p>
+        </div>
 
-    </div>
+        <div class="split-layout">
+          <!-- Camera Scan Panel -->
+          <div class="card scanner-card">
+            <div class="card-header">
+              <h2>📷 OCR 카메라 스캔 뷰파인더</h2>
+              <span class="badge badge-indigo">카메라 시뮬레이터</span>
+            </div>
+            
+            <!-- Video Viewport -->
+            <div class="video-viewport">
+              <div class="scanning-laser"></div>
+              <video id="checkin-video" autoplay playsinline muted></video>
+              <div class="video-overlay" id="checkin-video-overlay">
+                <span class="overlay-text">카메라 스캔 대기 중...</span>
+              </div>
+              <div class="scan-marker"></div>
+            </div>
+
+            <div class="scanner-actions">
+              <button class="btn btn-off" id="btn-init-checkin-cam">카메라 켜기/끄기</button>
+              <div class="ocr-input-group" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <label for="checkin-ocr-input" style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">자동 스캔된 OCR 텍스트:</label>
+                <input type="text" id="checkin-ocr-input" class="form-control" placeholder="시약을 카메라 앞에 놓고 스캔하면 자동 입력됩니다..." readonly style="background: rgba(0,0,0,0.25); color: var(--text-secondary);">
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">카메라 앞에 배치할 시약 선택 (스캔 시뮬레이션):</span>
+                  <div class="ocr-quick-examples" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkin', 'Ethanol')">🧪 Ethanol 스캔</button>
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkin', 'Acetone')">🧪 Acetone 스캔</button>
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkin', 'Distilled Water')">🧪 Distilled Water 스캔</button>
+                  </div>
+                  <button type="button" class="btn btn-off" style="padding: 8px 12px; font-size: 12px;" onclick="simulateOcrScan('checkin', 'Random')">🎲 무작위 시약 스캔</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scan Status & Progress Panel -->
+          <div class="card status-card">
+            <div class="card-header">
+              <h2>⏳ 반입 세션 진행 상태</h2>
+            </div>
+
+            <!-- Timer / Countdown Indicator -->
+            <div id="checkin-session-status" class="session-status-idle">
+              <div class="status-icon">📥</div>
+              <h3 id="session-status-title">반입 대기 중</h3>
+              <p id="session-status-msg">왼쪽의 스캔 카메라를 통해 시약통을 스캔해주세요.</p>
+              
+              <!-- Timer visual -->
+              <div class="session-timer-circle" style="display: none;">
+                <svg viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" class="timer-bg"></circle>
+                  <circle cx="50" cy="50" r="45" class="timer-progress" id="timer-progress-ring" style="stroke-dashoffset: 0;"></circle>
+                </svg>
+                <span class="timer-number" id="session-timer-val">15</span>
+              </div>
+
+              <!-- Recommendation notice -->
+              <div class="recommendation-notice" id="recommendation-notice" style="display: none;">
+                <span class="notice-icon">💡</span>
+                <span id="recommendation-text">기존에 반입된 기록이 있는 시약입니다.</span>
+              </div>
+            </div>
+
+            <!-- Shelf Placement Helper Tips -->
+            <div class="placement-tips">
+              <h4>💡 시약 반입 단계:</h4>
+              <ol>
+                <li>카메라 또는 OCR 인식 목록에서 시약명을 고른 후 <strong>[시약 스캔 (OCR)]</strong> 버튼을 클릭합니다.</li>
+                <li>OCR 리스트에 있는 시약이면 서버에 스캔 정보가 임시 보관되며 15초 타이머가 실행됩니다.</li>
+                <li>그동안 3개의 선반 중 원하는 곳에 시약을 올려 무게를 올려주세요. (대시보드의 <strong>ESP 시뮬레이터</strong>를 활용해 무게 증가를 줄 수 있습니다).</li>
+                <li>무게가 증가한 ESP 선반을 자동 인식하여 해당 시약이 등록됩니다.</li>
+                <li>만약 15초 안에 올려두지 않으면 <strong>"선반에 올려놔주세요"</strong> 라는 긴급 알림이 발생합니다.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CHECK-OUT (반출) -->
+      <section id="checkout-tab" class="tab-pane">
+        <div class="welcome-header">
+          <h1>📤 시약 반출 및 위치 검색 (Check-out)</h1>
+          <p>수납되어 있는 시약을 찾아 선반 LED를 밝히거나, 카메라 스캔을 통해 꺼낸 시약을 자동으로 반출 처리합니다.</p>
+        </div>
+
+        <div class="split-layout">
+          <!-- Checkout Scan Panel -->
+          <div class="card scanner-card">
+            <div class="card-header">
+              <h2>📷 반출용 OCR 카메라 스캔</h2>
+              <span class="badge badge-indigo">카메라 시뮬레이터</span>
+            </div>
+
+            <div class="video-viewport">
+              <div class="scanning-laser"></div>
+              <video id="checkout-video" autoplay playsinline muted></video>
+              <div class="video-overlay" id="checkout-video-overlay">
+                <span class="overlay-text">카메라 스캔 대기 중...</span>
+              </div>
+              <div class="scan-marker"></div>
+            </div>
+
+            <div class="scanner-actions">
+              <button class="btn btn-off" id="btn-init-checkout-cam">카메라 켜기/끄기</button>
+              <div class="ocr-input-group" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <label for="checkout-ocr-input" style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">자동 스캔된 OCR 반출 텍스트:</label>
+                <input type="text" id="checkout-ocr-input" class="form-control" placeholder="시약을 카메라 앞에 놓고 스캔하면 자동 입력됩니다..." readonly style="background: rgba(0,0,0,0.25); color: var(--text-secondary);">
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">카메라 앞에 배치할 시약 선택 (스캔 시뮬레이션):</span>
+                  <div class="ocr-quick-examples" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkout', 'Ethanol')">🧪 Ethanol 반출 스캔</button>
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkout', 'Acetone')">🧪 Acetone 반출 스캔</button>
+                    <button type="button" class="btn btn-on" style="padding: 8px 12px; font-size: 12px; flex: 1;" onclick="simulateOcrScan('checkout', 'Distilled Water')">🧪 Distilled Water 반출 스캔</button>
+                  </div>
+                  <button type="button" class="btn btn-off" style="padding: 8px 12px; font-size: 12px;" onclick="simulateOcrScan('checkout', 'Random')">🎲 무작위 보관 시약 반출 스캔</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search & LED Output Panel -->
+          <div class="card search-card">
+            <div class="card-header">
+              <h2>🔍 수납 시약 위치 찾기</h2>
+            </div>
+            
+            <div class="search-form-group">
+              <div class="search-input-wrapper">
+                <input type="text" id="search-chem-input" class="form-control" placeholder="시약 이름 검색 (예: Ethanol)...">
+                <button class="btn btn-on" id="btn-search-chemicals">검색</button>
+              </div>
+            </div>
+
+            <div class="search-results-container">
+              <div class="results-header">검색 결과 및 위치 제어</div>
+              <ul class="results-list" id="search-results-list">
+                <li class="results-placeholder">시약 목록을 검색하거나 조회해주세요.</li>
+              </ul>
+            </div>
+
+            <div class="led-instruction">
+              <p class="desc-info">💡 <strong>위치 찾기 기능:</strong> 검색된 시약 항목의 <strong>[위치 표시 (LED ON)]</strong> 버튼을 클릭하면, 해당 시약이 들어있는 ESP 선반의 물리 LED에 신호가 전달되어 밝게 깜빡입니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="app.js"></script>
