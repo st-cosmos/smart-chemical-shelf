@@ -83,13 +83,15 @@ interface ApiService {
     @POST("api/checkin-session/cancel")
     suspend fun cancelCheckinSession(): Map<String, String>
 
-    // --- Legacy (구버전 LED 데모 호환) ---
-    @GET("api/led")
-    suspend fun getLed(): LedState
+    // --- Device (ESP8266 로드셀 모듈 · 구버전 데모 호환) ---
+    @GET("api/device/{device_id}")
+    suspend fun getDevice(
+        @Path("device_id") deviceId: String
+    ): DeviceState
 
-    @PUT("api/led/{led_id}")
-    suspend fun setLed(
-        @Path("led_id") ledId: String,
-        @Body command: LedCommand
-    ): LedState
+    @PUT("api/device/{device_id}")
+    suspend fun setDevice(
+        @Path("device_id") deviceId: String,
+        @Body command: DeviceCommand
+    ): DeviceState
 }

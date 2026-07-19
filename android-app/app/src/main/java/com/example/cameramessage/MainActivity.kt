@@ -135,13 +135,13 @@ class MainActivity : AppCompatActivity() {
         val target = detectChemical(text)
         if (target == lastSent) return              // 이미 그 상태면 다시 보내지 않음
         lastSent = target
-        sendLed(target)
+        sendDeviceState(target)
     }
 
     /**
      * 글자 속에서 특정 키워드가 있는지 판별합니다.
-     *  - 키워드가 하나라도 포함되어 있으면 true (LED 켜기)
-     *  - 키워드가 전혀 없거나 비어 있으면 false (LED 끄기)
+     *  - 키워드가 하나라도 포함되어 있으면 true (디바이스 ON)
+     *  - 키워드가 전혀 없거나 비어 있으면 false (디바이스 OFF)
      */
     private fun detectChemical(text: String): Boolean {
         if (text.isBlank()) return false
@@ -149,13 +149,13 @@ class MainActivity : AppCompatActivity() {
         return keywords.any { upper.contains(it) }
     }
 
-    /** 판별한 상태를 서버(PUT /api/led/{led_id})로 보냅니다. */
-    private fun sendLed(on: Boolean) {
+    /** 판별한 상태를 서버(PUT /api/device/{device_id})로 보냅니다. */
+    private fun sendDeviceState(on: Boolean) {
         lifecycleScope.launch {
             try {
-                val state = api.setLed("ESP-01", LedCommand(on = on, by = "OCR"))
+                val state = api.setDevice("device1", DeviceCommand(on = on, by = "OCR"))
                 val mark = if (state.on) "🟡 ON" else "⚪ OFF"
-                binding.statusText.text = "LED: $mark  (${state.by} · ${state.time})"
+                binding.statusText.text = "Device: $mark  (${state.by} · ${state.time})"
             } catch (e: Exception) {
                 Toast.makeText(
                     this@MainActivity,

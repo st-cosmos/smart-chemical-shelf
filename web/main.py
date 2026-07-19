@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import crud
@@ -57,66 +58,94 @@ app.include_router(logs.router)
 app.include_router(session.router)
 
 
-# --- Legacy endpoints kept for the ESP8266 firmware (firmware/src/main.cpp) ---
-# The firmware polls GET /api/led and posts potentiometer values that emulate
-# the load-cell weight of shelf module "ESP-01".
+# --- ESP8266 로드셀 모듈용 디바이스 API (firmware/src/main.cpp) ---
+# 펌웨어는 GET /api/device/{id} 로 LED 상태를 폴링하고,
+# 무게(그램, 정수)를 POST /api/weight/{id} 로 보고합니다.
+# 미지의 device_id 가 접속하면 미등록(unregistered) 선반으로 자동 생성되어
+# 앱의 "신규 선반 기기 감지" 흐름으로 이어집니다.
 
-LEGACY_SHELF_ID = "ESP-01"
+
+class DeviceCommand(BaseModel):
+    on: bool
+    by: str
 
 
-def _legacy_led_payload(db: Session):
-    shelf = db.query(models.Shelf).filter(models.Shelf.id == LEGACY_SHELF_ID).first()
-    led_on = bool(shelf.led_on) if shelf else False
-    by_val = (shelf.led_message if shelf and shelf.led_message else "서버/ESP") if led_on else "아직 아무도"
-    led_time = shelf.updated_time if shelf else "-"
+class WeightEvent(BaseModel):
+    value: int  # grams
+
+
+def _get_or_create_shelf(device_id: str, db: Session) -> models.Shelf:
+    shelf = db.query(models.Shelf).filter(models.Shelf.id == device_id).first()
+    if not shelf:
+        shelf = models.Shelf(id=device_id, status="unregistered")
+        db.add(shelf)
+        db.commit()
+        db.refresh(shelf)
+    return shelf
+
+
+def _device_payload(shelf: models.Shelf):
+    by_val = (shelf.led_message or "서버/ESP") if shelf.led_on else "아직 아무도"
+    return {"on": bool(shelf.led_on), "by": by_val, "time": shelf.updated_time or "-"}
+
+
+def _weight_status(shelf: models.Shelf) -> str:
+    if shelf.weight > shelf.prev_weight:
+        return "증가"
+    if shelf.weight < shelf.prev_weight:
+        return "감소"
+    return "유지"
+
+
+@app.get("/api/device/{device_id}")
+def get_device(device_id: str, db: Session = Depends(get_db)):
+    """디바이스(선반 모듈)의 LED 상태를 돌려줍니다."""
+    return _device_payload(_get_or_create_shelf(device_id, db))
+
+
+@app.put("/api/device/{device_id}")
+def set_device(device_id: str, cmd: DeviceCommand, db: Session = Depends(get_db)):
+    """디바이스 LED 상태를 바꾸고, 누가 언제 바꿨는지 기록합니다."""
+    shelf = _get_or_create_shelf(device_id, db)
+    shelf.led_on = cmd.on
+    shelf.led_message = f"By {cmd.by}"
+    shelf.updated_time = datetime.now().strftime("%H:%M:%S")
+    db.commit()
+    db.refresh(shelf)
+    return _device_payload(shelf)
+
+
+@app.post("/api/weight/{device_id}")
+def post_weight(device_id: str, event: WeightEvent, db: Session = Depends(get_db)):
+    """로드셀 무게(그램)를 전달받아 선반 상태를 갱신합니다.
+
+    kg 단위로 환산해 선반 무게 갱신 로직(체크인 세션 완료 감지 포함)에 위임합니다.
+    """
+    _get_or_create_shelf(device_id, db)
+    weight_kg = round(event.value / 1000.0, 3)
+    result = shelves.update_weight(device_id, schemas.WeightUpdate(weight=weight_kg), db)
+    shelf = result["shelf"]
     return {
-        "led1": {"on": led_on, "by": by_val, "time": led_time},
-        "led1_on": led_on,
-        "on": led_on,
-        "by": by_val,
-        "time": led_time,
+        "status": "success",
+        "data": {
+            "value": int(shelf.weight * 1000),
+            "previous_value": int(shelf.prev_weight * 1000),
+            "status": _weight_status(shelf),
+            "time": shelf.updated_time,
+        },
+        "session_result": result["session_result"],
     }
 
 
-@app.get("/api/led")
-def legacy_get_led(db: Session = Depends(get_db)):
-    return _legacy_led_payload(db)
-
-
-@app.put("/api/led/{led_id}")
-def legacy_set_led(led_id: str, cmd: schemas.LedCommand, db: Session = Depends(get_db)):
-    shelf = db.query(models.Shelf).filter(models.Shelf.id == LEGACY_SHELF_ID).first()
-    if shelf:
-        shelf.led_on = cmd.on
-        shelf.led_message = f"By {cmd.by}"
-        shelf.updated_time = datetime.now().strftime("%H:%M:%S")
-        db.commit()
-    return _legacy_led_payload(db)
-
-
-@app.post("/api/potentiometer")
-def legacy_post_potentiometer(event: schemas.PotentiometerEvent, db: Session = Depends(get_db)):
-    shelf_id = event.esp_id if event.esp_id else LEGACY_SHELF_ID
-    # Convert analog 0-1023 to weight in kg (0.0 - 10.0)
-    weight = round(event.value * 10.0 / 1023, 2)
-    return shelves.update_weight(shelf_id, schemas.WeightUpdate(weight=weight), db)
-
-
-@app.get("/api/potentiometer")
-def legacy_get_potentiometer(db: Session = Depends(get_db)):
-    shelf = db.query(models.Shelf).filter(models.Shelf.id == LEGACY_SHELF_ID).first()
-    weight = shelf.weight if shelf else 0.0
-    prev_weight = shelf.prev_weight if shelf else 0.0
-    status = "유지"
-    if weight > prev_weight:
-        status = "증가"
-    elif weight < prev_weight:
-        status = "감소"
+@app.get("/api/weight/{device_id}")
+def get_weight(device_id: str, db: Session = Depends(get_db)):
+    """디바이스의 현재 무게 상태(그램)를 반환합니다."""
+    shelf = _get_or_create_shelf(device_id, db)
     return {
-        "value": int(weight * 1023 / 10.0),
-        "previous_value": int(prev_weight * 1023 / 10.0),
-        "status": status,
-        "time": shelf.updated_time if shelf else "-",
+        "value": int(shelf.weight * 1000),
+        "previous_value": int(shelf.prev_weight * 1000),
+        "status": _weight_status(shelf),
+        "time": shelf.updated_time or "-",
     }
 
 
