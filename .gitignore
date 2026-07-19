@@ -38,5 +38,6 @@ firmware/.pio/
 
 # Python / FastAPI Web Server
 web/.venv/
-web/__pycache__/
-web/*.pyc
+**/__pycache__/
+**/*.pyc
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="#FFFFFF"
+    android:gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/chemSearchName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="황산 0.1M (H₂SO₄)"
+            android:textColor="#1E2A56"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/chemSearchDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="잔량 420 mL · 유통기한 2027-02-11"
+            android:textColor="#8B97BE"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/chemSearchLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/badge_primary_bg"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:text="선반 A · 1행 2열"
+        android:textColor="#3D6BF5"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+</LinearLayout>
