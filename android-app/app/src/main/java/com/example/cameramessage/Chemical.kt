@@ -99,5 +99,5 @@ data class CheckinSessionState(
     val chemical_name: String,
     val time_left: Double,
     val timeout: Boolean,
-    val username: String
+    val username: String? = null
 )

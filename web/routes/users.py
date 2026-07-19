@@ -31,6 +31,20 @@ def register_user(req: schemas.UserRegister, db: Session = Depends(get_db)):
         created_at=new_user.created_at.strftime("%Y-%m-%d %H:%M:%S")
     )
 
+@router.post("/login", response_model=schemas.UserResponse)
+def login_user(req: schemas.UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == req.username).first()
+    if not user or user.password != req.password:
+        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
+
+    return schemas.UserResponse(
+        username=user.username,
+        nickname=user.nickname,
+        role=user.role,
+        created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+
 @router.get("", response_model=List[schemas.UserResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()

@@ -1,310 +1,353 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- app-checkout / -search (design-spec §3.9, §3.10) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F2F5FF">
+    android:background="@color/bg">
 
-    <!-- Header bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="#FFFFFF"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="24dp">
-
-        <TextView
-            android:id="@+id/btnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="← 홈으로"
-            android:textColor="#3D6BF5"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="시약 반출"
-            android:textColor="#1E2A56"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- Search Section at Top -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:orientation="vertical"
-        android:paddingBottom="16dp"
-        android:paddingHorizontal="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_white_bg"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="4dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@android:drawable/ic_menu_search" />
-
-            <EditText
-                android:id="@+id/searchEditText"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginStart="12dp"
-                android:background="@null"
-                android:hint="반출할 시약 검색 — 위치를 LED로 안내해드립니다"
-                android:inputType="text"
-                android:textColor="#1E2A56"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <!-- Search results dropdown container (dynamically visible) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/searchResultsRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:maxHeight="240dp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <!-- Main View Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        android:padding="24dp"
-        android:gap="24dp">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/space_page"
+        android:paddingEnd="@dimen/space_page"
+        android:paddingTop="@dimen/space_top">
 
-        <!-- Camera View (Left) -->
+        <include
+            android:id="@+id/appHeader"
+            layout="@layout/component_app_header" />
+
+        <!-- 검색바 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_pill_outline"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="검색"
+                app:tint="@color/text_muted" />
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@null"
+                android:hint="반출할 시약 검색 — 위치를 LED로 안내해드립니다"
+                android:textColorHint="@color/text_muted"
+                android:textColor="@color/text_strong"
+                android:textSize="11sp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:importantForAutofill="no" />
+        </LinearLayout>
+
+        <!-- 검색 결과 드롭다운 -->
+        <LinearLayout
+            android:id="@+id/searchResultsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:background="@drawable/shape_rounded_14"
+            android:elevation="4dp"
+            android:padding="8dp"
+            android:visibility="gone">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/searchResultsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:overScrollMode="never" />
+        </LinearLayout>
+
+        <!-- 카메라 뷰 -->
         <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.2"
-            android:layout_marginEnd="12dp"
-            android:background="#1A2138">
+            android:id="@+id/cameraCard"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/shape_rounded_14"
+            android:backgroundTint="@color/camera_bg">
 
             <androidx.camera.view.PreviewView
                 android:id="@+id/cameraPreview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:implementationMode="compatible" />
 
-            <!-- Target Box Overlay -->
-            <View
-                android:layout_width="320dp"
-                android:layout_height="220dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="18dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/shape_pill"
+                android:backgroundTint="@color/scrim_40"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/shape_circle"
+                    android:backgroundTint="@color/danger" />
+                <TextView
+                    android:id="@+id/scanStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="스캔 중"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/btnFlash"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="18dp"
+                android:background="@drawable/shape_circle"
+                android:backgroundTint="@color/scrim_40">
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_zap"
+                    android:contentDescription="플래시"
+                    app:tint="@color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/scanFrame"
+                android:layout_width="300dp"
+                android:layout_height="200dp"
                 android:layout_gravity="center"
-                android:background="@drawable/camera_target_border" />
+                android:background="@drawable/bg_scan_frame">
+                <View
+                    android:id="@+id/scanLine"
+                    android:layout_width="256dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_scan_line"
+                    android:elevation="2dp" />
+            </FrameLayout>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="24dp"
-                android:background="#80000000"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:text="반출할 시약 라벨을 스캔하여 반출을 완료하세요"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp" />
-        </FrameLayout>
-
-        <!-- Scanned Result View (Right) -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.8"
-            android:layout_marginStart="12dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/resultCard"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/card_white_bg"
-                android:orientation="vertical"
-                android:padding="28dp">
-
+                android:layout_marginBottom="18dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/shape_pill"
+                android:backgroundTint="@color/scrim_50"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp">
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_scan_line"
+                    android:contentDescription="스캔"
+                    app:tint="@color/white" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="시약통 라벨을 프레임 안에 맞춰주세요"
+                    android:textSize="10sp"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 인식 결과 카드 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical"
+            android:background="@drawable/shape_rounded_14"
+            android:elevation="3dp"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="인식 결과"
-                    android:textColor="#8B97BE"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_strong" />
+                <TextView
+                    android:id="@+id/resultBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/shape_pill"
+                    android:backgroundTint="@color/success_soft"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text="서버 기록 완료"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/success"
+                    android:visibility="gone" />
+            </LinearLayout>
 
-                <!-- Scan state views -->
+            <TextView
+                android:id="@+id/scanResultEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="18dp"
+                android:paddingBottom="18dp"
+                android:gravity="center"
+                android:text="카메라로 시약통 라벨을 스캔해 주세요"
+                android:textSize="11sp"
+                android:textColor="@color/text_muted" />
+
+            <LinearLayout
+                android:id="@+id/scanResultActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/shape_rounded_12"
+                    android:backgroundTint="@color/primary_soft">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_flask_conical"
+                        android:contentDescription="시약"
+                        app:tint="@color/primary" />
+                </FrameLayout>
+
                 <LinearLayout
-                    android:id="@+id/scanResultEmpty"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
                     android:orientation="vertical">
-                    
-                    <ProgressBar
-                        android:layout_width="48dp"
-                        android:layout_height="48dp" />
-                        
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="시약 반출 대기 중..."
-                        android:textColor="#8B97BE"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/scanResultActive"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/checkoutSuccessText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="서버 기록 완료"
-                        android:textColor="#27B876"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/scannedChemicalName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="황산 0.1M (H₂SO₄)"
-                        android:textColor="#1E2A56"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/scannedOperatorInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="반출자 : 김연구 · 오늘 14:32"
-                        android:textColor="#44507E"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/scannedCheckoutDetails"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="보관 위치였던 선반 A · 1행 2열이 비워졌습니다"
-                        android:textColor="#8B97BE"
-                        android:textSize="14sp" />
-
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_strong" />
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
                         <ImageView
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:src="@android:drawable/checkbox_on_background" />
-
+                            android:layout_width="11dp"
+                            android:layout_height="11dp"
+                            android:src="@drawable/ic_user"
+                            android:contentDescription="반출자"
+                            app:tint="@color/text_muted" />
                         <TextView
+                            android:id="@+id/scannedOperatorInfo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="반출 기록이 성공적으로 완료되었습니다"
-                            android:textColor="#27B876"
-                            android:textSize="13sp" />
+                            android:layout_marginStart="4dp"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_body" />
                     </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btnResetScan"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="다음 시약 반출하기"
-                        android:backgroundTint="#3D6BF5"
-                        android:textColor="#FFFFFF" />
+                        android:layout_marginTop="3dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <ImageView
+                            android:layout_width="11dp"
+                            android:layout_height="11dp"
+                            android:src="@drawable/ic_map_pin"
+                            android:contentDescription="위치"
+                            app:tint="@color/text_muted" />
+                        <TextView
+                            android:id="@+id/scannedCheckoutDetails"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_body" />
+                    </LinearLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp">
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="@color/success_soft">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_check"
+                            android:contentDescription="상태"
+                            app:tint="@color/success" />
+                    </FrameLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="반출 기록 완료"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/success" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:text="서버 저장됨"
+                        android:textSize="8sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
             </LinearLayout>
-
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Bottom Navigation Bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="#FFFFFF"
-        android:elevation="8dp"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/navCheckin"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="시약 반입"
-                android:textColor="#8B97BE"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navCheckout"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="시약 반출"
-                android:textColor="#3D6BF5"
-                android:textStyle="bold"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navShelf"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="선반 관리"
-                android:textColor="#8B97BE"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </LinearLayout>
-
+    <include
+        android:id="@+id/bottomNav"
+        layout="@layout/component_bottom_nav" />
 </LinearLayout>

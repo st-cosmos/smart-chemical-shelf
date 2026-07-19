@@ -1,74 +1,59 @@
-import React from 'react';
-import { Database, LayoutGrid, ShoppingCart, UserPlus, LogOut } from 'lucide-react';
+import { Boxes, FlaskConical, Layers, LogOut, ShoppingCart, UserPlus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import type { SessionUser } from '../types';
+
+export type TabKey = 'inventory' | 'shelves' | 'orders' | 'users';
+
+const NAV_ITEMS: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: 'inventory', label: '재고 관리', icon: Boxes },
+  { key: 'shelves', label: '선반 관리', icon: Layers },
+  { key: 'orders', label: '주문 관리', icon: ShoppingCart },
+  { key: 'users', label: '사용자 등록', icon: UserPlus },
+];
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  currentUser: { username: string; nickname: string; role: string } | null;
+  activeTab: TabKey;
+  onSelect: (tab: TabKey) => void;
+  user: SessionUser;
   onLogout: () => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, currentUser, onLogout }: SidebarProps) {
+export default function Sidebar({ activeTab, onSelect, user, onLogout }: SidebarProps) {
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <span className="brand-logo">🧪</span>
-        <div className="brand-text">
-          <h1>Smart Shelf</h1>
-          <p>시약 관리 시스템</p>
+      <div className="sidebar-logo">
+        <div className="sidebar-logo-mark">
+          <FlaskConical size={22} />
+        </div>
+        <div>
+          <div className="sidebar-logo-title">Smart Shelf</div>
+          <div className="sidebar-logo-sub">시약 관리 시스템</div>
         </div>
       </div>
 
-      <nav className="nav-links">
-        <button 
-          className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`}
-          onClick={() => setActiveTab('inventory')}
+      {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
+        <button
+          key={key}
+          className={`sidebar-nav-item${activeTab === key ? ' active' : ''}`}
+          onClick={() => onSelect(key)}
         >
-          <Database size={20} />
-          <span>재고 관리</span>
+          <Icon size={20} />
+          {label}
         </button>
-        <button 
-          className={`nav-item ${activeTab === 'shelves' ? 'active' : ''}`}
-          onClick={() => setActiveTab('shelves')}
-        >
-          <LayoutGrid size={20} />
-          <span>선반 관리</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          <ShoppingCart size={20} />
-          <span>주문 관리</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          <UserPlus size={20} />
-          <span>사용자 등록</span>
-        </button>
-      </nav>
+      ))}
 
-      {currentUser && (
-        <div className="user-profile">
-          <div className="user-avatar">
-            {currentUser.nickname.charAt(0)}
-          </div>
-          <div className="user-info">
-            <h4>{currentUser.nickname}</h4>
-            <p>{currentUser.role}</p>
-          </div>
-          <button 
-            onClick={onLogout} 
-            className="btn btn-outline" 
-            style={{ padding: '6px', marginLeft: 'auto', border: 'none', background: 'transparent' }}
-            title="로그아웃"
-          >
-            <LogOut size={16} className="text-muted" />
-          </button>
+      <div className="sidebar-spacer" />
+
+      <div className="sidebar-user">
+        <div className="avatar">{user.nickname.charAt(0)}</div>
+        <div className="sidebar-user-info">
+          <div className="sidebar-user-name">{user.nickname}</div>
+          <div className="sidebar-user-role">{user.role}</div>
         </div>
-      )}
+        <button className="sidebar-logout" onClick={onLogout} title="로그아웃">
+          <LogOut size={16} />
+        </button>
+      </div>
     </aside>
   );
 }

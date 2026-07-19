@@ -9,4 +9,6 @@ requires-python = ">=3.10"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
+    "sqlalchemy>=2.0",
+    "psycopg2-binary",
 ]

@@ -40,4 +40,9 @@ firmware/.pio/
 web/.venv/
 **/__pycache__/
 **/*.pyc
+web/*.db
+
+# Frontend
+web/frontend/node_modules/
+web/frontend/dist/
 

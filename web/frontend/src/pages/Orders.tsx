@@ -1,31 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, CheckCircle, Check, DollarSign } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Check, History, Minus, Plus, ShoppingCart, X } from 'lucide-react';
+import Badge from '../components/Badge';
+import Button from '../components/Button';
+import ProgressBar from '../components/ProgressBar';
+import { getJSON, postJSON, putJSON } from '../api';
+import type { Order } from '../types';
 
-interface OrderItem {
-  id: number;
-  chemical_name: string;
-  formula: string | null;
-  manufacturer: string | null;
-  current_qty: string;
-  threshold_qty: string;
-  price: number;
-  selected: boolean;
-  status: string;
+// 테이블 컬럼 폭 (design-spec §5.2)
+const COL = {
+  check: 52,
+  remain: 170,
+  threshold: 100,
+  qty: 150,
+  price: 130,
+};
+
+function parsePct(qty: string | null): number {
+  const n = parseInt(qty ?? '', 10);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+function won(amount: number): string {
+  return `₩${amount.toLocaleString('ko-KR')}`;
 }
 
 export default function Orders() {
-  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [qty, setQty] = useState<Record<number, number>>({});
+  const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders');
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data);
-      }
-    } catch (err) {
-      console.error(err);
+      setOrders(await getJSON<Order[]>('/api/orders'));
+    } catch {
+      // 무시
     } finally {
       setLoading(false);
     }
@@ -35,174 +45,177 @@ export default function Orders() {
     fetchOrders();
   }, []);
 
-  const toggleSelect = async (id: number, currentSelected: boolean) => {
+  const qtyOf = (id: number) => qty[id] ?? 1;
+  const changeQty = (id: number, delta: number) =>
+    setQty((prev) => ({ ...prev, [id]: Math.max(1, qtyOf(id) + delta) }));
+
+  const pending = orders.filter((o) => o.status === 'pending');
+  const ordered = orders.filter((o) => o.status === 'ordered');
+  const list = showHistory ? ordered : pending;
+  const selectedOrders = pending.filter((o) => o.selected);
+  const totalAmount = selectedOrders.reduce((sum, o) => sum + o.price * qtyOf(o.id), 0);
+
+  const flash = (ok: boolean, text: string) => {
+    setNotice({ ok, text });
+    setTimeout(() => setNotice(null), 4000);
+  };
+
+  const toggleSelect = async (order: Order) => {
+    const next = !order.selected;
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, selected: next } : o)));
     try {
-      const response = await fetch(`/api/orders/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selected: !currentSelected })
-      });
-      if (response.ok) {
-        // optimistically update state
-        setOrders(prev => prev.map(item => 
-          item.id === id ? { ...item, selected: !currentSelected } : item
-        ));
-      }
-    } catch (err) {
-      console.error(err);
+      await putJSON(`/api/orders/${order.id}`, { selected: next });
+    } catch {
+      // 실패 시 롤백
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, selected: order.selected } : o)),
+      );
     }
   };
 
-  const handleConfirmOrder = async () => {
-    const selectedCount = orders.filter(o => o.selected && o.status === 'pending').length;
-    if (selectedCount === 0) {
-      alert('주문할 항목을 선택해주세요.');
-      return;
-    }
-
+  const excludeSelected = async () => {
     try {
-      const response = await fetch('/api/orders/confirm', {
-        method: 'POST'
-      });
-      if (response.ok) {
-        alert('선택된 항목들의 주문 컨펌이 성공적으로 완료되었습니다.');
-        fetchOrders();
-      } else {
-        alert('주문 컨펌 실패');
-      }
+      await Promise.all(
+        selectedOrders.map((o) => putJSON(`/api/orders/${o.id}`, { selected: false })),
+      );
+      await fetchOrders();
     } catch (err) {
-      alert('서버 통신 오류');
+      flash(false, err instanceof Error ? err.message : '후보 제외에 실패했습니다.');
     }
   };
 
-  const pendingOrders = orders.filter(o => o.status === 'pending');
-  const completedOrders = orders.filter(o => o.status === 'ordered');
-  
-  const selectedItems = pendingOrders.filter(o => o.selected);
-  const totalCost = selectedItems.reduce((sum, item) => sum + item.price, 0);
+  const confirmOrders = async () => {
+    try {
+      const res = await postJSON<{ status: string; count: number }>('/api/orders/confirm');
+      flash(true, `${res.count}건의 주문이 확정되었습니다.`);
+      await fetchOrders();
+    } catch (err) {
+      flash(false, err instanceof Error ? err.message : '주문 컨펌에 실패했습니다.');
+    }
+  };
 
   return (
-    <div className="main-content">
-      <header className="topbar">
-        <div className="page-title">
-          <h2>주문 관리</h2>
-          <p>재고 부족으로 자동 감지되거나 보완이 필요한 시약들을 발주하고 주문 현황을 파악합니다.</p>
+    <div className="page">
+      <div className="topbar">
+        <div className="topbar-info">
+          <h1 className="topbar-title">주문 관리</h1>
+          <span className="topbar-sub">
+            {showHistory
+              ? `주문 완료된 시약 ${ordered.length}건`
+              : `재고 부족으로 주문 후보에 등록된 시약 ${pending.length}건`}
+          </span>
         </div>
-      </header>
+        <Button variant="outline" icon={History} onClick={() => setShowHistory(!showHistory)}>
+          {showHistory ? '주문 후보' : '주문 내역'}
+        </Button>
+      </div>
 
-      <div className="content-body" style={{ gap: '32px' }}>
-        <div className="card table-card" style={{ flexGrow: 2 }}>
-          <div className="card-title">
-            <span>주문 후보 목록 ({pendingOrders.length}건)</span>
-            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>잔량이 기준치 이하인 시약이 자동으로 등록됩니다</span>
+      <div className="card table-card">
+        <div className="t-head">
+          <div className="t-cell" style={{ width: COL.check }}>
+            <span className="checkbox" />
           </div>
-
-          <div className="table-wrapper">
-            {loading ? (
-              <p style={{ padding: '20px', textAlign: 'center' }}>데이터를 불러오는 중입니다...</p>
-            ) : pendingOrders.length === 0 ? (
-              <p style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>대기 중인 주문 후보가 없습니다.</p>
-            ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: '40px' }}>선택</th>
-                    <th>시약 정보</th>
-                    <th>현재 잔량</th>
-                    <th>기준치</th>
-                    <th>단가</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingOrders.map(item => (
-                    <tr 
-                      key={item.id}
-                      onClick={() => toggleSelect(item.id, item.selected)}
-                      className={item.selected ? 'selected' : ''}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <input 
-                          type="checkbox" 
-                          checked={item.selected}
-                          onChange={() => toggleSelect(item.id, item.selected)}
-                          style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }}
-                        />
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 700, color: 'var(--text-strong)' }}>{item.chemical_name}</span>
-                          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            {item.formula} · {item.manufacturer}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="badge badge-danger">{item.current_qty}</span>
-                      </td>
-                      <td>{item.threshold_qty}</td>
-                      <td style={{ fontWeight: 700, color: 'var(--text-strong)' }}>
-                        ₩{item.price.toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+          <div className="t-cell grow">시약 이름</div>
+          <div className="t-cell" style={{ width: COL.remain }}>현재 잔량</div>
+          <div className="t-cell" style={{ width: COL.threshold }}>기준 수량</div>
+          <div className="t-cell" style={{ width: COL.qty }}>주문 수량</div>
+          <div className="t-cell" style={{ width: COL.price }}>예상 금액</div>
         </div>
-
-        {/* Order Sidebar Summary */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '360px', flexShrink: 0 }}>
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-strong)' }}>발주 요약</h3>
-            
-            <div style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>선택한 품목</span>
-                <strong style={{ color: 'var(--text-strong)' }}>{selectedItems.length} 건</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>예상 총합</span>
-                <strong style={{ color: 'var(--primary)', fontSize: '18px' }}>₩{totalCost.toLocaleString()}</strong>
-              </div>
+        <div className="t-body">
+          {loading ? (
+            <div className="t-empty">데이터를 불러오는 중입니다...</div>
+          ) : list.length === 0 ? (
+            <div className="t-empty">
+              {showHistory ? '주문 내역이 없습니다.' : '주문 후보가 없습니다.'}
             </div>
-
-            <button 
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              disabled={selectedItems.length === 0}
-              onClick={handleConfirmOrder}
-            >
-              선택 항목 주문 컨펌
-            </button>
-          </div>
-
-          {/* Completed Orders List */}
-          <div className="card" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '14px' }}>
-              주문 완료 내역 ({completedOrders.length}건)
-            </h3>
-            <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {completedOrders.length === 0 ? (
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>주문 완료 내역이 없습니다.</p>
-              ) : (
-                completedOrders.map(item => (
-                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg)', borderRadius: 'var(--radius-sm)' }}>
-                    <div>
-                      <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-strong)' }}>{item.chemical_name}</h4>
-                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{item.manufacturer}</p>
-                    </div>
-                    <span className="badge badge-success">
-                      <Check size={12} /> 주문완료
-                    </span>
+          ) : (
+            list.map((order) => {
+              const checked = !showHistory && order.selected;
+              return (
+                <div key={order.id} className={`t-row${checked ? ' checked' : ''}`}>
+                  <div className="t-cell" style={{ width: COL.check, padding: '14px 16px' }}>
+                    {showHistory ? (
+                      <Badge variant="primary">완료</Badge>
+                    ) : (
+                      <button
+                        className={`checkbox${order.selected ? ' checked' : ''}`}
+                        onClick={() => toggleSelect(order)}
+                        title={order.selected ? '선택 해제' : '선택'}
+                      >
+                        {order.selected && <Check size={11} />}
+                      </button>
+                    )}
                   </div>
-                ))
-              )}
-            </div>
-          </div>
+                  <div className="t-cell grow" style={{ padding: '12px 16px' }}>
+                    <div className="cell-title">
+                      <span className="cell-title-main">{order.chemical_name}</span>
+                      <span className="cell-title-sub">
+                        {[order.formula, order.manufacturer].filter(Boolean).join(' · ')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="t-cell" style={{ width: COL.remain, padding: '12px 16px' }}>
+                    <ProgressBar percent={parsePct(order.current_qty)} trackWidth={64} danger />
+                  </div>
+                  <div className="t-cell" style={{ width: COL.threshold, padding: '12px 16px' }}>
+                    {order.threshold_qty ?? '-'}
+                  </div>
+                  <div className="t-cell" style={{ width: COL.qty, padding: '12px 16px' }}>
+                    {showHistory ? (
+                      <span>{qtyOf(order.id)}</span>
+                    ) : (
+                      <div className="stepper">
+                        <button className="stepper-btn" onClick={() => changeQty(order.id, -1)}>
+                          <Minus size={13} />
+                        </button>
+                        <span className="stepper-count">{qtyOf(order.id)}</span>
+                        <button className="stepper-btn plus" onClick={() => changeQty(order.id, 1)}>
+                          <Plus size={13} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="t-cell"
+                    style={{
+                      width: COL.price,
+                      padding: '12px 16px',
+                      fontWeight: 600,
+                      color: 'var(--text-strong)',
+                    }}
+                  >
+                    {won(order.price * qtyOf(order.id))}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
+
+      {notice && <div className={notice.ok ? 'form-success' : 'form-error'}>{notice.text}</div>}
+
+      {!showHistory && (
+        <div className="footer-bar">
+          <div className="footer-bar-summary">
+            <ShoppingCart size={18} />
+            {selectedOrders.length}건 선택 · 예상 합계 {won(totalAmount)}
+          </div>
+          <div className="footer-bar-actions">
+            <Button
+              variant="outline"
+              icon={X}
+              onClick={excludeSelected}
+              disabled={selectedOrders.length === 0}
+            >
+              후보에서 제외
+            </Button>
+            <Button icon={Check} onClick={confirmOrders} disabled={selectedOrders.length === 0}>
+              선택 항목 주문 컨펌
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,25 +1,47 @@
 package com.example.cameramessage
 
-import android.app.AlertDialog
-import android.content.Intent
+import android.content.ClipData
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.DragEvent
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.cameramessage.databinding.ActivityShelfManageBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * app-shelf-manage (design-spec §3.4)
+ * 미등록 기기 칩(드래그 소스) → 그리드 빈 슬롯(드롭 타깃) → 기기 등록 카드 → register API.
+ * 선반 카드/그리드는 configs(행×열) 기반으로 동적 생성. 행/열 추가, 새 선반 추가 지원.
+ */
 class ShelfManageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityShelfManageBinding
     private var pollJob: Job? = null
-    private var selectedUnregisteredId: String? = null
     private lateinit var exceptionHelper: ExceptionDialogHelper
+
+    private val expandedShelves = mutableSetOf<String>()
+    private var expandedInit = false
+    private var isDragging = false
+
+    private var pendingDeviceId: String? = null
+    private var pendingShelfId: String? = null
+    private var pendingRow = 0
+    private var pendingCol = 0
+
+    private var lastConfigs = listOf<ShelfConfig>()
+    private var lastShelves = listOf<ShelfDevice>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +49,18 @@ class ShelfManageActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         exceptionHelper = ExceptionDialogHelper(this)
+        NavBar.setup(binding.bottomNav, this, NavBar.TAB_SHELF)
 
-        setupNavigations()
+        binding.btnAddShelf.setOnClickListener { addShelf() }
+        binding.btnRegisterDevice.setOnClickListener { submitRegistration() }
+
+        // 등록 카드가 열려 있으면 뒤로가기로 먼저 닫는다
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.registerCard.visibility == View.VISIBLE) hideRegisterCard()
+                else finish()
+            }
+        })
     }
 
     override fun onResume() {
@@ -43,40 +75,11 @@ class ShelfManageActivity : AppCompatActivity() {
         exceptionHelper.stopPollingAlerts()
     }
 
-    private fun setupNavigations() {
-        binding.navCheckin.setOnClickListener {
-            startActivity(Intent(this, CheckinActivity::class.java))
-            finish()
-        }
-
-        binding.navCheckout.setOnClickListener {
-            startActivity(Intent(this, CheckoutActivity::class.java))
-            finish()
-        }
-
-        binding.navShelf.setOnClickListener {
-            // Already here
-        }
-        
-        binding.btnAddShelf.setOnClickListener {
-            Toast.makeText(this, "새 선반 추가 기능은 웹 관리자 페이지를 이용해 주세요.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun startPolling() {
+        pollJob?.cancel()
         pollJob = lifecycleScope.launch {
             while (true) {
-                try {
-                    val shelves = NetworkClient.api.getShelves()
-                    val configs = NetworkClient.api.getShelfConfigs()
-                    
-                    runOnUiThread {
-                        updateUnregisteredStrip(shelves)
-                        renderShelfGrids(configs, shelves)
-                    }
-                } catch (e: Exception) {
-                    // ignore network issue
-                }
+                refreshOnce()
                 delay(3000)
             }
         }
@@ -86,331 +89,493 @@ class ShelfManageActivity : AppCompatActivity() {
         pollJob?.cancel()
     }
 
+    private suspend fun refreshOnce() {
+        try {
+            val shelves = NetworkClient.api.getShelves()
+            val configs = NetworkClient.api.getShelfConfigs()
+            lastShelves = shelves
+            lastConfigs = configs
+
+            // 드래그/등록 입력 중에는 리렌더하지 않는다 (포커스/드래그 유지)
+            if (!isDragging && binding.registerCard.visibility != View.VISIBLE) {
+                updateUnregisteredStrip(shelves)
+                renderShelfCards(configs, shelves)
+            }
+        } catch (e: Exception) {
+            // 네트워크 오류 무시
+        }
+    }
+
+    private fun refreshNow() {
+        lifecycleScope.launch { refreshOnce() }
+    }
+
+    // ---------- 미등록 기기 스트립 ----------
+
     private fun updateUnregisteredStrip(shelves: List<ShelfDevice>) {
         val unregistered = shelves.filter { it.status == "unregistered" }
         if (unregistered.isEmpty()) {
             binding.unregisteredStripCard.visibility = View.GONE
-            selectedUnregisteredId = null
             return
         }
 
         binding.unregisteredStripCard.visibility = View.VISIBLE
+        binding.unregCountText.text = "미등록 기기 ${unregistered.size}대"
         binding.unregisteredDevicesLayout.removeAllViews()
 
         unregistered.forEach { device ->
-            val textView = TextView(this).apply {
-                text = "${device.id}\n(배터리 ${device.battery}%)"
-                gravity = Gravity.CENTER
-                setPadding(16, 12, 16, 12)
-                textSize = 13sp
-                setTextColor(if (selectedUnregisteredId == device.id) 0xFFFFFFFF.toInt() else 0xFF1E2A56.toInt())
-                setBackgroundResource(if (selectedUnregisteredId == device.id) R.drawable.card_primary_bg else R.drawable.card_white_bg)
-                clickable = true
-                focusable = true
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    marginEnd = 16
-                }
-                setOnClickListener {
-                    selectedUnregisteredId = if (selectedUnregisteredId == device.id) null else device.id
-                    updateUnregisteredStrip(shelves)
-                }
-            }
-            binding.unregisteredDevicesLayout.addView(textView)
+            binding.unregisteredDevicesLayout.addView(buildDeviceChip(device))
         }
     }
 
-    private fun renderShelfGrids(configs: List<ShelfConfig>, shelves: List<ShelfDevice>) {
+    /** 드래그 소스가 되는 기기 칩 (§3.4-2) */
+    private fun buildDeviceChip(device: ShelfDevice): View {
+        val primary = color(R.color.primary)
+        val chip = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundResource(R.drawable.shape_rounded_10)
+            backgroundTintList = ColorStateList.valueOf(color(R.color.primary_soft))
+            setPadding(dp(11), dp(8), dp(11), dp(8))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginEnd = dp(8) }
+        }
+
+        chip.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_grip_vertical)
+            imageTintList = ColorStateList.valueOf(primary)
+            layoutParams = LinearLayout.LayoutParams(dp(11), dp(11))
+        })
+        chip.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_hard_drive)
+            imageTintList = ColorStateList.valueOf(primary)
+            layoutParams = LinearLayout.LayoutParams(dp(12), dp(12)).apply { marginStart = dp(5) }
+        })
+        chip.addView(TextView(this).apply {
+            text = device.id
+            textSize = 10f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(primary)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginStart = dp(5) }
+        })
+
+        chip.setOnLongClickListener { v ->
+            isDragging = true
+            val clip = ClipData.newPlainText("deviceId", device.id)
+            v.startDragAndDrop(clip, View.DragShadowBuilder(v), device.id, 0)
+            true
+        }
+        chip.setOnClickListener {
+            Toast.makeText(this, "칩을 길게 눌러 빈 슬롯으로 드래그하세요.", Toast.LENGTH_SHORT).show()
+        }
+        return chip
+    }
+
+    // ---------- 선반 카드 / 그리드 ----------
+
+    private fun renderShelfCards(configs: List<ShelfConfig>, shelves: List<ShelfDevice>) {
+        if (!expandedInit && configs.isNotEmpty()) {
+            expandedShelves.addAll(configs.map { it.id })
+            expandedInit = true
+        }
+
         binding.shelvesContainer.removeAllViews()
-
-        configs.forEach { config ->
-            // Create Shelf Container Card
-            val cardLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setBackgroundResource(R.drawable.card_white_bg)
-                padding = 24
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    bottomMargin = 24
-                }
-            }
-
-            // Shelf Header Layout
-            val headerLayout = RelativeLayout(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    bottomMargin = 16
-                }
-            }
-
-            val titleLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-            }
-
-            val titleText = TextView(this).apply {
-                text = "선반 ${config.id}"
-                textSize = 18sp
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                setTextColor(0xFF1E2A56.toInt())
-            }
-            titleLayout.addView(titleText)
-
-            val specsText = TextView(this).apply {
-                text = "${config.rows}행 × ${config.cols}열"
-                textSize = 12sp
-                setTextColor(0xFF8B97BE.toInt())
-            }
-            titleLayout.addView(specsText)
-
-            headerLayout.addView(titleLayout)
-
-            // Add Row button on header
-            val addRowBtn = Button(this).apply {
-                text = "+ 행 추가"
-                textSize = 12sp
-                backgroundTintList = android.content.res.ColorStateList.valueOf(0xFF3D6BF5.toInt())
-                layoutParams = RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    addRule(RelativeLayout.ALIGN_PARENT_END)
-                    addRule(RelativeLayout.CENTER_VERTICAL)
-                }
-                setOnClickListener {
-                    lifecycleScope.launch {
-                        try {
-                            NetworkClient.api.updateShelfConfig(config.id, mapOf("rows" to config.rows + 1))
-                            Toast.makeText(this@ShelfManageActivity, "행이 추가되었습니다.", Toast.LENGTH_SHORT).show()
-                            startPolling()
-                        } catch (e: Exception) {
-                            Toast.makeText(this@ShelfManageActivity, "수정 실패", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            headerLayout.addView(addRowBtn)
-            cardLayout.addView(headerLayout)
-
-            // Shelf Grid Layout
-            val gridLayout = GridLayout(this).apply {
-                columnCount = config.cols
-                rowCount = config.rows
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                setBackgroundColor(0xFFF2F5FF.toInt())
-                padding = 12
-            }
-
-            for (r in 1..config.rows) {
-                for (c in 1..config.cols) {
-                    val device = shelves.find { 
-                        it.parent_shelf == config.id && it.row == r && it.col == c && it.status == "registered" 
-                    }
-
-                    val cellView = if (device != null) {
-                        // Occupied cell layout
-                        val layout = LinearLayout(this).apply {
-                            orientation = LinearLayout.VERTICAL
-                            setPadding(12, 12, 12, 12)
-                            setBackgroundResource(if (device.led_on) R.drawable.banner_bg else R.drawable.card_white_bg)
-                            layoutParams = GridLayout.LayoutParams().apply {
-                                width = 0
-                                height = GridLayout.LayoutParams.WRAP_CONTENT
-                                columnSpec = GridLayout.spec(c - 1, 1f)
-                                rowSpec = GridLayout.spec(r - 1, 1f)
-                                setMargins(6, 6, 6, 6)
-                            }
-                        }
-
-                        val cellHeader = RelativeLayout(this)
-                        val nameTv = TextView(this).apply {
-                            text = device.name ?: "${config.id}${r}-${c}"
-                            textSize = 11sp
-                            setTypeface(null, android.graphics.Typeface.BOLD)
-                            setTextColor(0xFF8B97BE.toInt())
-                        }
-                        cellHeader.addView(nameTv)
-
-                        val battTv = TextView(this).apply {
-                            text = "🔋${device.battery}%"
-                            textSize = 10sp
-                            setTextColor(0xFF8B97BE.toInt())
-                            layoutParams = RelativeLayout.LayoutParams(
-                                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                RelativeLayout.LayoutParams.WRAP_CONTENT
-                            ).apply {
-                                addRule(RelativeLayout.ALIGN_PARENT_END)
-                            }
-                        }
-                        cellHeader.addView(battTv)
-                        layout.addView(cellHeader)
-
-                        val idTv = TextView(this).apply {
-                            text = device.id
-                            textSize = 12sp
-                            setTypeface(null, android.graphics.Typeface.BOLD)
-                            setTextColor(0xFF1E2A56.toInt())
-                            setPadding(0, 4, 0, 4)
-                        }
-                        layout.addView(idTv)
-
-                        val cellFooter = RelativeLayout(this)
-                        val weightTv = TextView(this).apply {
-                            text = "${device.weight} kg"
-                            textSize = 11sp
-                            setTypeface(null, android.graphics.Typeface.BOLD)
-                            setTextColor(0xFF3D6BF5.toInt())
-                        }
-                        cellFooter.addView(weightTv)
-
-                        val ledBtn = ImageView(this).apply {
-                            setImageResource(android.R.drawable.btn_star_big_off)
-                            layoutParams = RelativeLayout.LayoutParams(24, 24).apply {
-                                addRule(RelativeLayout.ALIGN_PARENT_END)
-                            }
-                            setOnClickListener {
-                                lifecycleScope.launch {
-                                    try {
-                                        NetworkClient.api.setLedState(
-                                            device.id,
-                                            ShelfLedUpdate(
-                                                led_on = !device.led_on,
-                                                led_message = if (!device.led_on) "App manual toggle" else ""
-                                            )
-                                        )
-                                        startPolling()
-                                    } catch (e: Exception) {
-                                        Toast.makeText(this@ShelfManageActivity, "LED 제어 실패", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        }
-                        cellFooter.addView(ledBtn)
-                        layout.addView(cellFooter)
-
-                        layout
-                    } else {
-                        // Empty cell layout
-                        val layout = LinearLayout(this).apply {
-                            orientation = LinearLayout.VERTICAL
-                            gravity = Gravity.CENTER
-                            setPadding(12, 16, 12, 16)
-                            setBackgroundResource(R.drawable.card_white_bg)
-                            layoutParams = GridLayout.LayoutParams().apply {
-                                width = 0
-                                height = GridLayout.LayoutParams.WRAP_CONTENT
-                                columnSpec = GridLayout.spec(c - 1, 1f)
-                                rowSpec = GridLayout.spec(r - 1, 1f)
-                                setMargins(6, 6, 6, 6)
-                            }
-                            clickable = true
-                            focusable = true
-                        }
-
-                        val addIcon = TextView(this).apply {
-                            text = "+"
-                            textSize = 20sp
-                            setTextColor(0xFF8B97BE.toInt())
-                        }
-                        layout.addView(addIcon)
-
-                        val emptyText = TextView(this).apply {
-                            text = "빈 슬롯"
-                            textSize = 11sp
-                            setTextColor(0xFF8B97BE.toInt())
-                        }
-                        layout.addView(emptyText)
-
-                        layout.setOnClickListener {
-                            if (selectedUnregisteredId == null) {
-                                Toast.makeText(
-                                    this@ShelfManageActivity,
-                                    "먼저 상단의 미등록 기기를 선택하세요.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                showRegistrationDialog(config.id, r, c, selectedUnregisteredId!!)
-                            }
-                        }
-                        layout
-                    }
-                    gridLayout.addView(cellView)
-                }
-            }
-            cardLayout.addView(gridLayout)
-            binding.shelvesContainer.addView(cardLayout)
+        configs.sortedBy { it.id }.forEach { config ->
+            binding.shelvesContainer.addView(buildShelfCard(config, shelves))
         }
     }
 
-    private fun showRegistrationDialog(shelfId: String, row: Int, col: Int, deviceId: String) {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_wrong_location, null)
-        val titleTv: TextView = dialogView.findViewById(R.id.dialogAlertTitle) ?: TextView(this)
-        val msgTv: TextView = dialogView.findViewById(R.id.dialogWarningMessage)
-        val btnCancel: Button = dialogView.findViewById(R.id.btnMoveToDesignated)
-        val btnSubmit: Button = dialogView.findViewById(R.id.btnUpdateLocation)
+    private fun buildShelfCard(config: ShelfConfig, shelves: List<ShelfDevice>): View {
+        val expanded = expandedShelves.contains(config.id)
+        val deviceCount = shelves.count { it.parent_shelf == config.id && it.status == "registered" }
 
-        // Reuse layout for registration
-        titleTv.text = "기기 등록 — $deviceId"
-        msgTv.text = "선반 $shelfId · ${row}행 ${col}열에 이 기기를 연결하시겠습니까?\n기기 이름을 정해주세요."
-
-        // Let's dynamically inject an EditText to name the slot
-        val container = dialogView as LinearLayout
-        val nameInput = EditText(this).apply {
-            hint = "기기 식별 이름 (예: 수납칸 ${shelfId}${row * 3 - (3 - col)})"
-            setText("수납칸 ${shelfId}${row * 3 - (3 - col)}")
-            setPadding(16, 12, 16, 12)
-            setBackgroundResource(R.drawable.card_white_bg)
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundResource(R.drawable.shape_rounded_14)
+            elevation = dp(2).toFloat()
+            setPadding(dp(14), dp(12), dp(14), dp(12))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 16
-            }
-        }
-        container.addView(nameInput, 3)
-
-        btnCancel.text = "취소"
-        btnSubmit.text = "등록"
-
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
+            ).apply { bottomMargin = dp(12) }
         }
 
-        btnSubmit.setOnClickListener {
-            val name = nameInput.text.toString().trim()
-            if (name.isEmpty()) {
-                Toast.makeText(this, "이름을 입력해 주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+        // 헤더: 이름 + 크기 칩 + 접기/펼치기
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        header.addView(TextView(this).apply {
+            text = "선반 ${config.id}"
+            textSize = 15f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(color(R.color.text_strong))
+        })
+        header.addView(TextView(this).apply {
+            text = if (expanded) "${config.rows}행 × ${config.cols}열"
+            else "${config.rows}행 × ${config.cols}열 · 기기 ${deviceCount}대"
+            textSize = 9f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(color(R.color.text_body))
+            setBackgroundResource(R.drawable.shape_pill)
+            backgroundTintList = ColorStateList.valueOf(color(R.color.bg))
+            setPadding(dp(8), dp(3), dp(8), dp(3))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginStart = dp(8) }
+        })
+        header.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
+        })
+        header.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_chevron_down)
+            imageTintList = ColorStateList.valueOf(color(R.color.text_muted))
+            rotation = if (expanded) 180f else 0f
+            layoutParams = LinearLayout.LayoutParams(dp(16), dp(16))
+        })
+        header.setOnClickListener {
+            if (expanded) expandedShelves.remove(config.id) else expandedShelves.add(config.id)
+            renderShelfCards(lastConfigs, lastShelves)
+        }
+        card.addView(header)
 
-            lifecycleScope.launch {
-                try {
-                    NetworkClient.api.registerShelf(
-                        deviceId,
-                        ShelfRegister(name, shelfId, row, col)
-                    )
-                    Toast.makeText(this@ShelfManageActivity, "기기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                    selectedUnregisteredId = null
-                    dialog.dismiss()
-                    startPolling()
-                } catch (e: Exception) {
-                    Toast.makeText(this@ShelfManageActivity, "등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+        if (!expanded) return card
+
+        // GridWrap: [슬롯 그리드] + [열 추가 버튼]
+        val gridWrap = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(10) }
+        }
+
+        val gridColumn = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        for (r in 1..config.rows) {
+            val rowLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+            for (c in 1..config.cols) {
+                val device = shelves.find {
+                    it.parent_shelf == config.id && it.row == r && it.col == c &&
+                            it.status == "registered"
+                }
+                rowLayout.addView(buildCell(config, r, c, device))
+            }
+            gridColumn.addView(rowLayout)
+        }
+        gridWrap.addView(gridColumn)
+
+        // 열 추가 버튼 (그리드 오른쪽 세로 버튼)
+        gridWrap.addView(FrameLayout(this).apply {
+            setBackgroundResource(R.drawable.shape_rounded_8)
+            backgroundTintList = ColorStateList.valueOf(color(R.color.bg))
+            layoutParams = LinearLayout.LayoutParams(dp(26), LinearLayout.LayoutParams.MATCH_PARENT)
+                .apply { setMargins(dp(3), dp(3), 0, dp(3)) }
+            addView(ImageView(this@ShelfManageActivity).apply {
+                setImageResource(R.drawable.ic_plus)
+                imageTintList = ColorStateList.valueOf(color(R.color.primary))
+                layoutParams = FrameLayout.LayoutParams(dp(13), dp(13)).apply {
+                    gravity = Gravity.CENTER
+                }
+            })
+            setOnClickListener { updateConfig(config.id, config.rows, config.cols + 1) }
+        })
+        card.addView(gridWrap)
+
+        // 행 추가 버튼
+        card.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setBackgroundResource(R.drawable.shape_rounded_8)
+            backgroundTintList = ColorStateList.valueOf(color(R.color.bg))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(30)
+            ).apply { topMargin = dp(6) }
+            addView(ImageView(this@ShelfManageActivity).apply {
+                setImageResource(R.drawable.ic_plus)
+                imageTintList = ColorStateList.valueOf(color(R.color.primary))
+                layoutParams = LinearLayout.LayoutParams(dp(12), dp(12))
+            })
+            addView(TextView(this@ShelfManageActivity).apply {
+                text = "행 추가"
+                textSize = 10f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color(R.color.primary))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp(4) }
+            })
+            setOnClickListener { updateConfig(config.id, config.rows + 1, config.cols) }
+        })
+
+        return card
+    }
+
+    /** 그리드 셀 3상태: 기기 배치됨 / 빈 슬롯 / 드롭 타깃 (§3.4-3) */
+    private fun buildCell(config: ShelfConfig, row: Int, col: Int, device: ShelfDevice?): View {
+        val cellParams = LinearLayout.LayoutParams(0, dp(78), 1f).apply {
+            setMargins(dp(3), dp(3), dp(3), dp(3))
+        }
+
+        if (device != null) {
+            // (a) 기기 배치됨 — LED 점등 시 primary 강조
+            val cell = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(8), dp(7), dp(8), dp(7))
+                setBackgroundResource(
+                    if (device.led_on) R.drawable.bg_cell_drop else R.drawable.shape_rounded_8
+                )
+                if (!device.led_on) {
+                    backgroundTintList = ColorStateList.valueOf(color(R.color.bg))
+                }
+                layoutParams = cellParams
+            }
+            cell.addView(TextView(this).apply {
+                text = device.name ?: device.id
+                textSize = 10f
+                maxLines = 1
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color(R.color.text_strong))
+            })
+            cell.addView(TextView(this).apply {
+                text = device.id
+                textSize = 8f
+                maxLines = 1
+                setTextColor(color(R.color.text_muted))
+            })
+
+            val meta = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(5) }
+            }
+            meta.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ic_weight)
+                imageTintList = ColorStateList.valueOf(color(R.color.text_muted))
+                layoutParams = LinearLayout.LayoutParams(dp(9), dp(9))
+            })
+            meta.addView(TextView(this).apply {
+                text = "${device.weight}kg"
+                textSize = 8f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color(R.color.text_body))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp(2) }
+            })
+            meta.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ic_battery_full)
+                imageTintList = ColorStateList.valueOf(color(R.color.success))
+                layoutParams = LinearLayout.LayoutParams(dp(10), dp(10)).apply {
+                    marginStart = dp(7)
+                }
+            })
+            meta.addView(TextView(this).apply {
+                text = "${device.battery}%"
+                textSize = 8f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color(R.color.text_body))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp(2) }
+            })
+            cell.addView(meta)
+
+            // 탭 → LED 토글 (기존 기능 유지)
+            cell.setOnClickListener {
+                lifecycleScope.launch {
+                    try {
+                        NetworkClient.api.setLedState(
+                            device.id,
+                            ShelfLedUpdate(
+                                led_on = !device.led_on,
+                                led_message = if (!device.led_on) "앱에서 수동 점등" else ""
+                            )
+                        )
+                        refreshOnce()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@ShelfManageActivity, "LED 제어 실패", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
+            return cell
         }
 
-        dialog.show()
+        // (b) 빈 슬롯 + (c) 드롭 타깃
+        val cell = FrameLayout(this).apply {
+            setBackgroundResource(R.drawable.bg_cell_empty)
+            layoutParams = cellParams
+        }
+        val emptyLabel = TextView(this).apply {
+            text = "빈 슬롯"
+            textSize = 9f
+            setTextColor(color(R.color.text_muted))
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.CENTER }
+        }
+        val dropHint = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            visibility = View.GONE
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.CENTER }
+            addView(ImageView(this@ShelfManageActivity).apply {
+                setImageResource(R.drawable.ic_circle_plus)
+                imageTintList = ColorStateList.valueOf(color(R.color.primary))
+                layoutParams = LinearLayout.LayoutParams(dp(16), dp(16))
+            })
+            addView(TextView(this@ShelfManageActivity).apply {
+                text = "여기에 배치"
+                textSize = 9f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color(R.color.primary))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(2) }
+            })
+        }
+        cell.addView(emptyLabel)
+        cell.addView(dropHint)
+
+        fun revertCellStyle() {
+            cell.setBackgroundResource(R.drawable.bg_cell_empty)
+            emptyLabel.visibility = View.VISIBLE
+            dropHint.visibility = View.GONE
+        }
+
+        cell.setOnDragListener { _, event ->
+            when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> event.localState is String
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    cell.setBackgroundResource(R.drawable.bg_cell_drop)
+                    emptyLabel.visibility = View.GONE
+                    dropHint.visibility = View.VISIBLE
+                    true
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    revertCellStyle()
+                    true
+                }
+                DragEvent.ACTION_DROP -> {
+                    val deviceId = event.localState as? String
+                    revertCellStyle()
+                    if (deviceId != null) {
+                        onDeviceDropped(deviceId, config, row, col)
+                        true
+                    } else false
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    isDragging = false
+                    revertCellStyle()
+                    true
+                }
+                else -> true
+            }
+        }
+        return cell
     }
+
+    // ---------- 기기 등록 카드 ----------
+
+    private fun onDeviceDropped(deviceId: String, config: ShelfConfig, row: Int, col: Int) {
+        pendingDeviceId = deviceId
+        pendingShelfId = config.id
+        pendingRow = row
+        pendingCol = col
+
+        binding.registerCardTitle.text = "기기 등록 — $deviceId"
+        binding.regDeviceIdText.text = deviceId
+        binding.regPositionText.text = "선반 ${config.id} · ${row}행 ${col}열"
+        binding.regNameInput.setText("수납칸 ${config.id}${(row - 1) * config.cols + col}")
+        binding.registerCard.visibility = View.VISIBLE
+        binding.regNameInput.requestFocus()
+        binding.scrollArea.post {
+            binding.scrollArea.smoothScrollTo(0, binding.registerCard.top)
+        }
+    }
+
+    private fun hideRegisterCard() {
+        pendingDeviceId = null
+        pendingShelfId = null
+        binding.registerCard.visibility = View.GONE
+        refreshNow()
+    }
+
+    private fun submitRegistration() {
+        val deviceId = pendingDeviceId ?: return
+        val shelfId = pendingShelfId ?: return
+        val name = binding.regNameInput.text.toString().trim()
+        if (name.isEmpty()) {
+            Toast.makeText(this, "기기 식별 이름을 입력해 주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.registerShelf(
+                    deviceId,
+                    ShelfRegister(name = name, parent_shelf = shelfId, row = pendingRow, col = pendingCol)
+                )
+                Toast.makeText(this@ShelfManageActivity, "기기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                hideRegisterCard()
+            } catch (e: Exception) {
+                Toast.makeText(this@ShelfManageActivity, "등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ---------- 선반 구성 변경 ----------
+
+    private fun updateConfig(configId: String, rows: Int, cols: Int) {
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.updateShelfConfig(configId, mapOf("rows" to rows, "cols" to cols))
+                refreshOnce()
+            } catch (e: Exception) {
+                Toast.makeText(this@ShelfManageActivity, "선반 구성 변경 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun addShelf() {
+        val nextId = if (lastConfigs.isEmpty()) {
+            "A"
+        } else {
+            val maxChar = lastConfigs.mapNotNull { it.id.firstOrNull() }.maxOrNull() ?: 'A'
+            (maxChar + 1).toString()
+        }
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.updateShelfConfig(nextId, mapOf("rows" to 3, "cols" to 4))
+                Toast.makeText(this@ShelfManageActivity, "선반 ${nextId}가 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                expandedShelves.add(nextId)
+                refreshOnce()
+            } catch (e: Exception) {
+                Toast.makeText(this@ShelfManageActivity, "선반 추가 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun color(res: Int): Int = ContextCompat.getColor(this, res)
 }

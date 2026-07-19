@@ -12,6 +12,11 @@ services:
       POSTGRES_DB: smart_shelf
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d smart_shelf"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     restart: always
 
   web:
@@ -24,7 +29,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/smart_shelf
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
 
 volumes:

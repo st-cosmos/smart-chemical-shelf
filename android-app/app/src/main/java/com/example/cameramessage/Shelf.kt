@@ -38,3 +38,23 @@ data class ShelfLedUpdate(
     val led_on: Boolean,
     val led_message: String
 )
+
+data class CheckinCompleteChemical(
+    val id: String,
+    val name: String,
+    val shelf_id: String?,
+    val shelf_row: Int?,
+    val shelf_col: Int?,
+    val weight: Double
+)
+
+data class CheckinSessionResult(
+    val event: String,
+    val chemical: CheckinCompleteChemical
+)
+
+data class ShelfWeightResponse(
+    val status: String,
+    val shelf: ShelfDevice,
+    val session_result: CheckinSessionResult?
+)

@@ -13,3 +13,8 @@ data class UserRegisterRequest(
     val nickname: String,
     val role: String
 )
+
+data class UserLoginRequest(
+    val username: String,
+    val password: String
+)

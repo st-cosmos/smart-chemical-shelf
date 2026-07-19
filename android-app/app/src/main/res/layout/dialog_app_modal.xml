@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modal/App (design-spec §1.4). 톤(색)은 AppModal.show() 에서 지정한다. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/modal_width"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@drawable/shape_rounded_14"
+    android:paddingTop="28dp"
+    android:paddingBottom="28dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp">
+
+    <FrameLayout
+        android:id="@+id/modalIconWrap"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/shape_circle"
+        android:backgroundTint="@color/primary_soft">
+        <ImageView
+            android:id="@+id/modalIcon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_triangle_alert"
+            android:contentDescription="상태 아이콘"
+            app:tint="@color/primary" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/modalTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_strong"
+        tools:text="잘못된 위치에 놓였습니다" />
+
+    <TextView
+        android:id="@+id/modalMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:textSize="12sp"
+        android:textColor="@color/text_body"
+        tools:text="메시지 본문" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/btnModalSecondary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:background="@drawable/shape_pill"
+            android:backgroundTint="@color/bg"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_body"
+            tools:text="나중에 하기" />
+
+        <TextView
+            android:id="@+id/btnModalPrimary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="@drawable/shape_pill"
+            android:backgroundTint="@color/primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:elevation="3dp"
+            tools:text="확인" />
+    </LinearLayout>
+</LinearLayout>

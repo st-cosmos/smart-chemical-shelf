@@ -1,37 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, Shield, ShieldCheck, UserCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Ellipsis, UserPlus } from 'lucide-react';
+import Badge, { roleBadgeVariant } from '../components/Badge';
+import Input from '../components/Input';
+import SearchBar from '../components/SearchBar';
+import { getJSON, postJSON } from '../api';
+import type { User } from '../types';
 
-interface RegisteredUser {
-  username: string;
-  nickname: string;
-  role: string;
-  created_at: string;
+const ROLES = ['관리자', '연구원', '보조원'] as const;
+
+function formatDate(iso: string): string {
+  return iso ? iso.slice(0, 10) : '-';
 }
 
 export default function UserRegister() {
-  const [users, setUsers] = useState<RegisteredUser[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  // Form states
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
-  const [role, setRole] = useState('연구원');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [role, setRole] = useState<string>('연구원');
+  const [submitting, setSubmitting] = useState(false);
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setUsers(await getJSON<User[]>('/api/users'));
+    } catch {
+      // 무시
     }
   };
 
@@ -39,223 +36,123 @@ export default function UserRegister() {
     fetchUsers();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!username || !password || !nickname || !role) {
-      setError('모든 필드를 입력해 주세요.');
+    if (submitting) return;
+    if (!username || !password || !nickname) {
+      setNotice({ ok: false, text: '아이디·비밀번호·별명을 모두 입력하세요.' });
       return;
     }
-
-    if (username.length < 4) {
-      setError('아이디는 4자 이상이어야 합니다.');
-      return;
-    }
-
-    if (password.length < 4) {
-      setError('비밀번호는 4자 이상이어야 합니다.');
-      return;
-    }
-
+    setSubmitting(true);
+    setNotice(null);
     try {
-      const response = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, nickname, role })
+      const created = await postJSON<User>('/api/users/register', {
+        username,
+        password,
+        nickname,
+        role,
       });
-
-      if (response.ok) {
-        setSuccess(`사용자 '${nickname}' 등록이 완료되었습니다.`);
-        setUsername('');
-        setPassword('');
-        setNickname('');
-        setRole('연구원');
-        fetchUsers();
-      } else {
-        const err = await response.json();
-        setError(err.detail || '등록 실패. 아이디 중복을 확인하세요.');
-      }
+      setNotice({ ok: true, text: `${created.nickname} (${created.role}) 계정이 생성되었습니다.` });
+      setUsername('');
+      setPassword('');
+      setNickname('');
+      setRole('연구원');
+      await fetchUsers();
     } catch (err) {
-      setError('서버 연결 실패');
+      setNotice({ ok: false, text: err instanceof Error ? err.message : '등록에 실패했습니다.' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const getRoleBadge = (roleName: string) => {
-    switch (roleName) {
-      case '관리자':
-        return (
-          <span className="badge badge-danger">
-            <ShieldCheck size={12} /> 관리자
-          </span>
-        );
-      case '연구원':
-        return (
-          <span className="badge badge-primary">
-            <UserCheck size={12} /> 연구원
-          </span>
-        );
-      default:
-        return (
-          <span className="badge badge-success">
-            <UserCheck size={12} /> 보조원
-          </span>
-        );
-    }
-  };
-
-  const filteredUsers = users.filter(u => 
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
-    u.nickname.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter((u) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return u.nickname.toLowerCase().includes(q) || u.username.toLowerCase().includes(q);
+  });
 
   return (
-    <div className="main-content">
-      <header className="topbar">
-        <div className="page-title">
-          <h2>사용자 등록</h2>
-          <p>태블릿 앱과 웹 대시보드에 로그인해 시스템을 이용할 연구실 계정을 생성하고 권한을 분배합니다.</p>
+    <div className="page">
+      <div className="topbar">
+        <div className="topbar-info">
+          <h1 className="topbar-title">사용자 등록</h1>
+          <span className="topbar-sub">태블릿 앱과 웹에서 사용할 계정을 생성합니다</span>
         </div>
-      </header>
+      </div>
 
-      <div className="content-body" style={{ gap: '32px' }}>
-        {/* Form Card */}
-        <div className="card form-card">
-          <div className="card-title">새 사용자 정보</div>
+      <div className="register-layout">
+        {/* 좌: 등록 폼 카드 */}
+        <form className="card form-card" onSubmit={handleSubmit}>
+          <h3 className="form-card-title">새 사용자 정보</h3>
 
-          {error && (
-            <div className="badge badge-danger" style={{ display: 'block', width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '16px', textAlign: 'center' }}>
-              {error}
-            </div>
-          )}
+          <Input
+            label="아이디"
+            placeholder="영문·숫자 4자 이상"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <Input
+            label="비밀번호"
+            type="password"
+            placeholder="8자 이상, 숫자·특수문자 포함"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Input
+            label="별명"
+            placeholder="앱 프로필에 표시될 이름"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+          />
 
-          {success && (
-            <div className="badge badge-success" style={{ display: 'block', width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '16px', textAlign: 'center' }}>
-              {success}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>아이디</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="영문·숫자 4자 이상 (예: lee.exp)"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>비밀번호 (PIN Code)</label>
-              <input 
-                type="password" 
-                className="form-control" 
-                placeholder="태블릿 로그인 시 사용할 암호"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>별명 (표시 이름)</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="예: 이실험 연구원"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>권한</label>
-              <div className="radio-group">
-                <input 
-                  type="radio" 
-                  id="role-researcher" 
-                  name="role" 
-                  value="연구원" 
-                  checked={role === '연구원'}
-                  onChange={() => setRole('연구원')}
-                />
-                <label htmlFor="role-researcher" className="radio-label">연구원</label>
-
-                <input 
-                  type="radio" 
-                  id="role-admin" 
-                  name="role" 
-                  value="관리자"
-                  checked={role === '관리자'}
-                  onChange={() => setRole('관리자')}
-                />
-                <label htmlFor="role-admin" className="radio-label">관리자</label>
-
-                <input 
-                  type="radio" 
-                  id="role-assistant" 
-                  name="role" 
-                  value="보조원"
-                  checked={role === '보조원'}
-                  onChange={() => setRole('보조원')}
-                />
-                <label htmlFor="role-assistant" className="radio-label">보조원</label>
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', marginTop: '16px' }}>
-              <UserPlus size={16} /> 사용자 등록
-            </button>
-          </form>
-        </div>
-
-        {/* Users List Card */}
-        <div className="card table-card">
-          <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>등록된 사용자 ({users.length}명)</span>
-            <div className="search-container" style={{ width: '220px' }}>
-              <Search className="search-icon" size={16} />
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="사용자 검색"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{ padding: '8px 12px 8px 36px', fontSize: '13px' }}
-              />
+          <div className="input-group">
+            <span className="input-label">권한</span>
+            <div className="segment">
+              {ROLES.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={role === r ? 'active' : ''}
+                  onClick={() => setRole(r)}
+                >
+                  {r}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="table-wrapper">
-            {loading ? (
-              <p style={{ padding: '20px', textAlign: 'center' }}>데이터를 불러오는 중입니다...</p>
-            ) : filteredUsers.length === 0 ? (
-              <p style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>검색 결과가 없습니다.</p>
+          {notice && <div className={notice.ok ? 'form-success' : 'form-error'}>{notice.text}</div>}
+
+          <button type="submit" className="btn btn-primary btn-cta" disabled={submitting}>
+            <UserPlus size={16} />
+            {submitting ? '등록 중...' : '사용자 등록'}
+          </button>
+        </form>
+
+        {/* 우: 사용자 목록 카드 */}
+        <div className="card user-list-card">
+          <div className="user-list-head">
+            <h3>등록된 사용자 {users.length}명</h3>
+            <SearchBar value={search} onChange={setSearch} placeholder="사용자 검색" width={220} />
+          </div>
+          <div className="user-list-body">
+            {filtered.length === 0 ? (
+              <div className="t-empty">표시할 사용자가 없습니다.</div>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>사용자 이름 (별명)</th>
-                    <th>아이디</th>
-                    <th>권한</th>
-                    <th>등록일</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map(u => (
-                    <tr key={u.username}>
-                      <td style={{ fontWeight: 700, color: 'var(--text-strong)' }}>
-                        {u.nickname}
-                      </td>
-                      <td style={{ color: 'var(--text-muted)' }}>@{u.username}</td>
-                      <td>{getRoleBadge(u.role)}</td>
-                      <td>{u.created_at.substring(0, 10)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              filtered.map((u) => (
+                <div key={u.username} className="user-row">
+                  <div className="avatar avatar-sm">{u.nickname.charAt(0)}</div>
+                  <div className="user-row-info">
+                    <span className="user-row-name">{u.nickname}</span>
+                    <span className="user-row-id">@{u.username}</span>
+                  </div>
+                  <Badge variant={roleBadgeVariant(u.role)}>{u.role}</Badge>
+                  <span className="user-row-date">등록일 {formatDate(u.created_at)}</span>
+                  <span className="user-row-more">
+                    <Ellipsis size={18} />
+                  </span>
+                </div>
+              ))
             )}
           </div>
         </div>

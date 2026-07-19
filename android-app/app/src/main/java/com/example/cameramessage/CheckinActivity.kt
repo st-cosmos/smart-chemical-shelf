@@ -1,19 +1,24 @@
 package com.example.cameramessage
 
 import android.Manifest
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
+import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -26,17 +31,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
+/**
+ * app-checkin / -new / -new-complete / -alert (design-spec §3.5~3.8)
+ * CameraX 프리뷰 + ML Kit 한국어 OCR → scan-in → 결과 카드 상태 변화 + 세션 폴링.
+ */
 class CheckinActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCheckinBinding
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private val recognizer = TextRecognition.getClient(KoreanTextRecognizerOptions.Builder().build())
 
+    private var camera: Camera? = null
+    private var torchOn = false
     private var activeSessionJob: Job? = null
     private var isScanned = false
     private var currentUser: String = ""
+    private var currentNewItem = false
     private var recommendedShelfId: String? = null
     private var recommendedShelfDesc: String = ""
+    private var ocrKeywords: List<String> = DEFAULT_KEYWORDS
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -52,15 +65,21 @@ class CheckinActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
 
-        binding.btnBack.setOnClickListener {
-            onBackPressed()
+        // Header: 반입/반출 화면에서는 Bell 버튼 숨김 (design-spec §1.3)
+        binding.appHeader.headerTitle.text = "시약 반입"
+        binding.appHeader.btnBell.visibility = View.GONE
+        binding.appHeader.btnBack.setOnClickListener { finish() }
+
+        NavBar.setup(binding.bottomNav, this, NavBar.TAB_CHECKIN)
+
+        binding.cameraCard.clipToOutline = true
+        binding.btnFlash.setOnClickListener {
+            torchOn = !torchOn
+            camera?.cameraControl?.enableTorch(torchOn)
         }
 
-        binding.btnCancelSession.setOnClickListener {
-            cancelCheckinSession()
-        }
-
-        setupNavigations()
+        startScanLineAnimation()
+        fetchOcrKeywords()
 
         if (hasCameraPermission()) startCamera()
         else requestPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -93,26 +112,47 @@ class CheckinActivity : AppCompatActivity() {
             val selector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, preview, analysis)
+                camera = cameraProvider.bindToLifecycle(this, selector, preview, analysis)
             } catch (e: Exception) {
                 Toast.makeText(this, "카메라 구동 실패: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun setupNavigations() {
-        binding.navCheckin.setOnClickListener {
-            // Already here
+    /** 스캔 라인 상하 이동 애니메이션 (design-spec §3.5-2) */
+    private fun startScanLineAnimation() {
+        val range = dp(80).toFloat()
+        val anim = TranslateAnimation(0f, 0f, -range, range).apply {
+            duration = 1600
+            repeatMode = Animation.REVERSE
+            repeatCount = Animation.INFINITE
+            interpolator = LinearInterpolator()
         }
+        binding.scanLine.startAnimation(anim)
+    }
 
-        binding.navCheckout.setOnClickListener {
-            startActivity(Intent(this, CheckoutActivity::class.java))
-            finish()
+    private fun startLoaderAnimation() {
+        val rotate = RotateAnimation(
+            0f, 360f,
+            Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f
+        ).apply {
+            duration = 900
+            repeatCount = Animation.INFINITE
+            interpolator = LinearInterpolator()
         }
+        binding.statusIcon.startAnimation(rotate)
+    }
 
-        binding.navShelf.setOnClickListener {
-            startActivity(Intent(this, ShelfManageActivity::class.java))
-            finish()
+    /** 서버의 OCR 인식 대상 시약명 리스트를 키워드 필터로 사용 */
+    private fun fetchOcrKeywords() {
+        lifecycleScope.launch {
+            try {
+                val names = NetworkClient.api.getOcrChemicals()
+                if (names.isNotEmpty()) ocrKeywords = names + DEFAULT_KEYWORDS
+            } catch (e: Exception) {
+                // 실패 시 기본 키워드 유지
+            }
         }
     }
 
@@ -140,49 +180,89 @@ class CheckinActivity : AppCompatActivity() {
     }
 
     private fun detectAndTriggerCheckin(text: String) {
-        // Simple client-side filters for speed
-        val keywords = listOf("에탄올", "메탄올", "아세톤", "황산", "시안", "ETHANOL", "METHANOL", "ACETONE", "SULFURIC", "CYANIDE")
         val upperText = text.uppercase()
-        val hasKeyword = keywords.any { upperText.contains(it) }
-
-        if (!hasKeyword) return
+        if (ocrKeywords.none { upperText.contains(it.uppercase()) }) return
 
         isScanned = true
         lifecycleScope.launch {
             try {
-                val response = NetworkClient.api.scanIn(ScanInRequest(ocr_text = text, username = currentUser))
+                val response = NetworkClient.api.scanIn(
+                    ScanInRequest(ocr_text = text, username = currentUser)
+                )
                 if (response.status == "success") {
                     recommendedShelfId = response.recommended_shelf
                     recommendedShelfDesc = response.recommended_shelf_desc
-                    
-                    runOnUiThread {
-                        showScanResult(response)
-                        startSessionPolling()
-                    }
+                    currentNewItem = !response.has_history
+                    showScanResult(response)
+                    startSessionPolling()
                 } else {
                     isScanned = false
                 }
             } catch (e: Exception) {
                 isScanned = false
-                Toast.makeText(this@CheckinActivity, "스캔 연동 실패", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    /** 인식 결과 카드 갱신 — 기존(§3.5) / 신규(§3.7) 상태 */
     private fun showScanResult(response: ScanInResponse) {
         binding.scanResultEmpty.visibility = View.GONE
         binding.scanResultActive.visibility = View.VISIBLE
-        
-        binding.scannedChemicalName.text = response.chemical_name
-        binding.scannedHistoryType.text = if (response.has_history) "기존 보유 시약 · 재반입" else "신규 시약 등록"
-        binding.scannedLocationDesc.text = if (response.has_history) {
-            "지정 위치: ${response.recommended_shelf_desc} — LED 점등됨"
-        } else {
-            "선반의 원하는 빈 슬롯에 시약을 내려놓아주세요."
-        }
+        binding.resultBadge.visibility = View.VISIBLE
+        binding.resultBadge.text = "인식 완료"
+        binding.scanStatusText.text = "안착 감지 중"
 
-        binding.placementStatusIcon.setImageResource(android.R.drawable.stat_sys_download)
-        binding.placementStatusText.text = "시약을 선반의 지정된 위치에 내려놓아 주세요"
+        binding.scannedChemicalName.text = response.chemical_name
+
+        val warning = color(R.color.warning)
+        if (response.has_history) {
+            // 기존 보유 시약 · 재반입
+            binding.meta1Icon.setImageResource(R.drawable.ic_history)
+            binding.meta1Icon.imageTintList = ColorStateList.valueOf(color(R.color.text_muted))
+            binding.meta1Text.text = "기존 보유 시약 · 재반입"
+            binding.meta1Text.setTextColor(color(R.color.text_body))
+
+            binding.meta2Icon.setImageResource(R.drawable.ic_map_pin)
+            binding.meta2Icon.imageTintList = ColorStateList.valueOf(color(R.color.primary))
+            binding.meta2Text.text = "지정 위치 : ${response.recommended_shelf_desc} — LED 점등됨"
+            binding.meta2Text.setTextColor(color(R.color.primary))
+
+            setStatusWaiting("안착 대기 중", "지정 위치 안착 감지 중")
+        } else {
+            // 신규 유입 시약
+            binding.meta1Icon.setImageResource(R.drawable.ic_sparkles)
+            binding.meta1Icon.imageTintList = ColorStateList.valueOf(warning)
+            binding.meta1Text.text = "신규 유입 시약 · 등록 필요"
+            binding.meta1Text.setTextColor(color(R.color.text_body))
+
+            binding.meta2Icon.setImageResource(R.drawable.ic_help_circle)
+            binding.meta2Icon.imageTintList = ColorStateList.valueOf(warning)
+            binding.meta2Text.text = "원하는 선반 위치에 시약을 배치해 주세요."
+            binding.meta2Text.setTextColor(warning)
+
+            setStatusWaiting("안착 대기 중", "선반 배치 시 자동 등록")
+        }
+    }
+
+    private fun setStatusWaiting(title: String, sub: String) {
+        binding.statusCircle.backgroundTintList = ColorStateList.valueOf(color(R.color.warning_soft))
+        binding.statusIcon.setImageResource(R.drawable.ic_loader)
+        binding.statusIcon.imageTintList = ColorStateList.valueOf(color(R.color.warning))
+        binding.statusTitle.text = title
+        binding.statusTitle.setTextColor(color(R.color.warning))
+        binding.statusSub.text = sub
+        startLoaderAnimation()
+    }
+
+    private fun setStatusSuccess(title: String, sub: String) {
+        binding.statusIcon.clearAnimation()
+        binding.statusCircle.backgroundTintList = ColorStateList.valueOf(color(R.color.success_soft))
+        binding.statusIcon.setImageResource(R.drawable.ic_check)
+        binding.statusIcon.imageTintList = ColorStateList.valueOf(color(R.color.success))
+        binding.statusTitle.text = title
+        binding.statusTitle.setTextColor(color(R.color.success))
+        binding.statusSub.text = sub
+        binding.scanStatusText.text = "스캔 중"
     }
 
     private fun startSessionPolling() {
@@ -191,112 +271,105 @@ class CheckinActivity : AppCompatActivity() {
             while (true) {
                 try {
                     val session = NetworkClient.api.getCheckinSession()
-                    
-                    // If session is no longer active, it means checkin completed!
                     if (!session.active) {
-                        // Let's verify if chemical was registered
+                        // 세션 종료 → 안착 완료 또는 타임아웃
                         val chemicals = NetworkClient.api.getChemicals()
-                        // Find latest chem registered by current user
-                        val latestChem = chemicals.filter { it.name == session.chemical_name }
+                        val latestChem = chemicals
+                            .filter { it.name == session.chemical_name }
                             .maxByOrNull { it.time_in ?: "" }
-                            
-                        if (latestChem != null) {
-                            runOnUiThread {
-                                handleCheckinComplete(latestChem)
-                            }
+                        if (latestChem != null && !session.timeout) {
+                            handleCheckinComplete(latestChem)
                         } else {
-                            runOnUiThread {
-                                resetScanState()
-                            }
+                            resetScanState()
                         }
                         break
                     } else {
-                        runOnUiThread {
-                            binding.placementStatusText.text = "시약 안착 대기 중... (${session.time_left.toInt()}초 남음)"
-                        }
+                        binding.statusSub.text = "남은 시간 ${session.time_left.toInt()}초"
                     }
                 } catch (e: Exception) {
-                    // ignore network error during poll
+                    // 폴링 중 네트워크 오류는 무시
                 }
                 delay(1000)
             }
         }
     }
 
-    private fun handleCheckinComplete(chemical: ChemicalData) {
-        activeSessionJob?.cancel()
-        
+    private suspend fun handleCheckinComplete(chemical: ChemicalData) {
         val placedShelfId = chemical.shelf_id ?: ""
-        val placedShelfDesc = "선반 ${placedShelfId.replace("SHELF-", "").substring(0, 1)} · ${chemical.shelf_row}행 ${chemical.shelf_col}열"
+        val parentShelf = try {
+            NetworkClient.api.getShelves().find { it.id == placedShelfId }?.parent_shelf
+        } catch (e: Exception) {
+            null
+        }
+        val placedShelfDesc =
+            "선반 ${parentShelf ?: "?"} · ${chemical.shelf_row ?: 0}행 ${chemical.shelf_col ?: 0}열"
 
-        // Check if placed in wrong spot (if it had history)
-        if (recommendedShelfId != null && placedShelfId != recommendedShelfId) {
-            showWrongLocationDialog(chemical, placedShelfDesc)
-        } else {
-            // Success placement
-            binding.placementStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
-            binding.placementStatusText.text = "등록 완료\n지정 위치($placedShelfDesc) 안착 확인됨"
-            
-            lifecycleScope.launch {
-                delay(3000)
-                resetScanState()
+        when {
+            // 신규 시약 → 등록 완료 success 모달 (§3.8)
+            currentNewItem -> {
+                setStatusSuccess("등록 완료", "선반 안착 확인")
+                AppModal.show(
+                    this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                    "신규 시약 등록 완료",
+                    "신규 시약 [${chemical.name}]이(가)\n${placedShelfDesc}에 등록 완료되었습니다.",
+                    null, "확인",
+                    onPrimary = { resetScanState() }
+                )
+            }
+            // 기존 시약이 지정 위치가 아닌 곳에 안착 → warning 모달 (§3.6)
+            recommendedShelfId != null && placedShelfId != recommendedShelfId -> {
+                AppModal.show(
+                    this, AppModal.Tone.WARNING, R.drawable.ic_triangle_alert,
+                    "잘못된 위치에 놓였습니다",
+                    "${chemical.name}의 지정 위치는 ${recommendedShelfDesc}입니다.\n" +
+                            "현재 ${placedShelfDesc}에 안착이 감지되었습니다.",
+                    "지정 위치로 옮기기", "이 위치로 수정하기",
+                    onSecondary = {
+                        // 다시 옮겨 놓도록 초기화 → 재스캔 시 LED 재안내
+                        resetScanState()
+                    },
+                    onPrimary = {
+                        // 서버에는 이미 현재 칸으로 기록되어 있으므로 이 위치를 확정
+                        setStatusSuccess("위치 변경 완료", "현재 위치로 등록됨")
+                        scheduleReset()
+                    }
+                )
+            }
+            // 지정 위치 안착 성공 (§3.5)
+            else -> {
+                setStatusSuccess("등록 완료", "지정 위치 안착 확인")
+                scheduleReset()
             }
         }
     }
 
-    private fun showWrongLocationDialog(chemical: ChemicalData, placedShelfDesc: String) {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_wrong_location, null)
-        val msgTv: TextView = dialogView.findViewById(R.id.dialogWarningMessage)
-        val btnMove: Button = dialogView.findViewById(R.id.btnMoveToDesignated)
-        val btnKeep: Button = dialogView.findViewById(R.id.btnUpdateLocation)
-
-        msgTv.text = "${chemical.name}의 지정 위치는 ${recommendedShelfDesc}입니다.\n현재 ${placedShelfDesc}에 안착이 감지되었습니다."
-
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
-
-        btnMove.setOnClickListener {
-            // User wants to move it.
-            // Dismiss dialog, and reset scan state so they can place it again (which triggers new checkin session).
-            dialog.dismiss()
-            resetScanState()
-        }
-
-        btnKeep.setOnClickListener {
-            // User wants to keep it at this new location.
-            // The DB is already registered here, so just show success and close.
-            dialog.dismiss()
-            
-            binding.placementStatusIcon.setImageResource(android.R.drawable.checkbox_on_background)
-            binding.placementStatusText.text = "위치 변경 완료\n새 위치($placedShelfDesc)에 등록되었습니다."
-            
-            lifecycleScope.launch {
-                delay(3000)
-                resetScanState()
-            }
-        }
-
-        dialog.show()
-    }
-
-    private fun cancelCheckinSession() {
+    private fun scheduleReset() {
         lifecycleScope.launch {
-            try {
-                NetworkClient.api.cancelCheckinSession()
-            } catch (e: Exception) {}
+            delay(4000)
             resetScanState()
         }
     }
 
     private fun resetScanState() {
         isScanned = false
+        currentNewItem = false
         recommendedShelfId = null
         recommendedShelfDesc = ""
         activeSessionJob?.cancel()
-        
+
+        binding.statusIcon.clearAnimation()
         binding.scanResultActive.visibility = View.GONE
+        binding.resultBadge.visibility = View.GONE
         binding.scanResultEmpty.visibility = View.VISIBLE
+        binding.scanStatusText.text = "스캔 중"
+    }
+
+    private fun color(res: Int): Int = ContextCompat.getColor(this, res)
+
+    companion object {
+        private val DEFAULT_KEYWORDS = listOf(
+            "에탄올", "메탄올", "아세톤", "황산", "질산", "염산", "시안", "아세토니트릴", "톨루엔",
+            "ETHANOL", "METHANOL", "ACETONE", "SULFURIC", "NITRIC", "CYANIDE", "ACETONITRILE", "TOLUENE"
+        )
     }
 }
