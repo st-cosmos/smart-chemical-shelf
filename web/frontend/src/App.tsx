@@ -6,6 +6,7 @@ import Inventory from './pages/Inventory';
 import Shelves from './pages/Shelves';
 import Orders from './pages/Orders';
 import UserRegister from './pages/UserRegister';
+import Profile from './pages/Profile';
 import { getJSON } from './api';
 import { EMPTY_ALERTS } from './types';
 import type { Alerts, SessionUser } from './types';
@@ -49,6 +50,11 @@ export default function App() {
     setUser(loggedIn);
   };
 
+  const handleProfileUpdated = (updated: SessionUser) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setUser(updated);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
@@ -61,11 +67,18 @@ export default function App() {
 
   return (
     <div className="app">
-      <Sidebar activeTab={activeTab} onSelect={setActiveTab} user={user} onLogout={handleLogout} />
+      <Sidebar
+        activeTab={activeTab}
+        onSelect={setActiveTab}
+        user={user}
+        onProfile={() => setActiveTab('profile')}
+        onLogout={handleLogout}
+      />
       {activeTab === 'inventory' && <Inventory alerts={alerts} refreshAlerts={refreshAlerts} />}
       {activeTab === 'shelves' && <Shelves />}
       {activeTab === 'orders' && <Orders />}
       {activeTab === 'users' && <UserRegister />}
+      {activeTab === 'profile' && <Profile user={user} onUpdated={handleProfileUpdated} />}
     </div>
   );
 }

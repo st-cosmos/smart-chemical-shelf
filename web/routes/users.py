@@ -85,6 +85,35 @@ def login_user_pin(req: schemas.UserPinLogin, db: Session = Depends(get_db)):
     )
 
 
+@router.put("/{username}", response_model=schemas.UserResponse)
+def update_profile(username: str, req: schemas.UserProfileUpdate, db: Session = Depends(get_db)):
+    """본인 프로필 수정: 별명은 필수, 비밀번호·PIN은 입력했을 때만 검증 후 변경한다."""
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+
+    nickname = (req.nickname or "").strip()
+    if not nickname:
+        raise HTTPException(status_code=400, detail="별명을 입력하세요.")
+
+    if req.password:
+        _validate_password(req.password)
+        user.password = req.password
+    if req.pin:
+        _validate_pin(req.pin)
+        user.pin = req.pin
+
+    user.nickname = nickname
+    db.commit()
+    db.refresh(user)
+
+    return schemas.UserResponse(
+        username=user.username,
+        nickname=user.nickname,
+        role=user.role,
+        created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    )
+
 @router.get("", response_model=List[schemas.UserResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()

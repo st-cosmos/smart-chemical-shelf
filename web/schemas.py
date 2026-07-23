@@ -18,6 +18,12 @@ class UserPinLogin(BaseModel):
     username: str
     pin: str
 
+class UserProfileUpdate(BaseModel):
+    # 본인 프로필 수정: 별명은 필수, 비밀번호·PIN은 비우면 기존 값 유지
+    nickname: str
+    password: Optional[str] = None
+    pin: Optional[str] = None
+
 class UserResponse(BaseModel):
     username: str
     nickname: str

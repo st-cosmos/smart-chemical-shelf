@@ -16939,6 +16939,325 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "tXQp7",
+      "x": 7830,
+      "y": 6532,
+      "name": "web-profile-edit",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg",
+      "children": [
+        {
+          "id": "NsO5g",
+          "type": "ref",
+          "ref": "Xz4mG",
+          "name": "Sidebar",
+          "height": "fill_container",
+          "descendants": {
+            "qanie": {
+              "fill": "#FFFFFF00"
+            },
+            "mtV0u": {
+              "fill": "$text-muted"
+            },
+            "NzWEF": {
+              "fill": "$text-body"
+            },
+            "MI8bX": {
+              "fill": "$primary-soft"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "odNWt",
+          "name": "PF Main",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "TB6Gm",
+              "name": "PF Topbar",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "D3RUk",
+                  "name": "PF Title",
+                  "fill": "$text-strong",
+                  "content": "내 프로필",
+                  "fontFamily": "$font",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Z9IOHZ",
+                  "name": "PF Sub",
+                  "fill": "$text-muted",
+                  "content": "본인 계정 정보를 확인하고 수정합니다",
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hv20p",
+              "name": "PF Card",
+              "width": 480,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1E2A560D",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 24
+              },
+              "layout": "vertical",
+              "gap": 24,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bS7Zc",
+                  "name": "PF Header",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DVw3u",
+                      "name": "PF Avatar",
+                      "width": 56,
+                      "height": 56,
+                      "fill": "$primary-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GGKfc",
+                          "name": "PF Avatar Initial",
+                          "fill": "$primary",
+                          "content": "김",
+                          "fontFamily": "$font",
+                          "fontSize": 22,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XTSwG",
+                      "name": "PF Header Texts",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 3,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AcOMP",
+                          "name": "PF Name",
+                          "fill": "$text-strong",
+                          "content": "김연구",
+                          "fontFamily": "$font",
+                          "fontSize": 18,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "vAKZz",
+                          "name": "PF Username",
+                          "fill": "$text-muted",
+                          "content": "@kim.lab",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "KDeKl",
+                      "type": "ref",
+                      "ref": "Gp9Qm",
+                      "name": "PF Role Badge",
+                      "fill": "$primary-soft",
+                      "descendants": {
+                        "mTeYb": {
+                          "content": "관리자",
+                          "fill": "$primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "bD5sD",
+                  "name": "PF Divider",
+                  "fill": "$border",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "UNauc",
+                  "name": "PF Edit Section",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "g36SKn",
+                      "name": "PF Section Label",
+                      "fill": "$text-strong",
+                      "content": "정보 수정",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "Ay3k6",
+                      "type": "ref",
+                      "ref": "Cf6Du",
+                      "name": "PF Nick",
+                      "width": "fill_container",
+                      "descendants": {
+                        "U5p1xC": {
+                          "content": "별명"
+                        },
+                        "mHXJO": {
+                          "content": "김연구",
+                          "fill": "$text-body"
+                        }
+                      }
+                    },
+                    {
+                      "id": "qj7CD",
+                      "type": "ref",
+                      "ref": "Cf6Du",
+                      "name": "PF PW",
+                      "width": "fill_container",
+                      "descendants": {
+                        "U5p1xC": {
+                          "content": "새 비밀번호"
+                        },
+                        "mHXJO": {
+                          "content": "8자 이상, 숫자·특수문자 포함"
+                        }
+                      }
+                    },
+                    {
+                      "id": "dru12",
+                      "type": "ref",
+                      "ref": "Cf6Du",
+                      "name": "PF PW Confirm",
+                      "width": "fill_container",
+                      "descendants": {
+                        "U5p1xC": {
+                          "content": "새 비밀번호 확인"
+                        },
+                        "mHXJO": {
+                          "content": "새 비밀번호를 다시 입력하세요"
+                        }
+                      }
+                    },
+                    {
+                      "id": "CJdwI",
+                      "type": "ref",
+                      "ref": "Cf6Du",
+                      "name": "PF Pin",
+                      "width": "fill_container",
+                      "descendants": {
+                        "U5p1xC": {
+                          "content": "새 PIN번호"
+                        },
+                        "mHXJO": {
+                          "content": "4자리 숫자"
+                        }
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "j3A5pr",
+                      "name": "PF Note",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "아이디와 권한은 변경할 수 없습니다. 비밀번호·PIN번호는 비워두면 기존 값이 유지됩니다.",
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NuB92",
+                  "name": "PF Save",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$primary",
+                  "cornerRadius": 12,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#3D6BF540",
+                    "offset": {
+                      "x": 0,
+                      "y": 6
+                    },
+                    "blur": 18
+                  },
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "kaY1H",
+                      "name": "PF Save Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "save",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "X1NzES",
+                      "name": "PF Save Text",
+                      "fill": "#FFFFFF",
+                      "content": "변경사항 저장",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {

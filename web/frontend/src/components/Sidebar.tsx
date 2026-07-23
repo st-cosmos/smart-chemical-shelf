@@ -2,7 +2,7 @@ import { Boxes, FlaskConical, Layers, LogOut, ShoppingCart, UserPlus } from 'luc
 import type { LucideIcon } from 'lucide-react';
 import type { SessionUser } from '../types';
 
-export type TabKey = 'inventory' | 'shelves' | 'orders' | 'users';
+export type TabKey = 'inventory' | 'shelves' | 'orders' | 'users' | 'profile';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: 'inventory', label: '재고 관리', icon: Boxes },
@@ -15,10 +15,11 @@ interface SidebarProps {
   activeTab: TabKey;
   onSelect: (tab: TabKey) => void;
   user: SessionUser;
+  onProfile: () => void;
   onLogout: () => void;
 }
 
-export default function Sidebar({ activeTab, onSelect, user, onLogout }: SidebarProps) {
+export default function Sidebar({ activeTab, onSelect, user, onProfile, onLogout }: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -44,12 +45,14 @@ export default function Sidebar({ activeTab, onSelect, user, onLogout }: Sidebar
 
       <div className="sidebar-spacer" />
 
-      <div className="sidebar-user">
-        <div className="avatar">{user.nickname.charAt(0)}</div>
-        <div className="sidebar-user-info">
-          <div className="sidebar-user-name">{user.nickname}</div>
-          <div className="sidebar-user-role">{user.role}</div>
-        </div>
+      <div className={`sidebar-user${activeTab === 'profile' ? ' active' : ''}`}>
+        <button className="sidebar-user-main" onClick={onProfile} title="내 프로필">
+          <div className="avatar">{user.nickname.charAt(0)}</div>
+          <div className="sidebar-user-info">
+            <div className="sidebar-user-name">{user.nickname}</div>
+            <div className="sidebar-user-role">{user.role}</div>
+          </div>
+        </button>
         <button className="sidebar-logout" onClick={onLogout} title="로그아웃">
           <LogOut size={16} />
         </button>
