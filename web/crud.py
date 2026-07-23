@@ -9,15 +9,16 @@ def init_db_seed(db: Session):
         return
 
     # 1. Seed Users
+    # 웹 로그인 비밀번호는 qwer1234, 앱 로그인 PIN은 1234 로 통일한다.
     users = [
-        models.User(username="kim.lab", password="123", nickname="김연구", role="관리자"),
-        models.User(username="lee.exp", password="123", nickname="이실험", role="연구원"),
-        models.User(username="park.safe", password="123", nickname="박안전", role="관리자"),
-        models.User(username="jung.dev", password="123", nickname="정개발", role="연구원"),
-        models.User(username="kang.design", password="123", nickname="강디자인", role="연구원"),
-        models.User(username="yoon.plan", password="123", nickname="윤기획", role="연구원"),
-        models.User(username="cho.test", password="123", nickname="조테스트", role="연구원"),
-        models.User(username="shin.intern", password="123", nickname="신인턴", role="연구원"),
+        models.User(username="kim.lab", password="qwer1234", pin="1234", nickname="김연구", role="관리자"),
+        models.User(username="lee.exp", password="qwer1234", pin="1234", nickname="이실험", role="연구원"),
+        models.User(username="park.safe", password="qwer1234", pin="1234", nickname="박안전", role="관리자"),
+        models.User(username="jung.dev", password="qwer1234", pin="1234", nickname="정개발", role="연구원"),
+        models.User(username="kang.design", password="qwer1234", pin="1234", nickname="강디자인", role="연구원"),
+        models.User(username="yoon.plan", password="qwer1234", pin="1234", nickname="윤기획", role="연구원"),
+        models.User(username="cho.test", password="qwer1234", pin="1234", nickname="조테스트", role="연구원"),
+        models.User(username="shin.intern", password="qwer1234", pin="1234", nickname="신인턴", role="연구원"),
     ]
     for u in users:
         db.add(u)

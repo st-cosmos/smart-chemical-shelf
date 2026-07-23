@@ -19,8 +19,9 @@ interface ApiService {
     @POST("api/users/register")
     suspend fun registerUser(@Body request: UserRegisterRequest): UserData
 
-    @POST("api/users/login")
-    suspend fun login(@Body request: UserLoginRequest): UserData
+    // 앱 로그인은 4자리 PIN 방식(login-pin)을 사용한다. (웹은 비밀번호 방식 /login)
+    @POST("api/users/login-pin")
+    suspend fun loginPin(@Body request: UserPinLoginRequest): UserData
 
     // --- Shelves ---
     @GET("api/shelves")

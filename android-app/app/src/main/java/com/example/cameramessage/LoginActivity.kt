@@ -23,9 +23,9 @@ import kotlinx.coroutines.launch
 
 /**
  * app-login-profiles → app-login (design-spec §3.1, §3.2)
- * 프로필 목록에서 선택 → PIN 카드(4도트 + 키패드) → POST /api/users/login 검증.
- * 시드 비밀번호가 "123"이므로 3자리째부터 조용히 로그인을 시도하고,
- * 4자리 입력 후 실패하면 도트 흔들림 + 에러 색으로 표시한다.
+ * 프로필 목록에서 선택 → PIN 카드(4도트 + 키패드) → POST /api/users/login-pin 검증.
+ * 4자리 PIN(시드값 "1234")을 모두 입력하면 로그인을 시도하고,
+ * 실패하면 도트 흔들림 + 에러 색으로 표시한다.
  */
 class LoginActivity : AppCompatActivity() {
 
@@ -106,7 +106,7 @@ class LoginActivity : AppCompatActivity() {
                 if (errorShowing || pinBuffer.length >= 4) return@setOnClickListener
                 pinBuffer.append(key.text)
                 updatePinDots()
-                if (pinBuffer.length >= 3) attemptLogin(silent = pinBuffer.length < 4)
+                if (pinBuffer.length >= 4) attemptLogin()
             }
         }
 
@@ -135,16 +135,16 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun attemptLogin(silent: Boolean) {
+    private fun attemptLogin() {
         val user = selectedUser ?: return
         val pin = pinBuffer.toString()
         loginJob?.cancel()
         loginJob = lifecycleScope.launch {
             try {
-                NetworkClient.api.login(UserLoginRequest(username = user.username, password = pin))
+                NetworkClient.api.loginPin(UserPinLoginRequest(username = user.username, pin = pin))
                 onLoginSuccess(user)
             } catch (e: Exception) {
-                if (!silent) showPinError()
+                showPinError()
             }
         }
     }

@@ -12053,7 +12053,7 @@
     {
       "type": "frame",
       "id": "u1Skr6",
-      "x": 4680,
+      "x": 4690,
       "y": 6532,
       "name": "web-user-register",
       "clip": true,
@@ -12212,6 +12212,21 @@
                       }
                     },
                     {
+                      "id": "P2zDGi",
+                      "type": "ref",
+                      "ref": "Cf6Du",
+                      "name": "UR Pin",
+                      "width": "fill_container",
+                      "descendants": {
+                        "U5p1xC": {
+                          "content": "PIN번호"
+                        },
+                        "mHXJO": {
+                          "content": "4자리 숫자"
+                        }
+                      }
+                    },
+                    {
                       "type": "frame",
                       "id": "yDeqq",
                       "name": "UR Role",
@@ -12280,31 +12295,6 @@
                                   "name": "Role Text 연구원",
                                   "fill": "#FFFFFF",
                                   "content": "연구원",
-                                  "fontFamily": "$font",
-                                  "fontSize": 13,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "Urhal",
-                              "name": "Role 보조원",
-                              "width": "fill_container",
-                              "height": 40,
-                              "fill": "$surface",
-                              "cornerRadius": 10,
-                              "stroke": "$border",
-                              "strokeWidth": 1,
-                              "justifyContent": "center",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Um1Sg",
-                                  "name": "Role Text 보조원",
-                                  "fill": "$text-body",
-                                  "content": "보조원",
                                   "fontFamily": "$font",
                                   "fontSize": 13,
                                   "fontWeight": "600"
@@ -12403,7 +12393,7 @@
                           "id": "p8Vmx",
                           "name": "UR List Title",
                           "fill": "$text-strong",
-                          "content": "등록된 사용자 4명",
+                          "content": "등록된 사용자 3명",
                           "fontFamily": "$font",
                           "fontSize": 15,
                           "fontWeight": "700"
@@ -12729,111 +12719,6 @@
                           "type": "icon",
                           "id": "xYPVf",
                           "name": "박안전 More",
-                          "width": 18,
-                          "height": 18,
-                          "icon": "ellipsis",
-                          "library": "lucide",
-                          "fill": "$text-muted"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "xoXLV",
-                      "name": "URow 최보조",
-                      "width": "fill_container",
-                      "stroke": "$border",
-                      "strokeWidth": {
-                        "bottom": 1
-                      },
-                      "strokeAlignment": "inner",
-                      "gap": 14,
-                      "padding": [
-                        13,
-                        24
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "azsXr",
-                          "name": "최보조 Avatar",
-                          "width": 36,
-                          "height": 36,
-                          "fill": "$primary-soft",
-                          "cornerRadius": 999,
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Eenqt",
-                              "name": "최보조 Initial",
-                              "fill": "$primary",
-                              "content": "최",
-                              "fontFamily": "$font",
-                              "fontSize": 14,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "hsPds",
-                          "name": "최보조 Texts",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 1,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "A1MKx",
-                              "name": "최보조 Nick",
-                              "fill": "$text-strong",
-                              "content": "최보조",
-                              "fontFamily": "$font",
-                              "fontSize": 14,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "b42JQy",
-                              "name": "최보조 Id",
-                              "fill": "$text-muted",
-                              "content": "@choi.assist",
-                              "fontFamily": "$font",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "id": "oUHzl",
-                          "type": "ref",
-                          "ref": "Gp9Qm",
-                          "name": "최보조 Role",
-                          "fill": "$warning-soft",
-                          "descendants": {
-                            "mTeYb": {
-                              "content": "보조원",
-                              "fill": "$warning"
-                            }
-                          }
-                        },
-                        {
-                          "type": "text",
-                          "id": "FjkYd",
-                          "name": "최보조 Date",
-                          "fill": "$text-muted",
-                          "content": "등록일 2026-01-20",
-                          "fontFamily": "$font",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "n1WPu",
-                          "name": "최보조 More",
                           "width": 18,
                           "height": 18,
                           "icon": "ellipsis",
@@ -14912,7 +14797,7 @@
     {
       "type": "frame",
       "id": "O3k3hO",
-      "x": 6120,
+      "x": 6270,
       "y": 6532,
       "name": "web-shelf-manage",
       "clip": true,
