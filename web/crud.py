@@ -13,7 +13,6 @@ def init_db_seed(db: Session):
         models.User(username="kim.lab", password="123", nickname="김연구", role="관리자"),
         models.User(username="lee.exp", password="123", nickname="이실험", role="연구원"),
         models.User(username="park.safe", password="123", nickname="박안전", role="관리자"),
-        models.User(username="choi.assist", password="123", nickname="최보조", role="보조원"),
         models.User(username="jung.dev", password="123", nickname="정개발", role="연구원"),
         models.User(username="kang.design", password="123", nickname="강디자인", role="연구원"),
         models.User(username="yoon.plan", password="123", nickname="윤기획", role="연구원"),
@@ -174,7 +173,7 @@ def init_db_seed(db: Session):
         models.Log(chemical_id="chem_2", chemical_name="황산 0.1M", action="반출", operator_name="김연구", details="보관 위치였던 선반 A · 1행 2열이 비워졌습니다", timestamp=datetime.now() - timedelta(minutes=10)),
         models.Log(chemical_id="chem_2", chemical_name="황산 0.1M", action="반입", operator_name="김연구", details="신규로 들어옴: 선반 A · 1행 2열에 등록됨", timestamp=datetime.now() - timedelta(hours=8)),
         models.Log(chemical_id="chem_6", chemical_name="메탄올", action="반출", operator_name="이실험", details="보관 위치였던 선반 B · 1행 2열이 비워졌습니다", timestamp=datetime.now() - timedelta(hours=24)),
-        models.Log(chemical_id="chem_6", chemical_name="메탄올", action="반입", operator_name="최보조", details="재반입 완료", timestamp=datetime.now() - timedelta(days=4)),
+        models.Log(chemical_id="chem_6", chemical_name="메탄올", action="반입", operator_name="이실험", details="재반입 완료", timestamp=datetime.now() - timedelta(days=4)),
     ]
     for l in logs:
         db.add(l)

@@ -7,7 +7,7 @@ import SearchBar from '../components/SearchBar';
 import { getJSON, postJSON } from '../api';
 import type { User } from '../types';
 
-const ROLES = ['관리자', '연구원', '보조원'] as const;
+const ROLES = ['관리자', '연구원'] as const;
 
 function formatDate(iso: string): string {
   return iso ? iso.slice(0, 10) : '-';

@@ -10,7 +10,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     nickname = Column(String, nullable=False)
-    role = Column(String, default="연구원")  # 관리자, 연구원, 보조원
+    role = Column(String, default="연구원")  # 관리자, 연구원
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Shelf(Base):
