@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from database import get_db
+import device_status
 import models
 import schemas
 from datetime import datetime
@@ -10,9 +11,14 @@ router = APIRouter(prefix="/api/shelves", tags=["shelves"])
 
 @router.get("", response_model=List[schemas.ShelfResponse])
 def get_shelves(db: Session = Depends(get_db)):
+    """등록된 선반은 항상 반환하고, 미등록 기기는 실제로 접속 중(하트비트가
+    살아 있는 경우)일 때만 노출한다. 꺼진 기기의 잔여 행이 앱/웹의
+    '신규 선반 기기 감지' 알림을 계속 띄우는 문제를 막는다."""
     shelves = db.query(models.Shelf).all()
-    # Sort shelves so that registered ones are first or sorted by id
-    return shelves
+    return [
+        s for s in shelves
+        if s.status == "registered" or device_status.is_online(s.id)
+    ]
 
 @router.get("/configs")
 def get_shelf_configs(db: Session = Depends(get_db)):

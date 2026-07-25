@@ -11,6 +11,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import crud
+import device_status
+import matching
 import models
 import schemas
 from database import Base, SessionLocal, engine, get_db
@@ -44,6 +46,7 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         crud.init_db_seed(db)
+        matching.ensure_alias_seed(db)  # 기존 DB에도 별칭 사전이 비어 있으면 시드
     finally:
         db.close()
     yield
@@ -108,7 +111,8 @@ def _weight_status(shelf: models.Shelf) -> str:
 
 @app.get("/api/device/{device_id}")
 def get_device(device_id: str, db: Session = Depends(get_db)):
-    """디바이스(선반 모듈)의 LED 상태를 돌려줍니다."""
+    """디바이스(선반 모듈)의 LED 상태를 돌려줍니다. 1초 주기 폴링 = 하트비트."""
+    device_status.mark_seen(device_id)
     return _device_payload(_get_or_create_shelf(device_id, db))
 
 
@@ -130,6 +134,7 @@ def post_weight(device_id: str, event: WeightEvent, db: Session = Depends(get_db
 
     kg 단위로 환산해 선반 무게 갱신 로직(체크인 세션 완료 감지 포함)에 위임합니다.
     """
+    device_status.mark_seen(device_id)
     _get_or_create_shelf(device_id, db)
     weight_kg = round(event.value / 1000.0, 3)
     result = shelves.update_weight(device_id, schemas.WeightUpdate(weight=weight_kg), db)
