@@ -7,10 +7,24 @@ import SearchBar from '../components/SearchBar';
 import { getJSON, postJSON } from '../api';
 import type { User } from '../types';
 
-const ROLES = ['관리자', '연구원', '보조원'] as const;
+const ROLES = ['관리자', '연구원'] as const;
 
 function formatDate(iso: string): string {
   return iso ? iso.slice(0, 10) : '-';
+}
+
+/** 웹 로그인용 비밀번호 규칙: 8자 이상, 숫자·특수문자 포함. 문제 있으면 메시지를, 없으면 null 을 반환. */
+function validatePassword(pw: string): string | null {
+  if (pw.length < 8) return '비밀번호는 8자 이상이어야 합니다.';
+  if (!/\d/.test(pw)) return '비밀번호에 숫자를 포함해야 합니다.';
+  if (!/[^A-Za-z0-9]/.test(pw)) return '비밀번호에 특수문자를 포함해야 합니다.';
+  return null;
+}
+
+/** 앱 로그인용 PIN 규칙: 정확히 4자리 숫자. */
+function validatePin(pin: string): string | null {
+  if (!/^\d{4}$/.test(pin)) return 'PIN번호는 4자리 숫자여야 합니다.';
+  return null;
 }
 
 export default function UserRegister() {
@@ -20,6 +34,7 @@ export default function UserRegister() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [pin, setPin] = useState('');
   const [role, setRole] = useState<string>('연구원');
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
@@ -39,8 +54,18 @@ export default function UserRegister() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submitting) return;
-    if (!username || !password || !nickname) {
-      setNotice({ ok: false, text: '아이디·비밀번호·별명을 모두 입력하세요.' });
+    if (!username || !password || !nickname || !pin) {
+      setNotice({ ok: false, text: '아이디·비밀번호·별명·PIN번호를 모두 입력하세요.' });
+      return;
+    }
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setNotice({ ok: false, text: pwError });
+      return;
+    }
+    const pinError = validatePin(pin);
+    if (pinError) {
+      setNotice({ ok: false, text: pinError });
       return;
     }
     setSubmitting(true);
@@ -50,12 +75,14 @@ export default function UserRegister() {
         username,
         password,
         nickname,
+        pin,
         role,
       });
       setNotice({ ok: true, text: `${created.nickname} (${created.role}) 계정이 생성되었습니다.` });
       setUsername('');
       setPassword('');
       setNickname('');
+      setPin('');
       setRole('연구원');
       await fetchUsers();
     } catch (err) {
@@ -103,6 +130,14 @@ export default function UserRegister() {
             placeholder="앱 프로필에 표시될 이름"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
+          />
+          <Input
+            label="PIN번호"
+            placeholder="4자리 숫자"
+            inputMode="numeric"
+            maxLength={4}
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
           />
 
           <div className="input-group">

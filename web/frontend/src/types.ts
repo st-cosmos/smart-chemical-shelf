@@ -3,7 +3,7 @@
 export interface User {
   username: string;
   nickname: string;
-  role: string; // 관리자 | 연구원 | 보조원
+  role: string; // 관리자 | 연구원
   created_at: string;
 }
 

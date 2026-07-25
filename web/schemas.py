@@ -3,13 +3,26 @@ from typing import Optional, List
 
 class UserRegister(BaseModel):
     username: str
-    password: str
+    password: str        # 웹 로그인용 (8자 이상, 숫자·특수문자 포함)
     nickname: str
+    pin: str             # 앱 로그인용 4자리 PIN
     role: str
 
 class UserLogin(BaseModel):
+    # 웹 로그인: 긴 비밀번호로 인증
     username: str
     password: str
+
+class UserPinLogin(BaseModel):
+    # 안드로이드 앱 로그인: 4자리 PIN으로 인증
+    username: str
+    pin: str
+
+class UserProfileUpdate(BaseModel):
+    # 본인 프로필 수정: 별명은 필수, 비밀번호·PIN은 비우면 기존 값 유지
+    nickname: str
+    password: Optional[str] = None
+    pin: Optional[str] = None
 
 class UserResponse(BaseModel):
     username: str

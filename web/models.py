@@ -8,9 +8,10 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
+    password = Column(String, nullable=False)          # 웹 로그인용 (8자 이상, 숫자·특수문자 포함)
+    pin = Column(String, nullable=False, default="0000")  # 안드로이드 앱 로그인용 4자리 PIN
     nickname = Column(String, nullable=False)
-    role = Column(String, default="연구원")  # 관리자, 연구원, 보조원
+    role = Column(String, default="연구원")  # 관리자, 연구원
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Shelf(Base):

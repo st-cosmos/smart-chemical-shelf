@@ -1295,3 +1295,88 @@ select.input-field {
 .modal-actions .btn {
   flex: 1;
 }
+
+/* ============================================================
+   사이드바 사용자 블록 → 프로필 진입
+   ============================================================ */
+.sidebar-user-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar-user.active {
+  background: var(--primary-soft);
+}
+
+/* ============================================================
+   내 프로필 (web-profile-edit)
+   ============================================================ */
+.profile-card {
+  width: 480px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.avatar-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-head-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.profile-head-id {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+.profile-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.profile-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
