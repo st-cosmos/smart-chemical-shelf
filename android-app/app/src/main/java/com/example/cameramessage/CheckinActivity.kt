@@ -463,8 +463,8 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                         setStatusSuccess("위치 변경 완료", "현재 위치로 등록됨")
                         AppModal.show(
                             this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
-                            "반입 완료",
-                            "[${chemical.name}]이(가)\n${placedShelfDesc}에 반입 완료되었습니다.",
+                            "위치 변경 완료",
+                            "[${chemical.name}]의 보관 위치가\n${placedShelfDesc}(으)로 변경되었습니다.",
                             null, "확인",
                             autoDismissMs = 3000L,
                             onPrimary = { resetScanState() }
