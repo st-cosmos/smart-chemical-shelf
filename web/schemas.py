@@ -1,12 +1,23 @@
-from pydantic import BaseModel
+import re
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 
 class UserRegister(BaseModel):
-    username: str
+    username: str = Field(..., min_length=4)
     password: str        # 웹 로그인용 (8자 이상, 숫자·특수문자 포함)
     nickname: str
     pin: str             # 앱 로그인용 4자리 PIN
     role: str
+
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        v_str = (v or "").strip()
+        if len(v_str) < 4:
+            raise ValueError('아이디는 4자 이상이어야 합니다.')
+        if not re.match(r'^[a-zA-Z0-9._-]+$', v_str):
+            raise ValueError('아이디는 영문, 숫자 및 특수기호(._-)만 허용됩니다.')
+        return v_str
 
 class UserLogin(BaseModel):
     # 웹 로그인: 긴 비밀번호로 인증

@@ -33,3 +33,9 @@ export function putJSON<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   }).then((res) => handle<T>(res));
 }
+
+export function deleteJSON<T>(url: string): Promise<T> {
+  return fetch(url, {
+    method: 'DELETE',
+  }).then((res) => handle<T>(res));
+}
