@@ -80,3 +80,19 @@ class ShelfConfig(Base):
     rows = Column(Integer, default=3)
     cols = Column(Integer, default=4)
 
+class ChemicalAlias(Base):
+    """OCR 매칭용 별칭 사전. alias 는 정규화된 문자열(소문자, 한글/영문/숫자만)."""
+    __tablename__ = "chemical_aliases"
+
+    id = Column(Integer, primary_key=True, index=True)
+    alias = Column(String, unique=True, index=True, nullable=False)
+    standard_name = Column(String, nullable=False)      # e.g., 에탄올 95%
+
+class BarcodeMap(Base):
+    """병에 이미 붙어 있는 바코드/QR → 시약 매핑. 첫 스캔에서 학습된다."""
+    __tablename__ = "barcode_map"
+
+    barcode = Column(String, primary_key=True, index=True)  # 디코딩된 원문 (불투명 키)
+    chemical_name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+

@@ -55,10 +55,23 @@ class LedUpdate(BaseModel):
 class ScanInRequest(BaseModel):
     ocr_text: str
     username: str  # who scanned it
+    chemical_name: Optional[str] = None  # 앱에서 매칭/확인이 끝난 표준명 (있으면 매칭 생략)
 
 class ScanOutRequest(BaseModel):
     ocr_text: str
     username: str  # who scanned it
+    chemical_name: Optional[str] = None  # 앱에서 매칭/확인이 끝난 표준명 (있으면 매칭 생략)
+
+class MatchRequest(BaseModel):
+    # 앱이 스캔 중 주기적으로 보내는 인식 시도 (OCR 누적 텍스트 + 병의 바코드/QR)
+    ocr_text: str = ""
+    barcode: Optional[str] = None
+
+class MatchConfirmRequest(BaseModel):
+    # 사용자 확인/직접 선택 결과 학습용
+    chemical_name: str
+    barcode: Optional[str] = None
+    matched_token: Optional[str] = None
 
 class SelectLedRequest(BaseModel):
     chem_id: str

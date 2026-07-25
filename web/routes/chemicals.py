@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from database import get_db
+import matching
 import models
 import schemas
 from datetime import datetime
@@ -9,68 +10,50 @@ import time
 
 router = APIRouter(prefix="/api/chemicals", tags=["chemicals"])
 
-OCR_CHEMICALS = [
-    "Ethanol",
-    "Acetone",
-    "Hydrochloric Acid",
-    "Sodium Hydroxide",
-    "Methanol",
-    "Sulfuric Acid",
-    "Distilled Water",
-    "Benzene",
-    "Toluene",
-    "Hexane",
-    "에탄올 95%",
-    "아세톤",
-    "시안화칼륨",
-    "질산은 표준액",
-    "메탄올",
-    "황산 0.1M",
-    "톨루엔"
-]
 
-# Match Korean names or English names to standard name in database
-CHEMICAL_NAME_MAPPING = {
-    "ethanol": "에탄올 95%",
-    "에탄올": "에탄올 95%",
-    "acetone": "아세톤",
-    "아세톤": "아세톤",
-    "cyanide": "시안화칼륨",
-    "시안화칼륨": "시안화칼륨",
-    "silver nitrate": "질산은 표준액",
-    "질산은": "질산은 표준액",
-    "methanol": "메탄올",
-    "메탄올": "메탄올",
-    "sulfuric acid": "황산 0.1M",
-    "황산": "황산 0.1M",
-    "toluene": "톨루엔",
-    "톨루엔": "톨루엔"
-}
+def _resolve_chemical_name(db: Session, req, error_detail: str) -> str:
+    """scan-in/out 공통: 앱이 확정한 chemical_name 이 있으면 그대로,
+    없으면(구버전 클라이언트) 서버 매칭을 시도하되 자동 확정 수준일 때만 인정한다."""
+    if req.chemical_name:
+        return req.chemical_name
+    result = matching.match(db, req.ocr_text)
+    if result["status"] == "matched":
+        return result["chemical_name"]
+    raise HTTPException(status_code=400, detail=error_detail)
+
 
 @router.get("", response_model=List[schemas.ChemicalResponse])
 def get_chemicals(db: Session = Depends(get_db)):
     return db.query(models.Chemical).all()
 
 @router.get("/ocr-chemicals")
-def get_ocr_chemicals():
-    return OCR_CHEMICALS
+def get_ocr_chemicals(db: Session = Depends(get_db)):
+    # (구버전 호환) 인식 대상 시약명 목록 — 이제 별칭 사전 기반
+    return matching.known_names(db)
+
+@router.get("/known-names")
+def get_known_names(db: Session = Depends(get_db)):
+    """앱의 '직접 선택' 폴백 UI 용 표준명 목록."""
+    return matching.known_names(db)
+
+@router.post("/match")
+def match_chemical(req: schemas.MatchRequest, db: Session = Depends(get_db)):
+    """스캔 중 인식 시도. 바코드 > CAS > 별칭 > 유사도 순으로 매칭하고
+    확신이 없으면 needs_confirmation 으로 후보를 돌려준다."""
+    return matching.match(db, req.ocr_text, req.barcode)
+
+@router.post("/match/confirm")
+def confirm_match(req: schemas.MatchConfirmRequest, db: Session = Depends(get_db)):
+    """확정된 (바코드/토큰 → 시약) 매핑을 학습해 다음 스캔부터 즉시 인식되게 한다."""
+    learned = matching.confirm(db, req.chemical_name, req.barcode, req.matched_token)
+    return {"status": "success", "learned": learned}
 
 @router.post("/scan-in")
 def scan_in(req: schemas.ScanInRequest, db: Session = Depends(get_db)):
-    ocr_lower = req.ocr_text.lower()
-    matched_std_name = None
-    
-    # Try mapping key substring
-    for key, std_name in CHEMICAL_NAME_MAPPING.items():
-        if key in ocr_lower:
-            matched_std_name = std_name
-            break
-            
-    if not matched_std_name:
-        raise HTTPException(
-            status_code=400,
-            detail=f"인식된 텍스트 '{req.ocr_text}'에서 보관 가능한 시약을 매칭하지 못했습니다."
-        )
+    matched_std_name = _resolve_chemical_name(
+        db, req,
+        f"인식된 텍스트 '{req.ocr_text}'에서 보관 가능한 시약을 매칭하지 못했습니다."
+    )
         
     # Check if there is history of this chemical name to find designated shelf location
     prev_chem = db.query(models.Chemical).filter(
@@ -109,20 +92,11 @@ def scan_in(req: schemas.ScanInRequest, db: Session = Depends(get_db)):
 
 @router.post("/scan-out")
 def scan_out(req: schemas.ScanOutRequest, db: Session = Depends(get_db)):
-    ocr_lower = req.ocr_text.lower()
-    matched_std_name = None
-    
-    for key, std_name in CHEMICAL_NAME_MAPPING.items():
-        if key in ocr_lower:
-            matched_std_name = std_name
-            break
-            
-    if not matched_std_name:
-        raise HTTPException(
-            status_code=400,
-            detail=f"인식된 텍스트 '{req.ocr_text}'에서 반출할 시약을 식별할 수 없습니다."
-        )
-        
+    matched_std_name = _resolve_chemical_name(
+        db, req,
+        f"인식된 텍스트 '{req.ocr_text}'에서 반출할 시약을 식별할 수 없습니다."
+    )
+
     # Find active chemical in DB
     chem = db.query(models.Chemical).filter(
         models.Chemical.name == matched_std_name,
@@ -144,6 +118,7 @@ def scan_out(req: schemas.ScanOutRequest, db: Session = Depends(get_db)):
     chem.time_out = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     # Empty shelf weight
+    shelf = None
     if chem.shelf_id:
         shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
         if shelf:
