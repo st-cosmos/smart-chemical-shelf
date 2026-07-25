@@ -61,11 +61,26 @@ interface ApiService {
     @GET("api/chemicals/ocr-chemicals")
     suspend fun getOcrChemicals(): List<String>
 
+    @GET("api/chemicals/known-names")
+    suspend fun getKnownNames(): List<String>
+
+    // OCR 누적 텍스트 + 바코드로 시약 후보를 조회 (스캔 중 주기 호출)
+    @POST("api/chemicals/match")
+    suspend fun matchChemical(@Body request: MatchRequest): MatchResult
+
+    // 사용자 확인/직접 선택 결과를 서버에 학습 (별칭·바코드 사전 갱신)
+    @POST("api/chemicals/match/confirm")
+    suspend fun confirmMatch(@Body request: MatchConfirmRequest): Map<String, Any>
+
     @POST("api/chemicals/scan-in")
     suspend fun scanIn(@Body request: ScanInRequest): ScanInResponse
 
     @POST("api/chemicals/scan-out")
     suspend fun scanOut(@Body request: ScanOutRequest): ScanOutResponse
+
+    // 무게 감지 타임아웃 후 '무게 확인 없이 기록'
+    @POST("api/chemicals/scan-out/force")
+    suspend fun scanOutForce(@Body request: ScanOutForceRequest): ScanOutResponse
 
     @POST("api/chemicals/select-led")
     suspend fun selectLed(@Body request: SelectLedRequest): SelectLedResponse
@@ -83,6 +98,13 @@ interface ApiService {
 
     @POST("api/checkin-session/cancel")
     suspend fun cancelCheckinSession(): Map<String, String>
+
+    // --- Check-out Session (선반 무게 감소로 반출 확정) ---
+    @GET("api/checkout-session")
+    suspend fun getCheckoutSession(): CheckoutSessionState
+
+    @POST("api/checkout-session/cancel")
+    suspend fun cancelCheckoutSession(): Map<String, String>
 
     // --- Device (ESP8266 로드셀 모듈 · 구버전 데모 호환) ---
     @GET("api/device/{device_id}")

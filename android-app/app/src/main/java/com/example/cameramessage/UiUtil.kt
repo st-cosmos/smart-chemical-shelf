@@ -18,6 +18,17 @@ fun Context.dp(value: Int): Int =
         TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics
     ).toInt()
 
+/** FastAPI 오류 응답 {"detail": "..."} 에서 사용자용 메시지를 꺼낸다. */
+fun httpErrorDetail(e: Exception): String? {
+    val http = e as? retrofit2.HttpException ?: return null
+    return try {
+        val body = http.response()?.errorBody()?.string() ?: return null
+        org.json.JSONObject(body).optString("detail").takeIf { it.isNotBlank() }
+    } catch (ex: Exception) {
+        null
+    }
+}
+
 /**
  * Nav/BottomBar (design-spec §1.2) 활성 탭 스타일 지정 + 탭 이동 처리.
  * 홈이 항상 스택 하단에 있으므로, 홈 이외 화면 간 이동은 startActivity + finish 로 처리한다.

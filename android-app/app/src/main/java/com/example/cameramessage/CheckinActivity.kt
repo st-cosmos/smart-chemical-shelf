@@ -1,6 +1,7 @@
 package com.example.cameramessage
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -23,6 +24,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.cameramessage.databinding.ActivityCheckinBinding
+import com.google.android.gms.tasks.Tasks
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
@@ -33,13 +38,28 @@ import java.util.concurrent.Executors
 
 /**
  * app-checkin / -new / -new-complete / -alert (design-spec §3.5~3.8)
- * CameraX 프리뷰 + ML Kit 한국어 OCR → scan-in → 결과 카드 상태 변화 + 세션 폴링.
+ * CameraX 프리뷰 + ML Kit OCR·바코드 → ChemicalScanner(서버 매칭) → scan-in → 세션 폴링.
+ *
+ * 인식 확신이 낮으면 "이 시약이 맞나요?" 확인 모달을 띄우고, 계속 실패하면
+ * "인식이 잘 안됩니다" 안내와 함께 목록 직접 선택 폴백을 제공한다.
+ * 확인·직접 선택 결과는 서버 별칭/바코드 사전에 학습되어 다음 스캔부터 즉시 인식된다.
  */
-class CheckinActivity : AppCompatActivity() {
+class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private lateinit var binding: ActivityCheckinBinding
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private val recognizer = TextRecognition.getClient(KoreanTextRecognizerOptions.Builder().build())
+    private val barcodeScanner = BarcodeScanning.getClient(
+        BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_QR_CODE, Barcode.FORMAT_DATA_MATRIX,
+                Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8,
+                Barcode.FORMAT_CODE_128, Barcode.FORMAT_CODE_39,
+                Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E
+            )
+            .build()
+    )
+    private lateinit var scanner: ChemicalScanner
 
     private var camera: Camera? = null
     private var torchOn = false
@@ -49,7 +69,7 @@ class CheckinActivity : AppCompatActivity() {
     private var currentNewItem = false
     private var recommendedShelfId: String? = null
     private var recommendedShelfDesc: String = ""
-    private var ocrKeywords: List<String> = DEFAULT_KEYWORDS
+    private var scannedName: String = ""  // 세션 완료 후 결과 조회용 (세션 리셋 시 이름이 비므로)
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -65,6 +85,8 @@ class CheckinActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
 
+        scanner = ChemicalScanner(lifecycleScope, this)
+
         // Header: 반입/반출 화면에서는 Bell 버튼 숨김 (design-spec §1.3)
         binding.appHeader.headerTitle.text = "시약 반입"
         binding.appHeader.btnBell.visibility = View.GONE
@@ -77,9 +99,9 @@ class CheckinActivity : AppCompatActivity() {
             torchOn = !torchOn
             camera?.cameraControl?.enableTorch(torchOn)
         }
+        binding.btnManualSelect.setOnClickListener { openManualSelect() }
 
         startScanLineAnimation()
-        fetchOcrKeywords()
 
         if (hasCameraPermission()) startCamera()
         else requestPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -107,7 +129,7 @@ class CheckinActivity : AppCompatActivity() {
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
-            analysis.setAnalyzer(cameraExecutor, TextAnalyzer())
+            analysis.setAnalyzer(cameraExecutor, ScanAnalyzer())
 
             val selector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
@@ -144,19 +166,8 @@ class CheckinActivity : AppCompatActivity() {
         binding.statusIcon.startAnimation(rotate)
     }
 
-    /** 서버의 OCR 인식 대상 시약명 리스트를 키워드 필터로 사용 */
-    private fun fetchOcrKeywords() {
-        lifecycleScope.launch {
-            try {
-                val names = NetworkClient.api.getOcrChemicals()
-                if (names.isNotEmpty()) ocrKeywords = names + DEFAULT_KEYWORDS
-            } catch (e: Exception) {
-                // 실패 시 기본 키워드 유지
-            }
-        }
-    }
-
-    private inner class TextAnalyzer : ImageAnalysis.Analyzer {
+    /** OCR + 바코드를 한 프레임에서 함께 분석해 ChemicalScanner 로 전달 */
+    private inner class ScanAnalyzer : ImageAnalysis.Analyzer {
         @ExperimentalGetImage
         override fun analyze(imageProxy: ImageProxy) {
             val mediaImage = imageProxy.image
@@ -166,47 +177,145 @@ class CheckinActivity : AppCompatActivity() {
             }
 
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            recognizer.process(image)
-                .addOnSuccessListener { result ->
-                    val text = result.text.trim()
-                    if (text.isNotEmpty() && !isScanned) {
-                        detectAndTriggerCheckin(text)
-                    }
-                }
-                .addOnCompleteListener {
-                    imageProxy.close()
-                }
+            val textTask = recognizer.process(image)
+            val barcodeTask = barcodeScanner.process(image)
+            Tasks.whenAllComplete(textTask, barcodeTask).addOnCompleteListener {
+                val text = if (textTask.isSuccessful) textTask.result?.text?.trim().orEmpty() else ""
+                val barcode = if (barcodeTask.isSuccessful) {
+                    barcodeTask.result?.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
+                } else null
+                runOnUiThread { if (!isScanned) scanner.onFrame(text, barcode) }
+                imageProxy.close()
+            }
         }
     }
 
-    private fun detectAndTriggerCheckin(text: String) {
-        val upperText = text.uppercase()
-        if (ocrKeywords.none { upperText.contains(it.uppercase()) }) return
+    // ---------- ChemicalScanner.Listener ----------
 
+    override fun onScanStatus(phase: ChemicalScanner.Phase, chipText: String, guideText: String) {
+        binding.scanStatusText.text = chipText
+        if (binding.scanResultEmpty.visibility == View.VISIBLE) {
+            binding.scanResultEmpty.text = guideText
+            binding.btnManualSelect.visibility =
+                if (phase == ChemicalScanner.Phase.WEAK || phase == ChemicalScanner.Phase.FAILED)
+                    View.VISIBLE else View.GONE
+        }
+    }
+
+    override fun onMatched(result: MatchResult, ocrText: String, barcode: String?) {
         isScanned = true
+        val name = result.chemical_name ?: run { resumeScanning(); return }
+        // 바코드로 매칭된 경우는 이미 학습된 것 → 재학습 불필요
+        requestScanIn(name, ocrText, barcode.takeIf { result.method != "barcode" }, learnToken = null)
+    }
+
+    override fun onNeedsConfirmation(result: MatchResult, ocrText: String, barcode: String?) {
+        isScanned = true
+        val name = result.chemical_name ?: run { resumeScanning(); return }
+        val percent = (result.confidence * 100).toInt()
+        AppModal.show(
+            this, AppModal.Tone.PRIMARY, R.drawable.ic_flask_conical,
+            "이 시약이 맞나요?",
+            "인식 결과: $name\n(일치율 ${percent}%)",
+            "아니요", "맞아요",
+            onSecondary = {
+                scanner.declineCandidate(name)
+                Toast.makeText(
+                    this, "다시 비춰주세요. 계속 안 되면 '직접 선택'을 이용하세요.", Toast.LENGTH_SHORT
+                ).show()
+                resumeScanning(800)
+            },
+            onPrimary = {
+                // 사용자 확인 결과를 학습(별칭·바코드)해 다음부터 즉시 인식되게 한다
+                requestScanIn(
+                    name, ocrText,
+                    barcode.takeIf { result.method != "barcode" },
+                    learnToken = result.matched_token
+                )
+            }
+        )
+    }
+
+    // ---------- 반입 요청 / 학습 ----------
+
+    private fun requestScanIn(name: String, ocrText: String, barcode: String?, learnToken: String?) {
         lifecycleScope.launch {
             try {
                 val response = NetworkClient.api.scanIn(
-                    ScanInRequest(ocr_text = text, username = currentUser)
+                    ScanInRequest(ocr_text = ocrText, username = currentUser, chemical_name = name)
                 )
                 if (response.status == "success") {
+                    scannedName = response.chemical_name
                     recommendedShelfId = response.recommended_shelf
                     recommendedShelfDesc = response.recommended_shelf_desc
                     currentNewItem = !response.has_history
                     showScanResult(response)
                     startSessionPolling()
+                    learnMatch(name, barcode, learnToken)
                 } else {
-                    isScanned = false
+                    resumeScanning(1500)
                 }
             } catch (e: Exception) {
-                isScanned = false
+                Toast.makeText(
+                    this@CheckinActivity,
+                    httpErrorDetail(e) ?: "반입 요청 실패 — 잠시 후 다시 시도합니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                resumeScanning(2500)
             }
         }
     }
 
+    /** 확인·선택된 매핑을 서버에 학습 (실패해도 동작에는 지장 없음) */
+    private fun learnMatch(name: String, barcode: String?, token: String?) {
+        if (barcode == null && token == null) return
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.confirmMatch(MatchConfirmRequest(name, barcode, token))
+            } catch (e: Exception) {
+                // 학습 실패는 무시
+            }
+        }
+    }
+
+    // ---------- 직접 선택 폴백 ----------
+
+    private fun openManualSelect() {
+        isScanned = true
+        scanner.freeze()
+        lifecycleScope.launch {
+            val names = try {
+                NetworkClient.api.getKnownNames()
+            } catch (e: Exception) {
+                emptyList()
+            }
+            if (names.isEmpty()) {
+                Toast.makeText(this@CheckinActivity, "시약 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                resumeScanning(500)
+                return@launch
+            }
+            AlertDialog.Builder(this@CheckinActivity)
+                .setTitle("반입할 시약 직접 선택")
+                .setItems(names.toTypedArray()) { _, which ->
+                    requestScanIn(names[which], scanner.aggregatedText, scanner.activeBarcode, null)
+                }
+                .setNegativeButton("취소") { _, _ -> resumeScanning() }
+                .setOnCancelListener { resumeScanning() }
+                .show()
+        }
+    }
+
+    private fun resumeScanning(cooldownMs: Long = 0L) {
+        isScanned = false
+        scanner.resume(cooldownMs)
+    }
+
+    // ---------- 결과 카드 / 세션 ----------
+
     /** 인식 결과 카드 갱신 — 기존(§3.5) / 신규(§3.7) 상태 */
     private fun showScanResult(response: ScanInResponse) {
         binding.scanResultEmpty.visibility = View.GONE
+        binding.btnManualSelect.visibility = View.GONE
         binding.scanResultActive.visibility = View.VISIBLE
         binding.resultBadge.visibility = View.VISIBLE
         binding.resultBadge.text = "인식 완료"
@@ -273,9 +382,11 @@ class CheckinActivity : AppCompatActivity() {
                     val session = NetworkClient.api.getCheckinSession()
                     if (!session.active) {
                         // 세션 종료 → 안착 완료 또는 타임아웃
+                        // (완료 시 서버 세션이 리셋되어 chemical_name 이 비므로 스캔 시점 이름 사용)
+                        val targetName = session.chemical_name.ifBlank { scannedName }
                         val chemicals = NetworkClient.api.getChemicals()
                         val latestChem = chemicals
-                            .filter { it.name == session.chemical_name }
+                            .filter { it.name == targetName }
                             .maxByOrNull { it.time_in ?: "" }
                         if (latestChem != null && !session.timeout) {
                             handleCheckinComplete(latestChem)
@@ -351,25 +462,19 @@ class CheckinActivity : AppCompatActivity() {
     }
 
     private fun resetScanState() {
-        isScanned = false
         currentNewItem = false
         recommendedShelfId = null
         recommendedShelfDesc = ""
+        scannedName = ""
         activeSessionJob?.cancel()
 
         binding.statusIcon.clearAnimation()
         binding.scanResultActive.visibility = View.GONE
         binding.resultBadge.visibility = View.GONE
         binding.scanResultEmpty.visibility = View.VISIBLE
-        binding.scanStatusText.text = "스캔 중"
+        binding.btnManualSelect.visibility = View.GONE
+        resumeScanning()
     }
 
     private fun color(res: Int): Int = ContextCompat.getColor(this, res)
-
-    companion object {
-        private val DEFAULT_KEYWORDS = listOf(
-            "에탄올", "메탄올", "아세톤", "황산", "질산", "염산", "시안", "아세토니트릴", "톨루엔",
-            "ETHANOL", "METHANOL", "ACETONE", "SULFURIC", "NITRIC", "CYANIDE", "ACETONITRILE", "TOLUENE"
-        )
-    }
 }

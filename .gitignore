@@ -46,3 +46,14 @@ web/*.db
 web/frontend/node_modules/
 web/frontend/dist/
 
+# Claude Code (로컬 에이전트 설정·메모)
+.claude/
+CLAUDE.local.md
+
+# IDE (JetBrains 계열, 루트에서 열었을 때)
+.idea/
+
+# 로컬 임시 파일
+.git-diff-temp/
+.env
+

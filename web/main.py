@@ -7,9 +7,12 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import crud
+import device_status
+import matching
 import models
 import schemas
 from database import Base, SessionLocal, engine, get_db
@@ -31,10 +34,19 @@ def wait_for_db(retries: int = 30, delay: float = 1.0):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     wait_for_db()
+    # PIN 도입(8fe9e9b) 이전에 만들어진 users 테이블 대응:
+    # create_all 은 기존 테이블에 컬럼을 추가하지 않으므로 직접 보강한다.
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS pin VARCHAR DEFAULT '0000';"))
+            conn.execute(text("UPDATE users SET pin = '0000' WHERE pin IS NULL;"))
+    except Exception as e:
+        print(f"Migration notice: {e}")
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         crud.init_db_seed(db)
+        matching.ensure_alias_seed(db)  # 기존 DB에도 별칭 사전이 비어 있으면 시드
     finally:
         db.close()
     yield
@@ -56,6 +68,7 @@ app.include_router(chemicals.router)
 app.include_router(orders.router)
 app.include_router(logs.router)
 app.include_router(session.router)
+app.include_router(session.checkout_router)
 
 
 # --- ESP8266 로드셀 모듈용 디바이스 API (firmware/src/main.cpp) ---
@@ -99,7 +112,8 @@ def _weight_status(shelf: models.Shelf) -> str:
 
 @app.get("/api/device/{device_id}")
 def get_device(device_id: str, db: Session = Depends(get_db)):
-    """디바이스(선반 모듈)의 LED 상태를 돌려줍니다."""
+    """디바이스(선반 모듈)의 LED 상태를 돌려줍니다. 1초 주기 폴링 = 하트비트."""
+    device_status.mark_seen(device_id)
     return _device_payload(_get_or_create_shelf(device_id, db))
 
 
@@ -121,6 +135,7 @@ def post_weight(device_id: str, event: WeightEvent, db: Session = Depends(get_db
 
     kg 단위로 환산해 선반 무게 갱신 로직(체크인 세션 완료 감지 포함)에 위임합니다.
     """
+    device_status.mark_seen(device_id)
     _get_or_create_shelf(device_id, db)
     weight_kg = round(event.value / 1000.0, 3)
     result = shelves.update_weight(device_id, schemas.WeightUpdate(weight=weight_kg), db)

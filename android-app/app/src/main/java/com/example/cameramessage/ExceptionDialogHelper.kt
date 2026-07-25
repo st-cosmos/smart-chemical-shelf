@@ -54,7 +54,8 @@ class ExceptionDialogHelper(private val activity: Activity) {
             }
         }
 
-        // 2. 유통기한 경과
+        // 2. 유통기한 경과 (추후 구현 예정으로 알림 팝업 트리거 일시 중단)
+        /*
         val expired = alerts.expired_chemicals.firstOrNull { it.days_over > 0 }
         if (expired != null) {
             val alertId = "expired_${expired.chemical_id}"
@@ -62,6 +63,7 @@ class ExceptionDialogHelper(private val activity: Activity) {
                 showExpiredWarningDialog(expired)
             }
         }
+        */
 
         // 3. 인접 보관 위험
         if (alerts.co_storage_warnings.isNotEmpty()) {
