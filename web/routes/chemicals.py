@@ -104,15 +104,39 @@ def scan_out(req: schemas.ScanOutRequest, db: Session = Depends(get_db)):
         f"인식된 텍스트 '{req.ocr_text}'에서 반출할 시약을 식별할 수 없습니다."
     )
 
-    candidates = checkout_flow.start(
-        db, matched_std_name, req.username, chemical_id=req.chemical_id
+    query = db.query(models.Chemical).filter(
+        models.Chemical.name == matched_std_name,
+        models.Chemical.current_status == "비치중",
     )
-    if candidates == 0:
+    if req.chemical_id:
+        query = query.filter(models.Chemical.id == req.chemical_id)
+    candidate_chems = query.all()
+    if not candidate_chems:
         raise HTTPException(
             status_code=404,
             detail=f"비치 중인 시약 목록에서 '{matched_std_name}'을(를) 찾을 수 없습니다."
         )
 
+    # 선반 무게가 이미 비어 있는 병 = 회수가 이미 일어난 사후 스캔
+    # ('반출 스캔 미완료' 알림 흐름) → 무게 감소를 기다리지 않고 즉시 확정
+    for chem in candidate_chems:
+        if not chem.shelf_id:
+            continue
+        shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
+        if shelf and shelf.weight < checkout_flow.EMPTY_SHELF_KG:
+            result = checkout_flow.finalize_already_removed(db, chem, req.username)
+            db.refresh(chem)
+            return {
+                "status": "success",
+                "already_removed": True,
+                "chemical": chem,
+                "weight_verified": result["weight_verified"],
+                "measured_delta": result["measured_delta"],
+            }
+
+    candidates = checkout_flow.start(
+        db, matched_std_name, req.username, chemical_id=req.chemical_id
+    )
     from session_store import checkout_session
     return {
         "status": "pending",

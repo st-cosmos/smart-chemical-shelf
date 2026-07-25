@@ -113,7 +113,10 @@ data class ScanOutResponse(
     val chemical_name: String? = null,
     val candidates: Int? = null,
     val timeout_seconds: Double? = null,
-    val chemical: ChemicalData? = null
+    val chemical: ChemicalData? = null,
+    val weight_verified: Boolean? = null,   // 사후 스캔 즉시 확정 시 검증 결과
+    val measured_delta: Double? = null,
+    val already_removed: Boolean? = null    // 이미 선반에서 회수된 병의 사후 스캔 여부
 )
 
 data class ScanOutForceRequest(

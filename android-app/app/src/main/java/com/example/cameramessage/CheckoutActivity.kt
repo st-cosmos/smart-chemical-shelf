@@ -435,9 +435,11 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
                         showWaitingState(name)
                         startCheckoutPolling()
                     }
-                    // (호환) 즉시 확정 응답
+                    // 즉시 확정 응답 — 이미 선반에서 회수된 병의 사후 스캔 등
                     response.status == "success" && response.chemical != null -> {
-                        showCheckoutResult(response.chemical, null, null)
+                        showCheckoutResult(
+                            response.chemical, response.weight_verified, response.measured_delta
+                        )
                         learnMatch(name, barcode, learnToken)
                     }
                     else -> resumeScanning(1500)

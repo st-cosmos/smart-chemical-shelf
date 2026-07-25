@@ -19,6 +19,9 @@ from session_store import checkout_session as state
 
 LED_PREFIX = "반출 대상"
 
+# 이 무게(kg) 미만이면 선반이 비어 있는 것으로 본다 (사후 스캔 즉시 확정 판정)
+EMPTY_SHELF_KG = 0.1
+
 
 def weight_within_tolerance(expected_kg, measured_kg) -> bool:
     """허용 오차: ±20% 또는 최소 ±0.1kg. 기록 무게가 없으면 검증 생략."""
@@ -153,9 +156,9 @@ def handle_weight_drop(db: Session, shelf: models.Shelf, delta_kg: float):
 def finalize(db: Session, chem: models.Chemical, measured_delta=None, verified=None):
     """반출 확정: 상태 변경 + LED 소등 + 로그 + 세션 결과 기록.
 
-    verified=None 은 무게 확인 없이 기록한 경우(force)다.
+    verified=None 은 무게 확인 없이 기록한 경우(force·사후 스캔)다.
     """
-    username = state["username"] if state["active"] else ""
+    username = state["username"] or ""
     operator = _operator_name(db, username) if username else "알수없음"
     shelf_desc = _shelf_desc(db, chem.shelf_id)
 
@@ -164,6 +167,12 @@ def finalize(db: Session, chem: models.Chemical, measured_delta=None, verified=N
     chem.time_out = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     _clear_leds(db)
+    # 해당 병 선반에 다른 이유(검색 안내 등)로 켜져 있던 LED 도 함께 소등
+    if chem.shelf_id:
+        shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
+        if shelf and shelf.led_on:
+            shelf.led_on = False
+            shelf.led_message = ""
 
     if verified is True:
         details = f"반출 확인: {shelf_desc}에서 {measured_delta}kg 감소 감지 (기록 {chem.weight}kg)"
@@ -196,6 +205,24 @@ def force_finalize(db: Session, chem: models.Chemical, username: str):
     """타임아웃 후 사용자가 '무게 확인 없이 기록'을 선택한 경우."""
     state["username"] = username or state["username"]
     return finalize(db, chem, measured_delta=None, verified=None)
+
+
+def finalize_already_removed(db: Session, chem: models.Chemical, username: str):
+    """이미 선반에서 회수된(무게가 빠져 있는) 병의 사후 스캔 — 대기 없이 즉시 확정.
+
+    '반출 스캔 미완료' 알림에서 넘어온 흐름. 선반의 직전 무게(prev_weight)와의
+    차이가 남아 있으면 그 값으로 사후 검증까지 수행한다.
+    """
+    delta = None
+    if chem.shelf_id:
+        shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
+        if shelf and shelf.prev_weight:
+            drop = round(shelf.prev_weight - shelf.weight, 2)
+            if drop >= 0.05:
+                delta = drop
+    verified = weight_within_tolerance(chem.weight, delta) if delta is not None else None
+    state["username"] = username or state["username"]
+    return finalize(db, chem, measured_delta=delta, verified=verified)
 
 
 def expire(db: Session):
