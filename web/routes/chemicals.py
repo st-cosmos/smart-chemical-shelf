@@ -215,9 +215,8 @@ def get_alerts(db: Session = Depends(get_db)):
                 })
                 
     # 2. Expired chemicals:
-    # Check if expiration_date is past current date (7/19/2026)
     expired_chemicals = []
-    current_date = datetime.strptime("2026-07-19", "%Y-%m-%d").date() # Using system mock date
+    current_date = datetime.now().date()
     for c in chemicals:
         if c.expiration_date:
             try:
