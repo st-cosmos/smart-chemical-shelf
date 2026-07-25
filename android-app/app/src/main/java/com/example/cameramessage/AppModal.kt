@@ -34,6 +34,7 @@ object AppModal {
         secondaryText: String?,
         primaryText: String,
         cancelable: Boolean = false,
+        autoDismissMs: Long? = null,  // 지정 시 그 시간 안에 버튼을 안 누르면 Primary 동작으로 자동 닫힘
         onSecondary: (() -> Unit)? = null,
         onPrimary: (() -> Unit)? = null
     ): AlertDialog? {
@@ -64,11 +65,25 @@ object AppModal {
             .create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
+        // 자동 닫힘 타이머 — 버튼을 누르면 취소된다
+        var autoRunnable: Runnable? = null
+        if (autoDismissMs != null) {
+            autoRunnable = Runnable {
+                if (dialog.isShowing && !activity.isFinishing && !activity.isDestroyed) {
+                    dialog.dismiss()
+                    onPrimary?.invoke()
+                }
+            }
+            binding.root.postDelayed(autoRunnable, autoDismissMs)
+        }
+
         binding.btnModalSecondary.setOnClickListener {
+            autoRunnable?.let { r -> binding.root.removeCallbacks(r) }
             dialog.dismiss()
             onSecondary?.invoke()
         }
         binding.btnModalPrimary.setOnClickListener {
+            autoRunnable?.let { r -> binding.root.removeCallbacks(r) }
             dialog.dismiss()
             onPrimary?.invoke()
         }
