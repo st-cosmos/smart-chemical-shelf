@@ -71,6 +71,11 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
     private var recommendedShelfDesc: String = ""
     private var scannedName: String = ""  // 세션 완료 후 결과 조회용 (세션 리셋 시 이름이 비므로)
 
+    // 세션 완료를 폴링 루프와 WebSocket 트리거가 동시에 감지해 완료 모달이
+    // 두 번 뜨는 것을 막기 위한 가드. 서버는 완료 결과를 다음 세션 시작
+    // 전까지 계속 돌려주므로, 클라이언트에서 1회만 처리하도록 막는다.
+    private var sessionCompleted = false
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) startCamera()
@@ -376,6 +381,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun startSessionPolling() {
         activeSessionJob?.cancel()
+        sessionCompleted = false
         AppWebSocketManager.connect(NetworkClient.BASE_URL)
 
         val wsListener: (String) -> Unit = { _ ->
@@ -402,6 +408,11 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         try {
             val session = NetworkClient.api.getCheckinSession()
             if (!session.active) {
+                // 폴링 루프와 WS 트리거가 동시에 완료를 감지해도 한 번만 처리한다.
+                // (아래 suspend 호출 전에 플래그를 설정해야 동시 호출 시에도 안전하다)
+                if (sessionCompleted) return true
+                sessionCompleted = true
+
                 // 세션 종료 → 안착 완료 또는 타임아웃
                 val targetName = session.chemical_name.ifBlank { scannedName }
                 val chemicals = NetworkClient.api.getChemicals()

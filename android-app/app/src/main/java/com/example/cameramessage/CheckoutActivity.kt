@@ -87,6 +87,11 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
     private var pendingChemicalId: String? = null
     private lateinit var exceptionHelper: ExceptionDialogHelper
 
+    // 세션 완료를 폴링 루프와 WebSocket 트리거가 동시에 감지해 완료 모달이
+    // 두 번 뜨는 것을 막기 위한 가드. 서버는 완료 결과를 다음 세션 시작
+    // 전까지 계속 돌려주므로, 클라이언트에서 1회만 처리하도록 막는다.
+    private var sessionCompleted = false
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) startCamera()
@@ -482,6 +487,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun startCheckoutPolling() {
         checkoutPollJob?.cancel()
+        sessionCompleted = false
         AppWebSocketManager.connect(NetworkClient.BASE_URL)
 
         val wsListener: (String) -> Unit = { _ ->
@@ -512,6 +518,10 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 Toast.makeText(this@CheckoutActivity, msg, Toast.LENGTH_LONG).show()
             }
             if (!session.active) {
+                // 폴링 루프와 WS 트리거가 동시에 완료를 감지해도 한 번만 처리한다.
+                if (sessionCompleted) return true
+                sessionCompleted = true
+
                 val result = session.result
                 when {
                     result != null -> handleCheckoutComplete(result)
