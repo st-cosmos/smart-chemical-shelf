@@ -442,6 +442,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     "신규 시약 등록 완료",
                     "신규 시약 [${chemical.name}]이(가)\n${placedShelfDesc}에 등록 완료되었습니다.",
                     null, "확인",
+                    autoDismissMs = 3000L,
                     onPrimary = { resetScanState() }
                 )
             }
@@ -460,22 +461,29 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     onPrimary = {
                         // 서버에는 이미 현재 칸으로 기록되어 있으므로 이 위치를 확정
                         setStatusSuccess("위치 변경 완료", "현재 위치로 등록됨")
-                        scheduleReset()
+                        AppModal.show(
+                            this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                            "반입 완료",
+                            "[${chemical.name}]이(가)\n${placedShelfDesc}에 반입 완료되었습니다.",
+                            null, "확인",
+                            autoDismissMs = 3000L,
+                            onPrimary = { resetScanState() }
+                        )
                     }
                 )
             }
-            // 지정 위치 안착 성공 (§3.5)
+            // 지정 위치 안착 성공 (§3.5) — 하단 카드 갱신 + 완료 팝업
             else -> {
                 setStatusSuccess("등록 완료", "지정 위치 안착 확인")
-                scheduleReset()
+                AppModal.show(
+                    this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                    "반입 완료",
+                    "[${chemical.name}]이(가)\n${placedShelfDesc}에 반입 완료되었습니다.",
+                    null, "확인",
+                    autoDismissMs = 3000L,
+                    onPrimary = { resetScanState() }
+                )
             }
-        }
-    }
-
-    private fun scheduleReset() {
-        lifecycleScope.launch {
-            delay(4000)
-            resetScanState()
         }
     }
 

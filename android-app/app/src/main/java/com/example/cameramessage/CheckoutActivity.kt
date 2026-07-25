@@ -527,17 +527,8 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
     }
 
     private suspend fun handleCheckoutComplete(result: CheckoutResultData) {
+        // 완료 팝업은 showCheckoutResult 안에서 무게 검증 결과에 맞춰 표시된다
         showCheckoutResult(result.chemical, result.weight_verified, result.measured_delta)
-        if (result.weight_verified == false) {
-            AppModal.show(
-                this, AppModal.Tone.WARNING, R.drawable.ic_triangle_alert,
-                "무게가 예상과 다릅니다",
-                "기록된 병 무게는 ${result.chemical.weight}kg인데\n" +
-                        "실제 감소량은 ${result.measured_delta ?: "-"}kg입니다.\n" +
-                        "맞는 병을 가져갔는지 확인해 주세요.",
-                null, "확인"
-            )
-        }
     }
 
     private fun showTimeoutModal() {
@@ -677,11 +668,47 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
             else -> "무게 확인 없이 기록"
         }
 
-        // 잠시 후 다음 스캔을 위해 초기화
-        lifecycleScope.launch {
-            delay(5000)
-            resetScanState()
+        // 완료 팝업 — 3초 내 [확인]이 없으면 자동으로 닫히며 초기화된다 (하단 카드는 유지).
+        // 무게 불일치 경고만은 놓치면 안 되므로 자동 닫힘 없이 확인을 요구한다.
+        val tone: AppModal.Tone
+        val icon: Int
+        val title: String
+        val message: String
+        val autoDismiss: Long?
+        when (weightVerified) {
+            false -> {
+                tone = AppModal.Tone.WARNING
+                icon = R.drawable.ic_triangle_alert
+                title = "반출 완료 — 무게 불일치 주의"
+                message = "[${chemical.name}] 반출이 기록되었습니다.\n" +
+                        "다만 기록된 병 무게 ${chemical.weight}kg 대비 " +
+                        "실제 감소량이 ${measuredDelta ?: "-"}kg입니다.\n" +
+                        "맞는 병을 가져갔는지 확인해 주세요."
+                autoDismiss = null
+            }
+            true -> {
+                tone = AppModal.Tone.SUCCESS
+                icon = R.drawable.ic_check
+                title = "반출 완료"
+                message = "[${chemical.name}]이(가) 반출 처리되었습니다.\n" +
+                        "무게 검증 완료 (${measuredDelta ?: "-"}kg 감소)"
+                autoDismiss = 3000L
+            }
+            else -> {
+                tone = AppModal.Tone.SUCCESS
+                icon = R.drawable.ic_check
+                title = "반출 완료"
+                message = "[${chemical.name}]이(가) 반출 처리되었습니다.\n" +
+                        "(무게 확인 없이 기록)"
+                autoDismiss = 3000L
+            }
         }
+        AppModal.show(
+            this, tone, icon, title, message,
+            null, "확인",
+            autoDismissMs = autoDismiss,
+            onPrimary = { resetScanState() }
+        )
     }
 
     private fun resetScanState() {
