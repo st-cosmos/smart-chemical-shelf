@@ -182,6 +182,21 @@
                 android:textSize="11sp"
                 android:textColor="@color/text_muted" />
 
+            <!-- 인식 실패 시 노출되는 직접 선택 폴백 -->
+            <TextView
+                android:id="@+id/btnManualSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="10dp"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_outline"
+                android:text="인식이 어려우면 목록에서 직접 선택"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/scanResultActive"
                 android:layout_width="match_parent"

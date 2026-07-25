@@ -1,0 +1,166 @@
+package com.example.cameramessage
+
+import android.os.SystemClock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+/**
+ * 반입/반출 공용 시약 인식 파이프라인.
+ *
+ * 카메라 프레임의 OCR 텍스트·바코드를 누적하고, 주기적으로 서버 매칭(POST /match)을
+ * 호출해 결과를 3갈래로 전달한다:
+ *  - matched            → onMatched (자동 확정)
+ *  - needs_confirmation → onNeedsConfirmation (사용자 확인 필요)
+ *  - no_match 지속      → 단계적 안내 (스캔 중 → 인식이 잘 안돼요 → 직접 선택 유도)
+ *
+ * 사용자가 "아니요"로 거절한 후보는 잠시 다시 제안하지 않으며(쿨다운),
+ * 요청 실패 직후에는 재시도를 쉬어 API 연타를 방지한다.
+ */
+class ChemicalScanner(
+    private val scope: CoroutineScope,
+    private val listener: Listener
+) {
+    enum class Phase { SCANNING, WEAK, FAILED, OFFLINE }
+
+    interface Listener {
+        /** 상태 안내 — chipText: 카메라 상단 칩용 짧은 문구, guideText: 결과 카드용 안내문 */
+        fun onScanStatus(phase: Phase, chipText: String, guideText: String)
+        fun onMatched(result: MatchResult, ocrText: String, barcode: String?)
+        fun onNeedsConfirmation(result: MatchResult, ocrText: String, barcode: String?)
+    }
+
+    companion object {
+        private const val WINDOW_SIZE = 5              // 누적할 최근 프레임 텍스트 수
+        private const val MATCH_INTERVAL_MS = 900L     // /match 호출 최소 간격
+        private const val BARCODE_TTL_MS = 4000L       // 마지막 바코드를 유효하게 보는 시간
+        private const val WEAK_AFTER_MS = 4000L        // "인식이 잘 안돼요" 안내 시점
+        private const val FAILED_AFTER_MS = 9000L      // "직접 선택" 유도 시점
+        private const val DECLINE_COOLDOWN_MS = 12000L // 거절한 후보 재제안 금지 시간
+    }
+
+    private val textWindow = ArrayDeque<String>()
+    private var lastBarcode: String? = null
+    private var lastBarcodeAt = 0L
+    private var lastMatchAt = 0L
+    private var struggleStartAt = 0L   // 신호는 있는데 매칭이 안 되기 시작한 시각
+    private var frozen = false
+    private var matching = false
+    private var offline = false
+    private var lastPhase: Phase? = null
+    private val declined = mutableMapOf<String, Long>()
+
+    /** 최근 프레임들의 OCR 텍스트 (서버 매칭·학습 요청용) */
+    val aggregatedText: String
+        get() = textWindow.joinToString("\n")
+
+    /** 아직 유효한(최근 감지된) 바코드 */
+    val activeBarcode: String?
+        get() = lastBarcode?.takeIf { SystemClock.elapsedRealtime() - lastBarcodeAt <= BARCODE_TTL_MS }
+
+    /** 카메라 분석기에서 프레임마다 호출한다. (메인 스레드) */
+    fun onFrame(text: String?, barcode: String?) {
+        if (frozen) return
+        val now = SystemClock.elapsedRealtime()
+
+        if (!barcode.isNullOrBlank()) {
+            lastBarcode = barcode
+            lastBarcodeAt = now
+        }
+        if (!text.isNullOrBlank()) {
+            textWindow.addLast(text)
+            while (textWindow.size > WINDOW_SIZE) textWindow.removeFirst()
+        }
+
+        val hasSignal = textWindow.isNotEmpty() || activeBarcode != null
+        if (!hasSignal) {
+            // 아무 글자도 안 보일 때는 재촉하지 않는다
+            struggleStartAt = 0L
+            setPhase(if (offline) Phase.OFFLINE else Phase.SCANNING)
+            return
+        }
+
+        if (struggleStartAt == 0L) struggleStartAt = now
+        val struggling = now - struggleStartAt
+        setPhase(
+            when {
+                offline -> Phase.OFFLINE
+                struggling > FAILED_AFTER_MS -> Phase.FAILED
+                struggling > WEAK_AFTER_MS -> Phase.WEAK
+                else -> Phase.SCANNING
+            }
+        )
+
+        if (matching || now - lastMatchAt < MATCH_INTERVAL_MS) return
+        matching = true
+        lastMatchAt = now
+        val ocr = aggregatedText
+        val code = activeBarcode
+        scope.launch {
+            try {
+                val result = NetworkClient.api.matchChemical(MatchRequest(ocr_text = ocr, barcode = code))
+                offline = false
+                if (frozen) return@launch
+                val name = result.chemical_name
+                if (name != null && !isDeclined(name)) {
+                    when (result.status) {
+                        "matched" -> {
+                            frozen = true
+                            listener.onMatched(result, ocr, code)
+                        }
+                        "needs_confirmation" -> {
+                            frozen = true
+                            listener.onNeedsConfirmation(result, ocr, code)
+                        }
+                    }
+                }
+                // no_match(또는 거절 쿨다운)이면 계속 스캔 — 단계적 안내 타이머가 흐른다
+            } catch (e: Exception) {
+                offline = true
+                setPhase(Phase.OFFLINE)
+            } finally {
+                matching = false
+            }
+        }
+    }
+
+    /** 사용자가 "아니요"한 후보를 잠시 다시 제안하지 않는다. */
+    fun declineCandidate(name: String) {
+        declined[name] = SystemClock.elapsedRealtime()
+    }
+
+    private fun isDeclined(name: String): Boolean {
+        val at = declined[name] ?: return false
+        return SystemClock.elapsedRealtime() - at < DECLINE_COOLDOWN_MS
+    }
+
+    /** 확정 처리나 다이얼로그 표시 동안 스캔을 멈춘다. */
+    fun freeze() {
+        frozen = true
+    }
+
+    /** 스캔 재개. cooldownMs 동안은 매칭 호출을 쉬어 실패 직후 연타를 방지한다. */
+    fun resume(cooldownMs: Long = 0L) {
+        textWindow.clear()
+        lastBarcode = null
+        struggleStartAt = 0L
+        lastMatchAt = SystemClock.elapsedRealtime() - MATCH_INTERVAL_MS + cooldownMs
+        lastPhase = null
+        frozen = false
+        setPhase(Phase.SCANNING)
+    }
+
+    private fun setPhase(phase: Phase) {
+        if (phase == lastPhase) return
+        lastPhase = phase
+        val (chip, guide) = when (phase) {
+            Phase.SCANNING -> "스캔 중" to "카메라로 시약통 라벨을 스캔해 주세요"
+            Phase.WEAK -> "인식이 잘 안돼요" to
+                    "인식이 잘 안됩니다 — 라벨이 프레임에 가득 차게,\n흔들림 없이 비춰주세요"
+            Phase.FAILED -> "인식 실패" to
+                    "인식이 계속 실패하고 있어요.\n아래 버튼으로 시약을 직접 선택할 수 있습니다"
+            Phase.OFFLINE -> "서버 연결 안 됨" to
+                    "서버에 연결할 수 없습니다 — 네트워크 상태를 확인해 주세요"
+        }
+        listener.onScanStatus(phase, chip, guide)
+    }
+}

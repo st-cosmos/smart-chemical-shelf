@@ -56,6 +56,9 @@ dependencies {
     // ML Kit 문자 인식(OCR) — 한국어, 온디바이스(인터넷 불필요)
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")
 
+    // ML Kit 바코드/QR 인식 — 병에 이미 붙어 있는 코드를 기회적으로 활용
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
     // 인식 결과를 LED 서버로 보내기 — 코루틴 + Retrofit (예제 2와 동일)
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

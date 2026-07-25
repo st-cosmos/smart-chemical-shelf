@@ -59,7 +59,8 @@ data class ChemicalAlerts(
 
 data class ScanInRequest(
     val ocr_text: String,
-    val username: String
+    val username: String,
+    val chemical_name: String? = null  // 매칭/확인이 끝난 표준명 (서버 매칭 생략)
 )
 
 data class ScanInResponse(
@@ -73,7 +74,35 @@ data class ScanInResponse(
 
 data class ScanOutRequest(
     val ocr_text: String,
-    val username: String
+    val username: String,
+    val chemical_name: String? = null  // 매칭/확인이 끝난 표준명 (서버 매칭 생략)
+)
+
+// --- OCR/바코드 매칭 (POST /api/chemicals/match) ---
+
+data class MatchRequest(
+    val ocr_text: String,
+    val barcode: String? = null
+)
+
+data class MatchCandidate(
+    val name: String,
+    val score: Double
+)
+
+data class MatchResult(
+    val status: String,          // matched | needs_confirmation | no_match
+    val method: String?,         // barcode | cas | alias | fuzzy
+    val chemical_name: String?,
+    val confidence: Double,
+    val candidates: List<MatchCandidate>,
+    val matched_token: String?
+)
+
+data class MatchConfirmRequest(
+    val chemical_name: String,
+    val barcode: String? = null,
+    val matched_token: String? = null
 )
 
 data class ScanOutResponse(

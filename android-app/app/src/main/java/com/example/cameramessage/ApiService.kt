@@ -61,6 +61,17 @@ interface ApiService {
     @GET("api/chemicals/ocr-chemicals")
     suspend fun getOcrChemicals(): List<String>
 
+    @GET("api/chemicals/known-names")
+    suspend fun getKnownNames(): List<String>
+
+    // OCR 누적 텍스트 + 바코드로 시약 후보를 조회 (스캔 중 주기 호출)
+    @POST("api/chemicals/match")
+    suspend fun matchChemical(@Body request: MatchRequest): MatchResult
+
+    // 사용자 확인/직접 선택 결과를 서버에 학습 (별칭·바코드 사전 갱신)
+    @POST("api/chemicals/match/confirm")
+    suspend fun confirmMatch(@Body request: MatchConfirmRequest): Map<String, Any>
+
     @POST("api/chemicals/scan-in")
     suspend fun scanIn(@Body request: ScanInRequest): ScanInResponse
 
