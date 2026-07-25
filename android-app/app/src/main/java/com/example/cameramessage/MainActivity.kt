@@ -149,13 +149,13 @@ class MainActivity : AppCompatActivity() {
         return keywords.any { upper.contains(it) }
     }
 
-    /** 판별한 상태를 서버(PUT /api/device/{device_id})로 보냅니다. */
+    /** 판별한 상태를 서버(PUT /api/led/{device_id})로 보냅니다. */
     private fun sendDeviceState(on: Boolean) {
         lifecycleScope.launch {
             try {
-                val state = api.setDevice("device1", DeviceCommand(on = on, by = "OCR"))
+                val state = api.setDevice("device1", DeviceCommand(on = on))
                 val mark = if (state.on) "🟡 ON" else "⚪ OFF"
-                binding.statusText.text = "Device: $mark  (${state.by} · ${state.time})"
+                binding.statusText.text = "Device: $mark  (${state.time})"
             } catch (e: Exception) {
                 Toast.makeText(
                     this@MainActivity,

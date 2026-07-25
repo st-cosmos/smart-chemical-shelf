@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import { getJSON, postJSON } from '../api';
 import type { Alerts, Chemical, ShelfDevice, TransactionLog, User } from '../types';
+import { useWebSocket } from '../useWebSocket';
 
 interface InventoryProps {
   alerts: Alerts;
@@ -74,6 +75,11 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
       setLoading(false);
     }
   };
+
+  useWebSocket(() => {
+    fetchData();
+    refreshAlerts();
+  });
 
   useEffect(() => {
     fetchData();

@@ -376,33 +376,51 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun startSessionPolling() {
         activeSessionJob?.cancel()
-        activeSessionJob = lifecycleScope.launch {
-            while (true) {
-                try {
-                    val session = NetworkClient.api.getCheckinSession()
-                    if (!session.active) {
-                        // 세션 종료 → 안착 완료 또는 타임아웃
-                        // (완료 시 서버 세션이 리셋되어 chemical_name 이 비므로 스캔 시점 이름 사용)
-                        val targetName = session.chemical_name.ifBlank { scannedName }
-                        val chemicals = NetworkClient.api.getChemicals()
-                        val latestChem = chemicals
-                            .filter { it.name == targetName }
-                            .maxByOrNull { it.time_in ?: "" }
-                        if (latestChem != null && !session.timeout) {
-                            handleCheckinComplete(latestChem)
-                        } else {
-                            resetScanState()
-                        }
-                        break
-                    } else {
-                        binding.statusSub.text = "남은 시간 ${session.time_left.toInt()}초"
-                    }
-                } catch (e: Exception) {
-                    // 폴링 중 네트워크 오류는 무시
-                }
-                delay(1000)
+        AppWebSocketManager.connect(NetworkClient.BASE_URL)
+
+        val wsListener: (String) -> Unit = { _ ->
+            lifecycleScope.launch {
+                checkCheckinSessionOnce()
             }
         }
+        AppWebSocketManager.addListener(wsListener)
+
+        activeSessionJob = lifecycleScope.launch {
+            try {
+                while (true) {
+                    val finished = checkCheckinSessionOnce()
+                    if (finished) break
+                    delay(1000)
+                }
+            } finally {
+                AppWebSocketManager.removeListener(wsListener)
+            }
+        }
+    }
+
+    private suspend fun checkCheckinSessionOnce(): Boolean {
+        try {
+            val session = NetworkClient.api.getCheckinSession()
+            if (!session.active) {
+                // 세션 종료 → 안착 완료 또는 타임아웃
+                val targetName = session.chemical_name.ifBlank { scannedName }
+                val chemicals = NetworkClient.api.getChemicals()
+                val latestChem = chemicals
+                    .filter { it.name == targetName }
+                    .maxByOrNull { it.time_in ?: "" }
+                if (latestChem != null && !session.timeout) {
+                    handleCheckinComplete(latestChem)
+                } else {
+                    resetScanState()
+                }
+                return true
+            } else {
+                binding.statusSub.text = "남은 시간 ${session.time_left.toInt()}초"
+            }
+        } catch (e: Exception) {
+            // 네트워크 오류 무시
+        }
+        return false
     }
 
     private suspend fun handleCheckinComplete(chemical: ChemicalData) {

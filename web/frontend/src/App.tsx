@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import { getJSON } from './api';
 import { EMPTY_ALERTS } from './types';
 import type { Alerts, SessionUser } from './types';
+import { useWebSocket } from './useWebSocket';
 
 const STORAGE_KEY = 'currentUser';
 
@@ -36,6 +37,10 @@ export default function App() {
       // 폴링 실패는 조용히 무시
     }
   }, []);
+
+  useWebSocket(() => {
+    if (user) refreshAlerts();
+  });
 
   // 알림 폴링 (5초)
   useEffect(() => {

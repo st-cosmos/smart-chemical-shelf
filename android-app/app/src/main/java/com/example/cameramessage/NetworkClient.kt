@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkClient {
     // Local server IP on Wi-Fi network
-    private const val BASE_URL = "http://10.21.120.70:8000/"
+    const val BASE_URL = "http://10.21.120.70:8000/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()

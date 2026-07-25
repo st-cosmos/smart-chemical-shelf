@@ -106,13 +106,13 @@ interface ApiService {
     @POST("api/checkout-session/cancel")
     suspend fun cancelCheckoutSession(): Map<String, String>
 
-    // --- Device (ESP8266 로드셀 모듈 · 구버전 데모 호환) ---
-    @GET("api/device/{device_id}")
+    // --- LED (ESP8266 로드셀 모듈 LED 제어) ---
+    @GET("api/led/{device_id}")
     suspend fun getDevice(
         @Path("device_id") deviceId: String
     ): DeviceState
 
-    @PUT("api/device/{device_id}")
+    @PUT("api/led/{device_id}")
     suspend fun setDevice(
         @Path("device_id") deviceId: String,
         @Body command: DeviceCommand

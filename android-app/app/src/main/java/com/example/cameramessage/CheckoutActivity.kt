@@ -480,31 +480,50 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun startCheckoutPolling() {
         checkoutPollJob?.cancel()
-        checkoutPollJob = lifecycleScope.launch {
-            while (true) {
-                try {
-                    val session = NetworkClient.api.getCheckoutSession()
-                    // 진행 중 경고 (예: 다른 시약이 들림) — 서버가 1회만 전달
-                    session.event?.message?.let { msg ->
-                        Toast.makeText(this@CheckoutActivity, msg, Toast.LENGTH_LONG).show()
-                    }
-                    if (!session.active) {
-                        val result = session.result
-                        when {
-                            result != null -> handleCheckoutComplete(result)
-                            session.timeout -> showTimeoutModal()
-                            else -> resetScanState()  // 다른 경로로 취소됨
-                        }
-                        break
-                    } else {
-                        binding.statusSub.text = "남은 시간 ${session.time_left.toInt()}초"
-                    }
-                } catch (e: Exception) {
-                    // 폴링 중 네트워크 오류는 무시
-                }
-                delay(1000)
+        AppWebSocketManager.connect(NetworkClient.BASE_URL)
+
+        val wsListener: (String) -> Unit = { _ ->
+            lifecycleScope.launch {
+                checkCheckoutSessionOnce()
             }
         }
+        AppWebSocketManager.addListener(wsListener)
+
+        checkoutPollJob = lifecycleScope.launch {
+            try {
+                while (true) {
+                    val finished = checkCheckoutSessionOnce()
+                    if (finished) break
+                    delay(1000)
+                }
+            } finally {
+                AppWebSocketManager.removeListener(wsListener)
+            }
+        }
+    }
+
+    private suspend fun checkCheckoutSessionOnce(): Boolean {
+        try {
+            val session = NetworkClient.api.getCheckoutSession()
+            // 진행 중 경고 (예: 다른 시약이 들림) — 서버가 1회만 전달
+            session.event?.message?.let { msg ->
+                Toast.makeText(this@CheckoutActivity, msg, Toast.LENGTH_LONG).show()
+            }
+            if (!session.active) {
+                val result = session.result
+                when {
+                    result != null -> handleCheckoutComplete(result)
+                    session.timeout -> showTimeoutModal()
+                    else -> resetScanState()  // 다른 경로로 취소됨
+                }
+                return true
+            } else {
+                binding.statusSub.text = "남은 시간 ${session.time_left.toInt()}초"
+            }
+        } catch (e: Exception) {
+            // 폴링 중 네트워크 오류는 무시
+        }
+        return false
     }
 
     private suspend fun handleCheckoutComplete(result: CheckoutResultData) {

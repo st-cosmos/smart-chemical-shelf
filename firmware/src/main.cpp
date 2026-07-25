@@ -7,7 +7,7 @@
 
 // 서버의 LED 상태를 읽어 물리 LED에 반영하는 예제
 
-const String DEVICE_ID = "device1"; // 디바이스 식별 ID
+
 const int LED_PIN_1 = 5;    // LED 1 핀 (D1, GPIO 5)
 
 
@@ -31,7 +31,7 @@ long tare_offset = 0;              // 영점 오프셋 값
 int lastRawWeight = 0;              // 직전 측정된 무게 (안정화 판단용)
 int lastSentWeightValue = -99999;   // 마지막으로 서버에 전송한 확정 무게
 unsigned long lastWeightChangeTime = 0; // 마지막으로 무게 변화가 감지된 시각
-const unsigned long stabilityDelay = 1500; // 무게가 안정될 때까지 기다릴 시간 (1.5초)
+const unsigned long stabilityDelay = 500; // 무게가 안정될 때까지 기다릴 시간 (0.5초)
 bool isChanging = false;            // 무게 변화 상태 여부
 unsigned long lastWeightPoll = 0;    // 마지막으로 무게를 읽은 시각
 const unsigned long weightPollInterval = 300; // 무게 확인 주기 (300ms)
@@ -176,7 +176,7 @@ void setup() {
 void pollLed() {
   HTTPClient http;
   WiFiClient client;
-  http.begin(client, String(SERVER_URL) + "/api/device/" + DEVICE_ID);
+  http.begin(client, String(SERVER_URL) + "/api/led/" + DEVICE_ID);
 
   int httpCode = http.GET();
   if (httpCode == 200) {

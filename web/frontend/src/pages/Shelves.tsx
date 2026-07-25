@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import { getJSON, postJSON } from '../api';
 import type { ShelfConfig, ShelfDevice } from '../types';
+import { useWebSocket } from '../useWebSocket';
 
 interface RegisterTarget {
   shelfId: string;
@@ -36,6 +37,11 @@ export default function Shelves() {
       setLoading(false);
     }
   };
+
+  useWebSocket(() => {
+    // WebSocket 실시간 메시지 수신 시 즉시 데이터 갱신
+    fetchData();
+  });
 
   useEffect(() => {
     fetchData();
