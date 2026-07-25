@@ -12,10 +12,15 @@ import kotlinx.coroutines.launch
 
 /**
  * app-exception-modals (design-spec §3.11)
- * GET /api/chemicals/alerts 를 폴링하여 3종 예외 모달을 Modal/App 스타일로 표시한다.
+ * GET /api/chemicals/alerts 로 3종 예외 모달을 Modal/App 스타일로 표시한다.
  *  1) 반출 스캔 미완료 (danger / clipboard-list)
  *  2) 유통기한 경과 (warning / clock-alert)
  *  3) 인접 보관 위험 (danger / shield-alert)
+ *
+ * 서버는 선반 무게가 바뀔 때마다 WebSocket(weight_update)을 즉시 브로드캐스트한다.
+ * 그 신호를 받으면 5초 폴링을 기다리지 않고 바로 alerts 를 재조회해, 무단 반출
+ * 감지(반출 스캔 미완료 알림)가 실제 무게 변화 시점과 최대한 가깝게 뜨도록 한다.
+ * 폴링은 WebSocket 유실을 대비한 보조 수단으로 유지한다.
  */
 class ExceptionDialogHelper(private val activity: Activity) {
 
@@ -25,23 +30,39 @@ class ExceptionDialogHelper(private val activity: Activity) {
     // 같은 알림을 반복해서 띄우지 않기 위한 기록
     private val shownAlertIds = mutableSetOf<String>()
 
+    // 무게가 바뀌었다는 신호를 받으면(반입/반출 모두) 즉시 alerts 를 다시 확인한다
+    private val wsListener: (String) -> Unit = { message ->
+        if (message.contains("\"type\":\"weight_update\"")) {
+            scope.launch { checkAlertsNow() }
+        }
+    }
+
     fun startPollingAlerts() {
         pollJob?.cancel()
+        AppWebSocketManager.connect(NetworkClient.BASE_URL)
+        AppWebSocketManager.addListener(wsListener)
+
         pollJob = scope.launch {
+            checkAlertsNow()  // 화면 진입 즉시 1회 확인 — 기존엔 5초를 기다린 뒤 첫 확인이라 느렸음
             while (true) {
                 delay(5000)
-                try {
-                    val alerts = NetworkClient.api.getAlerts()
-                    handleAlerts(alerts)
-                } catch (e: Exception) {
-                    // 네트워크 오류 무시
-                }
+                checkAlertsNow()
             }
         }
     }
 
     fun stopPollingAlerts() {
         pollJob?.cancel()
+        AppWebSocketManager.removeListener(wsListener)
+    }
+
+    private suspend fun checkAlertsNow() {
+        try {
+            val alerts = NetworkClient.api.getAlerts()
+            handleAlerts(alerts)
+        } catch (e: Exception) {
+            // 네트워크 오류 무시
+        }
     }
 
     private fun handleAlerts(alerts: ChemicalAlerts) {
