@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from database import get_db
+import checkout_flow
 import matching
 import models
 import schemas
@@ -92,58 +93,52 @@ def scan_in(req: schemas.ScanInRequest, db: Session = Depends(get_db)):
 
 @router.post("/scan-out")
 def scan_out(req: schemas.ScanOutRequest, db: Session = Depends(get_db)):
+    """반출 스캔 → 즉시 확정하지 않고 반출 세션을 시작한다.
+
+    후보 병(들)의 선반 LED 를 켜 위치를 안내하고, 실제 무게 감소가 감지된
+    칸으로 어느 병인지 확정한다 (동일 이름 병 개체 식별 + 감소량 검증).
+    확정/타임아웃 여부는 GET /api/checkout-session 폴링으로 전달된다.
+    """
     matched_std_name = _resolve_chemical_name(
         db, req,
         f"인식된 텍스트 '{req.ocr_text}'에서 반출할 시약을 식별할 수 없습니다."
     )
 
-    # Find active chemical in DB
-    chem = db.query(models.Chemical).filter(
-        models.Chemical.name == matched_std_name,
-        models.Chemical.current_status == "비치중"
-    ).first()
-    
-    if not chem:
+    candidates = checkout_flow.start(
+        db, matched_std_name, req.username, chemical_id=req.chemical_id
+    )
+    if candidates == 0:
         raise HTTPException(
             status_code=404,
             detail=f"비치 중인 시약 목록에서 '{matched_std_name}'을(를) 찾을 수 없습니다."
         )
-        
-    user = db.query(models.User).filter(models.User.username == req.username).first()
-    operator_name = user.nickname if user else req.username
-    
-    # Mark as checked-out
-    chem.current_status = "반출중"
-    chem.holder_username = req.username
-    chem.time_out = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Empty shelf weight
-    shelf = None
-    if chem.shelf_id:
-        shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
-        if shelf:
-            shelf.prev_weight = shelf.weight
-            shelf.weight = 0.0
-            shelf.led_on = False
-            shelf.led_message = ""
-            shelf.updated_time = datetime.now().strftime("%H:%M:%S")
-            
-    # Record Log
-    log = models.Log(
-        chemical_id=chem.id,
-        chemical_name=chem.name,
-        action="반출",
-        operator_name=operator_name,
-        details=f"반출 기록 완료: 보관 위치였던 선반 {shelf.parent_shelf if shelf else ''} · {shelf.row if shelf else ''}행 {shelf.col if shelf else ''}열이 비워졌습니다"
-    )
-    db.add(log)
-    
-    db.commit()
-    db.refresh(chem)
+
+    from session_store import checkout_session
     return {
-        "status": "success",
-        "chemical": chem
+        "status": "pending",
+        "chemical_name": matched_std_name,
+        "candidates": candidates,
+        "timeout_seconds": checkout_session["timeout_seconds"],
     }
+
+@router.post("/scan-out/force")
+def scan_out_force(req: schemas.ScanOutForceRequest, db: Session = Depends(get_db)):
+    """무게 감소가 감지되지 않았을 때(타임아웃) 사용자가 확인 없이 기록하는 경로."""
+    query = db.query(models.Chemical).filter(models.Chemical.current_status == "비치중")
+    if req.chemical_id:
+        query = query.filter(models.Chemical.id == req.chemical_id)
+    elif req.chemical_name:
+        query = query.filter(models.Chemical.name == req.chemical_name)
+    else:
+        raise HTTPException(status_code=400, detail="chemical_id 또는 chemical_name 이 필요합니다.")
+
+    chem = query.first()
+    if not chem:
+        raise HTTPException(status_code=404, detail="비치 중인 해당 시약을 찾을 수 없습니다.")
+
+    checkout_flow.force_finalize(db, chem, req.username)
+    db.refresh(chem)
+    return {"status": "success", "chemical": chem}
 
 @router.post("/select-led")
 def select_led(req: schemas.SelectLedRequest, db: Session = Depends(get_db)):

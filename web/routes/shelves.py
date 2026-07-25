@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from database import get_db
+import checkout_flow
 import device_status
 import models
 import schemas
@@ -60,91 +61,126 @@ def register_shelf(shelf_id: str, req: schemas.ShelfRegister, db: Session = Depe
     db.refresh(shelf)
     return shelf
 
+# 노이즈로 인한 미세 변화를 반입/반출 이벤트로 오인하지 않기 위한 최소 변화량 (kg)
+MIN_EVENT_DELTA_KG = 0.05
+
+
+def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
+    """체크인 세션 중 무게 증가(안착) 처리.
+
+    증가량(delta)을 병 무게로 기록하고, 같은 이름의 반출중 병 중
+    무게가 허용 오차 내로 가장 근접한 병이 있으면 그 병을 복귀 처리해
+    (동일 이름 개체 식별) 신규 행 난립을 막는다.
+    """
+    from session_store import checkin_session
+    if not (checkin_session["active"] and checkin_session["chemical_name"]):
+        return None
+
+    chem_name = checkin_session["chemical_name"]
+    username = checkin_session.get("username", "알수없음")
+    user = db.query(models.User).filter(models.User.username == username).first()
+    operator_name = user.nickname if user else username
+    measured = round(delta_kg, 2)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    shelf_desc = f"선반 {shelf.parent_shelf} · {shelf.row}행 {shelf.col}열"
+
+    # 반출중인 같은 이름 병 중 실측 증가량과 가장 근접한 병 → 복귀로 판정
+    restored = None
+    best_diff = None
+    outgone = db.query(models.Chemical).filter(
+        models.Chemical.name == chem_name,
+        models.Chemical.current_status == "반출중",
+    ).all()
+    for cand in outgone:
+        if cand.weight and checkout_flow.weight_within_tolerance(cand.weight, delta_kg):
+            diff = abs(cand.weight - delta_kg)
+            if best_diff is None or diff < best_diff:
+                best_diff, restored = diff, cand
+
+    if restored is not None:
+        restored.current_status = "비치중"
+        restored.shelf_id = shelf.id
+        restored.shelf_row = shelf.row or 1
+        restored.shelf_col = shelf.col or 1
+        restored.holder_username = None
+        restored.time_in = now_str
+        restored.time_out = None
+        restored.weight = measured
+        chem = restored
+        details = f"재반입 완료: {shelf_desc}에 적재됨 (실측 {measured}kg — 기존 병 복귀)"
+    else:
+        chem = models.Chemical(
+            id=f"chem_{int(datetime.now().timestamp())}",
+            name=chem_name,
+            shelf_id=shelf.id,
+            shelf_row=shelf.row or 1,
+            shelf_col=shelf.col or 1,
+            weight=measured,
+            current_status="비치중",
+            time_in=now_str,
+        )
+        db.add(chem)
+        details = f"신규 반입 완료: {shelf_desc}에 적재됨 (실측 {measured}kg)"
+
+    # 추천 위치 안내 LED 소등
+    recommended = db.query(models.Shelf).filter(
+        models.Shelf.led_message.like("%기존 반입%")
+    ).all()
+    for r_shelf in recommended:
+        r_shelf.led_on = False
+        r_shelf.led_message = ""
+
+    db.add(models.Log(
+        chemical_id=chem.id,
+        chemical_name=chem.name,
+        action="반입",
+        operator_name=operator_name,
+        details=details,
+    ))
+
+    checkin_session["active"] = False
+    checkin_session["chemical_name"] = ""
+    checkin_session["start_time"] = 0.0
+    checkin_session["username"] = ""
+    db.commit()
+
+    return {
+        "event": "checkin_complete",
+        "restored": restored is not None,
+        "chemical": {
+            "id": chem.id,
+            "name": chem.name,
+            "shelf_id": chem.shelf_id,
+            "shelf_row": chem.shelf_row,
+            "shelf_col": chem.shelf_col,
+            "weight": chem.weight,
+        },
+    }
+
+
 @router.post("/{shelf_id}/weight")
 def update_weight(shelf_id: str, req: schemas.WeightUpdate, db: Session = Depends(get_db)):
     shelf = db.query(models.Shelf).filter(models.Shelf.id == shelf_id).first()
     if not shelf:
         raise HTTPException(status_code=404, detail="선반을 찾을 수 없습니다.")
-        
+
     prev_w = shelf.weight
     shelf.prev_weight = prev_w
     shelf.weight = req.weight
     if req.battery is not None:
         shelf.battery = req.battery
     shelf.updated_time = datetime.now().strftime("%H:%M:%S")
-    
+
     db.commit()
-    
-    # Check if this weight update finishes an active checkin session
-    # Let's import checkin_session from main or handle it centrally.
-    # To keep routes clean, we can import checkin_session from a shared module
-    # or handle it in the main.py or a session file.
-    # Let's handle it by importing a shared state from web.main or web.session.
-    # Let's query if there is an active checkin session in the DB or a global variable.
-    # We will import the session from main or handle it here by accessing a global dictionary.
-    from session_store import checkin_session
-    
+
+    # 무게 변화량으로 반입(증가)/반출(감소) 세션을 진행시킨다
     session_result = None
-    if checkin_session["active"] and checkin_session["chemical_name"]:
-        # If weight increased
-        if req.weight > prev_w:
-            chem_name = checkin_session["chemical_name"]
-            username = checkin_session.get("username", "알수없음")
-            
-            # Find user's nickname
-            user = db.query(models.User).filter(models.User.username == username).first()
-            operator_name = user.nickname if user else username
-            
-            # Register chemical in DB
-            new_chem = models.Chemical(
-                id=f"chem_{int(datetime.now().timestamp())}",
-                name=chem_name,
-                shelf_id=shelf_id,
-                shelf_row=shelf.row or 1,
-                shelf_col=shelf.col or 1,
-                weight=round(req.weight, 2),
-                current_status="비치중",
-                time_in=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                manufacturer="시그마알드리치" # default
-            )
-            db.add(new_chem)
-            
-            # Turn off recommendation LEDs
-            recommended_shelves = db.query(models.Shelf).filter(models.Shelf.led_message.like("%기존 반입%")).all()
-            for r_shelf in recommended_shelves:
-                r_shelf.led_on = False
-                r_shelf.led_message = ""
-            
-            # Record log
-            log = models.Log(
-                chemical_id=new_chem.id,
-                chemical_name=new_chem.name,
-                action="반입",
-                operator_name=operator_name,
-                details=f"신규 반입 완료: 선반 {shelf.parent_shelf} · {shelf.row}행 {shelf.col}열에 적재됨"
-            )
-            db.add(log)
-            
-            # Reset session
-            checkin_session["active"] = False
-            checkin_session["chemical_name"] = ""
-            checkin_session["start_time"] = 0.0
-            checkin_session["username"] = ""
-            
-            db.commit()
-            
-            session_result = {
-                "event": "checkin_complete",
-                "chemical": {
-                    "id": new_chem.id,
-                    "name": new_chem.name,
-                    "shelf_id": new_chem.shelf_id,
-                    "shelf_row": new_chem.shelf_row,
-                    "shelf_col": new_chem.shelf_col,
-                    "weight": new_chem.weight
-                }
-            }
-            
+    delta = req.weight - prev_w
+    if delta >= MIN_EVENT_DELTA_KG:
+        session_result = _handle_checkin_increase(db, shelf, delta)
+    elif delta <= -MIN_EVENT_DELTA_KG:
+        session_result = checkout_flow.handle_weight_drop(db, shelf, -delta)
+
     db.commit()
     db.refresh(shelf)
     return {

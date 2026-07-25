@@ -68,6 +68,7 @@ app.include_router(chemicals.router)
 app.include_router(orders.router)
 app.include_router(logs.router)
 app.include_router(session.router)
+app.include_router(session.checkout_router)
 
 
 # --- ESP8266 로드셀 모듈용 디바이스 API (firmware/src/main.cpp) ---
