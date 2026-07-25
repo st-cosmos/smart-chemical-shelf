@@ -78,6 +78,10 @@ interface ApiService {
     @POST("api/chemicals/scan-out")
     suspend fun scanOut(@Body request: ScanOutRequest): ScanOutResponse
 
+    // 무게 감지 타임아웃 후 '무게 확인 없이 기록'
+    @POST("api/chemicals/scan-out/force")
+    suspend fun scanOutForce(@Body request: ScanOutForceRequest): ScanOutResponse
+
     @POST("api/chemicals/select-led")
     suspend fun selectLed(@Body request: SelectLedRequest): SelectLedResponse
 
@@ -94,6 +98,13 @@ interface ApiService {
 
     @POST("api/checkin-session/cancel")
     suspend fun cancelCheckinSession(): Map<String, String>
+
+    // --- Check-out Session (선반 무게 감소로 반출 확정) ---
+    @GET("api/checkout-session")
+    suspend fun getCheckoutSession(): CheckoutSessionState
+
+    @POST("api/checkout-session/cancel")
+    suspend fun cancelCheckoutSession(): Map<String, String>
 
     // --- Device (ESP8266 로드셀 모듈 · 구버전 데모 호환) ---
     @GET("api/device/{device_id}")

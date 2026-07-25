@@ -69,6 +69,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
     private var currentNewItem = false
     private var recommendedShelfId: String? = null
     private var recommendedShelfDesc: String = ""
+    private var scannedName: String = ""  // 세션 완료 후 결과 조회용 (세션 리셋 시 이름이 비므로)
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -244,6 +245,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     ScanInRequest(ocr_text = ocrText, username = currentUser, chemical_name = name)
                 )
                 if (response.status == "success") {
+                    scannedName = response.chemical_name
                     recommendedShelfId = response.recommended_shelf
                     recommendedShelfDesc = response.recommended_shelf_desc
                     currentNewItem = !response.has_history
@@ -380,9 +382,11 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     val session = NetworkClient.api.getCheckinSession()
                     if (!session.active) {
                         // 세션 종료 → 안착 완료 또는 타임아웃
+                        // (완료 시 서버 세션이 리셋되어 chemical_name 이 비므로 스캔 시점 이름 사용)
+                        val targetName = session.chemical_name.ifBlank { scannedName }
                         val chemicals = NetworkClient.api.getChemicals()
                         val latestChem = chemicals
-                            .filter { it.name == session.chemical_name }
+                            .filter { it.name == targetName }
                             .maxByOrNull { it.time_in ?: "" }
                         if (latestChem != null && !session.timeout) {
                             handleCheckinComplete(latestChem)
@@ -461,6 +465,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         currentNewItem = false
         recommendedShelfId = null
         recommendedShelfDesc = ""
+        scannedName = ""
         activeSessionJob?.cancel()
 
         binding.statusIcon.clearAnimation()

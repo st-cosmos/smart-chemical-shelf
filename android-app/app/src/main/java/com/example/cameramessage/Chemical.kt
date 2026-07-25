@@ -75,7 +75,8 @@ data class ScanInResponse(
 data class ScanOutRequest(
     val ocr_text: String,
     val username: String,
-    val chemical_name: String? = null  // 매칭/확인이 끝난 표준명 (서버 매칭 생략)
+    val chemical_name: String? = null, // 매칭/확인이 끝난 표준명 (서버 매칭 생략)
+    val chemical_id: String? = null    // 직접 선택으로 특정 병을 지정한 경우
 )
 
 // --- OCR/바코드 매칭 (POST /api/chemicals/match) ---
@@ -105,9 +106,42 @@ data class MatchConfirmRequest(
     val matched_token: String? = null
 )
 
+// scan-out 은 즉시 확정하지 않고 반출 세션을 시작한다 (status = "pending").
+// force 기록 응답은 chemical 을 담아 온다 (status = "success").
 data class ScanOutResponse(
     val status: String,
-    val chemical: ChemicalData
+    val chemical_name: String? = null,
+    val candidates: Int? = null,
+    val timeout_seconds: Double? = null,
+    val chemical: ChemicalData? = null
+)
+
+data class ScanOutForceRequest(
+    val username: String,
+    val chemical_name: String? = null,
+    val chemical_id: String? = null
+)
+
+// --- 반출 세션 (GET /api/checkout-session) ---
+
+data class CheckoutEvent(
+    val type: String,      // wrong_item 등
+    val message: String?
+)
+
+data class CheckoutResultData(
+    val chemical: ChemicalData,
+    val weight_verified: Boolean?,  // true=검증 통과, false=불일치, null=무게 확인 없이 기록
+    val measured_delta: Double?
+)
+
+data class CheckoutSessionState(
+    val active: Boolean,
+    val chemical_name: String,
+    val time_left: Double,
+    val timeout: Boolean,
+    val event: CheckoutEvent? = null,
+    val result: CheckoutResultData? = null
 )
 
 data class SelectLedRequest(

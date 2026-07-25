@@ -330,11 +330,13 @@
                     android:paddingStart="6dp"
                     android:paddingEnd="6dp">
                     <FrameLayout
+                        android:id="@+id/statusCircle"
                         android:layout_width="46dp"
                         android:layout_height="46dp"
                         android:background="@drawable/shape_circle"
                         android:backgroundTint="@color/success_soft">
                         <ImageView
+                            android:id="@+id/statusIcon"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_gravity="center"
@@ -343,6 +345,7 @@
                             app:tint="@color/success" />
                     </FrameLayout>
                     <TextView
+                        android:id="@+id/statusTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -351,6 +354,7 @@
                         android:textStyle="bold"
                         android:textColor="@color/success" />
                     <TextView
+                        android:id="@+id/statusSub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="1dp"
