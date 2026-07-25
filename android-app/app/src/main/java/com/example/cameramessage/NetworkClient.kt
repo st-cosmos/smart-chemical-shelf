@@ -4,8 +4,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkClient {
-    // Emulator loopback IP. Set this to your local server IP (e.g., http://192.168.x.x:8000/) for real devices.
-    private const val BASE_URL = "http://10.98.81.70:8000/"
+    // Local server IP on Wi-Fi network
+    private const val BASE_URL = "http://10.21.120.70:8000/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()
