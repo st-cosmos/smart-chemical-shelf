@@ -1,4 +1,4 @@
-import { Boxes, FlaskConical, Layers, LogOut, ShoppingCart, UserPlus } from 'lucide-react';
+import { Boxes, ChevronRight, FlaskConical, Layers, LogOut, ShoppingCart, UserPlus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { SessionUser } from '../types';
 
@@ -45,18 +45,32 @@ export default function Sidebar({ activeTab, onSelect, user, onProfile, onLogout
 
       <div className="sidebar-spacer" />
 
-      <div className={`sidebar-user${activeTab === 'profile' ? ' active' : ''}`}>
-        <button className="sidebar-user-main" onClick={onProfile} title="내 프로필">
+      <div className="sidebar-footer">
+        <button
+          type="button"
+          className={`sidebar-user-card${activeTab === 'profile' ? ' active' : ''}`}
+          onClick={onProfile}
+          title="내 프로필 수정"
+        >
           <div className="avatar">{user.nickname.charAt(0)}</div>
           <div className="sidebar-user-info">
             <div className="sidebar-user-name">{user.nickname}</div>
-            <div className="sidebar-user-role">{user.role}</div>
+            <div className="sidebar-user-role">{user.role} · 내 프로필</div>
           </div>
+          <ChevronRight size={16} className="sidebar-user-arrow" />
         </button>
-        <button className="sidebar-logout" onClick={onLogout} title="로그아웃">
+
+        <button
+          type="button"
+          className="sidebar-logout-btn"
+          onClick={onLogout}
+          title="로그아웃"
+        >
           <LogOut size={16} />
+          <span>로그아웃</span>
         </button>
       </div>
     </aside>
   );
 }
+

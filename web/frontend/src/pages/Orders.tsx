@@ -60,6 +60,26 @@ export default function Orders() {
     setTimeout(() => setNotice(null), 4000);
   };
 
+  const isAllSelected = pending.length > 0 && pending.every((o) => o.selected);
+
+  const toggleSelectAll = async () => {
+    if (showHistory || pending.length === 0) return;
+    const nextState = !isAllSelected;
+
+    setOrders((prev) =>
+      prev.map((o) => (o.status === 'pending' ? { ...o, selected: nextState } : o)),
+    );
+
+    try {
+      await Promise.all(
+        pending.map((o) => putJSON(`/api/orders/${o.id}`, { selected: nextState })),
+      );
+    } catch (err) {
+      await fetchOrders();
+      flash(false, err instanceof Error ? err.message : '선택 변경에 실패했습니다.');
+    }
+  };
+
   const toggleSelect = async (order: Order) => {
     const next = !order.selected;
     setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, selected: next } : o)));
@@ -113,7 +133,16 @@ export default function Orders() {
       <div className="card table-card">
         <div className="t-head">
           <div className="t-cell" style={{ width: COL.check }}>
-            <span className="checkbox" />
+            {!showHistory && (
+              <button
+                type="button"
+                className={`checkbox${isAllSelected ? ' checked' : ''}`}
+                onClick={toggleSelectAll}
+                title={isAllSelected ? '전체 선택 해제' : '전체 선택'}
+              >
+                {isAllSelected && <Check size={11} />}
+              </button>
+            )}
           </div>
           <div className="t-cell grow">시약 이름</div>
           <div className="t-cell" style={{ width: COL.remain }}>현재 잔량</div>

@@ -11,6 +11,12 @@ from datetime import datetime
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
+def _validate_username(username: str):
+    """아이디 규칙: 4자 이상."""
+    if not username or len(username.strip()) < 4:
+        raise HTTPException(status_code=400, detail="아이디는 4자 이상이어야 합니다.")
+
+
 def _validate_password(password: str):
     """웹 로그인용 비밀번호 규칙: 8자 이상, 숫자·특수문자 포함."""
     if len(password) < 8:
@@ -31,6 +37,7 @@ def _validate_pin(pin: str):
 def register_user(req: schemas.UserRegister, db: Session = Depends(get_db)):
     if not req.username or not req.nickname:
         raise HTTPException(status_code=400, detail="아이디·별명을 모두 입력하세요.")
+    _validate_username(req.username)
     _validate_password(req.password)
     _validate_pin(req.pin)
 
@@ -125,3 +132,15 @@ def get_users(db: Session = Depends(get_db)):
             created_at=u.created_at.strftime("%Y-%m-%d %H:%M:%S")
         ) for u in users
     ]
+
+
+@router.delete("/{username}")
+def delete_user(username: str, db: Session = Depends(get_db)):
+    """사용자 삭제 API"""
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+
+    db.delete(user)
+    db.commit()
+    return {"status": "ok", "message": f"{username} 사용자가 삭제되었습니다."}
