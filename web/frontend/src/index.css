@@ -1255,21 +1255,37 @@ select.input-field {
   gap: 12px;
 }
 
-.shelf-grid {
+/* 3행 × 3열만 보이는 스크롤 뷰포트 (행 150px × 3 + 간격 + 4행 살짝 노출) */
+.shelf-grid-viewport {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  max-height: 500px;
+  overflow: auto;
+  border-radius: 16px;
 }
 
-.shelf-grid-row {
-  display: flex;
+.shelf-grid-viewport::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.shelf-grid-viewport::-webkit-scrollbar-thumb {
+  background: var(--bg-deep);
+  border-radius: 999px;
+}
+
+.shelf-grid-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 열은 항상 3개 폭 기준 — 4열 이상이면 가로 스크롤 */
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), calc((100% - 24px) / 3));
   gap: 12px;
 }
 
 .slot {
-  flex: 1;
   min-width: 0;
   height: 150px;
   border-radius: 16px;
@@ -1277,15 +1293,22 @@ select.input-field {
 
 .slot-occupied {
   background: var(--bg);
-  padding: 16px 18px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   overflow: hidden;
 }
 
-.slot-name {
-  font-size: 19px;
+.slot-chem-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.slot-chem-name {
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-strong);
   white-space: nowrap;
@@ -1293,8 +1316,33 @@ select.input-field {
   text-overflow: ellipsis;
 }
 
-.slot-device {
-  font-size: 14px;
+.slot-chem-more {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.slot-remain {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.slot-remain-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.slot-remain-unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.slot-pos {
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -1302,10 +1350,10 @@ select.input-field {
 }
 
 .slot-meta {
-  padding-top: 10px;
+  padding-top: 6px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -1414,6 +1462,17 @@ select.input-field {
   color: var(--text-strong);
 }
 
+.modal-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: -12px;
+}
+
+.modal-help {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 .modal-actions {
   display: flex;
   gap: 12px;
@@ -1421,6 +1480,53 @@ select.input-field {
 
 .modal-actions .btn {
   flex: 1;
+}
+
+/* ============================================================
+   주문 관리 — 구매 링크 (web-order)
+   ============================================================ */
+.cell-title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.cell-title-link:hover {
+  text-decoration: underline;
+}
+
+.link-chip,
+.link-add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.link-chip {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.link-chip:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.link-add-chip {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.link-add-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* ============================================================

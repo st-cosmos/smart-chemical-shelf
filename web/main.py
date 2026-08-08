@@ -66,6 +66,7 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE users ADD COLUMN pin VARCHAR DEFAULT '0000';",
         "ALTER TABLE chemicals ADD COLUMN incompatible_chemicals VARCHAR;",
         "ALTER TABLE chemicals ADD COLUMN incompatible_reason VARCHAR;",
+        "ALTER TABLE orders ADD COLUMN purchase_link VARCHAR;",
         "UPDATE users SET pin = '0000' WHERE pin IS NULL;",
     ]:
         try:

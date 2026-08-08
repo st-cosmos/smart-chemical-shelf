@@ -10911,6 +10911,29 @@
                           "fontWeight": "600"
                         }
                       ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p7jBBl",
+                      "name": "OTH 구매 링크",
+                      "width": 116,
+                      "padding": [
+                        12,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yAeN2",
+                          "name": "OTH Text 구매 링크",
+                          "fill": "$text-muted",
+                          "content": "구매 링크",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -10976,14 +10999,33 @@
                       ],
                       "children": [
                         {
-                          "type": "text",
-                          "id": "m0z3C",
-                          "name": "메탄올 1L Name",
-                          "fill": "$text-strong",
-                          "content": "메탄올 1L",
-                          "fontFamily": "$font",
-                          "fontSize": 14,
-                          "fontWeight": "600"
+                          "type": "frame",
+                          "id": "dt1Oa",
+                          "name": "Name Row",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "m0z3C",
+                              "name": "메탄올 1L Name",
+                              "fill": "$primary",
+                              "content": "메탄올 1L",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "UMwQR",
+                              "name": "Ext Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            }
+                          ]
                         },
                         {
                           "type": "text",
@@ -11174,6 +11216,54 @@
                           "fontWeight": "600"
                         }
                       ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L0klUH",
+                      "name": "LinkCell",
+                      "width": 116,
+                      "padding": [
+                        12,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BV6UM",
+                          "name": "Link Chip",
+                          "fill": "$primary-soft",
+                          "cornerRadius": 8,
+                          "gap": 5,
+                          "padding": [
+                            5,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Acu7p",
+                              "name": "Link Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "aqs6x",
+                              "name": "Link Text",
+                              "fill": "$primary",
+                              "content": "링크",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -11239,14 +11329,33 @@
                       ],
                       "children": [
                         {
-                          "type": "text",
-                          "id": "n0V1RZ",
-                          "name": "아세톤 500mL Name",
-                          "fill": "$text-strong",
-                          "content": "아세톤 500mL",
-                          "fontFamily": "$font",
-                          "fontSize": 14,
-                          "fontWeight": "600"
+                          "type": "frame",
+                          "id": "NLxZH",
+                          "name": "Name Row",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "n0V1RZ",
+                              "name": "아세톤 500mL Name",
+                              "fill": "$primary",
+                              "content": "아세톤 500mL",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "pQg9a",
+                              "name": "Ext Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            }
+                          ]
                         },
                         {
                           "type": "text",
@@ -11435,6 +11544,54 @@
                           "fontFamily": "$font",
                           "fontSize": 13,
                           "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uekki",
+                      "name": "LinkCell",
+                      "width": 116,
+                      "padding": [
+                        12,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "RXuPq",
+                          "name": "Link Chip",
+                          "fill": "$primary-soft",
+                          "cornerRadius": 8,
+                          "gap": 5,
+                          "padding": [
+                            5,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Dtb0T",
+                              "name": "Link Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "toenK",
+                              "name": "Link Text",
+                              "fill": "$primary",
+                              "content": "링크",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -11700,6 +11857,56 @@
                           "fontWeight": "600"
                         }
                       ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MJMoA",
+                      "name": "LinkCell",
+                      "width": 116,
+                      "padding": [
+                        12,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "T9yK45",
+                          "name": "Link Add",
+                          "fill": "#FFFFFF00",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": 4,
+                          "padding": [
+                            5,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "OA0Nh",
+                              "name": "Add Icon",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ycXwD",
+                              "name": "Add Text",
+                              "fill": "$text-muted",
+                              "content": "링크 추가",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -11752,14 +11959,33 @@
                       ],
                       "children": [
                         {
-                          "type": "text",
-                          "id": "BVPBE",
-                          "name": "에탄올 95% 4L Name",
-                          "fill": "$text-strong",
-                          "content": "에탄올 95% 4L",
-                          "fontFamily": "$font",
-                          "fontSize": 14,
-                          "fontWeight": "600"
+                          "type": "frame",
+                          "id": "ihcpt",
+                          "name": "Name Row",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BVPBE",
+                              "name": "에탄올 95% 4L Name",
+                              "fill": "$primary",
+                              "content": "에탄올 95% 4L",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "P8Lgh",
+                              "name": "Ext Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            }
+                          ]
                         },
                         {
                           "type": "text",
@@ -11948,6 +12174,54 @@
                           "fontFamily": "$font",
                           "fontSize": 13,
                           "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sWinJ",
+                      "name": "LinkCell",
+                      "width": 116,
+                      "padding": [
+                        12,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vbtRD",
+                          "name": "Link Chip",
+                          "fill": "$primary-soft",
+                          "cornerRadius": 8,
+                          "gap": 5,
+                          "padding": [
+                            5,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "gVC9Q",
+                              "name": "Link Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "external-link",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sGnOe",
+                              "name": "Link Text",
+                              "fill": "$primary",
+                              "content": "링크",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -14964,7 +15238,7 @@
                                   "id": "LK539",
                                   "name": "Shelf A SizeText",
                                   "fill": "$text-body",
-                                  "content": "3행 × 4열",
+                                  "content": "4행 × 4열",
                                   "fontFamily": "$font",
                                   "fontSize": 16,
                                   "fontWeight": "600"
@@ -14994,344 +15268,393 @@
                       "children": [
                         {
                           "type": "frame",
-                          "id": "gxJew",
-                          "name": "Shelf A Grid",
+                          "id": "proaj",
+                          "name": "Grid Viewport A",
+                          "clip": true,
                           "width": "fill_container",
+                          "height": 512,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "rcOGo",
-                              "name": "Grid Row 0",
-                              "width": "fill_container",
+                              "id": "p7SOs0",
+                              "name": "Shelf A Grid",
+                              "layout": "vertical",
                               "gap": 12,
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "ryYl5",
-                                  "name": "Slot 01B4",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
+                                  "id": "XOTU9",
+                                  "name": "Grid Row 0",
+                                  "gap": 12,
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "smed0",
-                                      "name": "01B4 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A1",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "WBvAJ",
-                                      "name": "01B4 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-01B4",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
                                       "type": "frame",
-                                      "id": "XGr5y",
-                                      "name": "01B4 Meta",
-                                      "gap": 14,
+                                      "id": "jpevm",
+                                      "name": "Slot 수납칸 A1",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
+                                        12,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "G2ix4E",
-                                          "name": "01B4 M1",
-                                          "gap": 5,
+                                          "id": "dX9qH",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "J3dsA",
-                                              "name": "01B4 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
+                                              "type": "text",
+                                              "id": "L7bud",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "에탄올 95%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "Q1PDX",
-                                              "name": "01B4 WT",
-                                              "fill": "$text-body",
+                                              "id": "ZgxmU",
+                                              "name": "Chem More",
+                                              "fill": "$text-muted",
+                                              "content": "+1",
+                                              "fontFamily": "$font",
+                                              "fontSize": 12,
+                                              "fontWeight": "600"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "ZYzEU",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "dlUob",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
                                               "content": "4.2kg",
                                               "fontFamily": "$font",
                                               "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "jnedR",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
                                         {
+                                          "type": "text",
+                                          "id": "V7ico5",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A1 · SHELF-01B4",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
                                           "type": "frame",
-                                          "id": "g2Y5Jz",
-                                          "name": "01B4 M2",
-                                          "gap": 5,
+                                          "id": "mbPCM",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "f14cAL",
-                                              "name": "01B4 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "a2oOdJ",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "pY997",
-                                              "name": "01B4 BT",
+                                              "id": "B5EmX",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
                                               "content": "86%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
                                         }
                                       ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "ZiLgw",
-                                  "name": "Slot 02C7",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "GVKQ5",
-                                      "name": "02C7 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A2",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "cyU6W",
-                                      "name": "02C7 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-02C7",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "P8D18S",
-                                      "name": "02C7 Meta",
-                                      "gap": 14,
+                                      "id": "be9dY",
+                                      "name": "Slot 수납칸 A2",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
+                                        12,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "xeN29",
-                                          "name": "02C7 M1",
-                                          "gap": 5,
+                                          "id": "qnrEp",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "P8uijJ",
-                                              "name": "02C7 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
+                                              "type": "text",
+                                              "id": "Sgwm6",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "아세톤",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "eMhjY",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
                                             {
                                               "type": "text",
-                                              "id": "f4tLi",
-                                              "name": "02C7 WT",
-                                              "fill": "$text-body",
+                                              "id": "RnSNe",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
                                               "content": "3.1kg",
                                               "fontFamily": "$font",
                                               "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "CTNyj",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
                                         {
+                                          "type": "text",
+                                          "id": "jbNAI",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A2 · SHELF-02C7",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
                                           "type": "frame",
-                                          "id": "U9BEN",
-                                          "name": "02C7 M2",
-                                          "gap": 5,
+                                          "id": "veXk0",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "nYWTY",
-                                              "name": "02C7 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "XARmn",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "dK0iO",
-                                              "name": "02C7 BT",
-                                              "fill": "$text-body",
-                                              "content": "64%",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "WzhG8",
-                                  "name": "Slot 05D1",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "SvP2z",
-                                      "name": "05D1 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A3",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "m4gwvQ",
-                                      "name": "05D1 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-05D1",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "OLrX2",
-                                      "name": "05D1 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "frame",
-                                          "id": "a9kHqi",
-                                          "name": "05D1 M1",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "zz6JX",
-                                              "name": "05D1 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "lZFUX",
-                                              "name": "05D1 WT",
-                                              "fill": "$text-body",
-                                              "content": "5.1kg",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "znRJh",
-                                          "name": "05D1 M2",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "LNsi8",
-                                              "name": "05D1 BI",
-                                              "width": 19,
-                                              "height": 19,
-                                              "icon": "battery-full",
-                                              "library": "lucide",
-                                              "fill": "$success"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "b6WuYH",
-                                              "name": "05D1 BT",
+                                              "id": "e9lPq9",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
                                               "content": "91%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "jLGaa",
+                                      "name": "Slot 수납칸 A3",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
+                                      "padding": [
+                                        12,
+                                        14
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "CRKFI",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "l4mrA0",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "메탄올",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "VDB94",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "V3BIQ9",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "5.1kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "EoLaC",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "zYNJa",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A3 · SHELF-05D1",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "XDSkk",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "icon",
+                                              "id": "VTQxp",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
+                                              "icon": "battery-full",
+                                              "library": "lucide",
+                                              "fill": "$success"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "On1kb",
+                                              "name": "Bat Text",
+                                              "fill": "$text-body",
+                                              "content": "63%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 12,
+                                              "fontWeight": "600"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "aJPu7",
+                                      "name": "Slot Empty 03",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "O0jZHL",
+                                          "name": "Empty Label 03",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -15339,141 +15662,289 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "uT1yd",
-                                  "name": "Slot Empty 03",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
+                                  "id": "kiXpI",
+                                  "name": "Grid Row 1",
+                                  "gap": 12,
                                   "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "KDVl5",
-                                      "name": "Empty Text 03",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "cpC3e",
-                              "name": "Grid Row 1",
-                              "width": "fill_container",
-                              "gap": 12,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "trBCq",
-                                  "name": "Slot 07E2",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "RMQjD",
-                                      "name": "07E2 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A5",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "bPLaR",
-                                      "name": "07E2 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-07E2",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
                                     {
                                       "type": "frame",
-                                      "id": "b39PUF",
-                                      "name": "07E2 Meta",
-                                      "gap": 14,
+                                      "id": "EJKGJ",
+                                      "name": "Slot 수납칸 A5",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
+                                        12,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "H8ge8S",
-                                          "name": "07E2 M1",
-                                          "gap": 5,
+                                          "id": "hTZS1",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "pUqqF",
-                                              "name": "07E2 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
+                                              "type": "text",
+                                              "id": "vqNUA",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "염산 35%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "YJnoh",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
                                             {
                                               "type": "text",
-                                              "id": "X7xwm",
-                                              "name": "07E2 WT",
-                                              "fill": "$text-body",
+                                              "id": "X7K2yx",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
                                               "content": "2.8kg",
                                               "fontFamily": "$font",
                                               "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "y6vXf",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
                                         {
+                                          "type": "text",
+                                          "id": "cwv4Z",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A5 · SHELF-07E2",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
                                           "type": "frame",
-                                          "id": "ownVE",
-                                          "name": "07E2 M2",
-                                          "gap": 5,
+                                          "id": "NDjGC",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "ma0lR",
-                                              "name": "07E2 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "Dra7a",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "sMuf1",
-                                              "name": "07E2 BT",
+                                              "id": "y8vvjg",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
-                                              "content": "77%",
+                                              "content": "78%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 12,
+                                              "fontWeight": "600"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "bD9dK",
+                                      "name": "Slot Drop",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$primary-soft",
+                                      "cornerRadius": 16,
+                                      "stroke": "$primary",
+                                      "strokeWidth": 2,
+                                      "layout": "vertical",
+                                      "gap": 6,
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "XANbj",
+                                          "name": "Drop Icon",
+                                          "width": 26,
+                                          "height": 26,
+                                          "icon": "circle-plus",
+                                          "library": "lucide",
+                                          "fill": "$primary"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "SfgBV",
+                                          "name": "Drop Label",
+                                          "fill": "$primary",
+                                          "content": "여기에 배치",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "jKQlv",
+                                      "name": "Slot Empty 12",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "E4BK8",
+                                          "name": "Empty Label 12",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "nw4sw",
+                                      "name": "Slot 수납칸 A8",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
+                                      "padding": [
+                                        12,
+                                        14
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "HsmuW",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "aSAgt",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "질산 60%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "ZuL83",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "V4CKO2",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "1.9kg",
                                               "fontFamily": "$font",
                                               "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "NwmOm",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "b0fPS",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A8 · SHELF-09A0",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "ADAWG",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "icon",
+                                              "id": "A7jwr",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
+                                              "icon": "battery-full",
+                                              "library": "lucide",
+                                              "fill": "$success"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "t0UjTp",
+                                              "name": "Bat Text",
+                                              "fill": "$text-body",
+                                              "content": "88%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
@@ -15484,172 +15955,308 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "x7Tbt0",
-                                  "name": "Slot Drop 11",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$primary-soft",
-                                  "cornerRadius": 16,
-                                  "stroke": "$primary",
-                                  "strokeWidth": 2,
-                                  "layout": "vertical",
-                                  "gap": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
+                                  "id": "a1WKmT",
+                                  "name": "Grid Row 2",
+                                  "gap": 12,
                                   "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "jgFkv",
-                                      "name": "Drop Icon",
-                                      "width": 32,
-                                      "height": 32,
-                                      "icon": "circle-plus",
-                                      "library": "lucide",
-                                      "fill": "$primary"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "r0lCJD",
-                                      "name": "Drop Text",
-                                      "fill": "$primary",
-                                      "content": "여기에 배치",
-                                      "fontFamily": "$font",
-                                      "fontSize": 17,
-                                      "fontWeight": "600"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "a8zmc",
-                                  "name": "Slot Empty 12",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "JwM0a",
-                                      "name": "Empty Text 12",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "qeDwG",
-                                  "name": "Slot 09A0",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "x9Nt2Z",
-                                      "name": "09A0 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A8",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "PNqAT",
-                                      "name": "09A0 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-09A0",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
                                     {
                                       "type": "frame",
-                                      "id": "D3Ykl",
-                                      "name": "09A0 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
+                                      "id": "xLPus",
+                                      "name": "Slot Empty 20",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
                                       "alignItems": "center",
                                       "children": [
                                         {
+                                          "type": "text",
+                                          "id": "o8x8Q",
+                                          "name": "Empty Label 20",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "X69MA",
+                                      "name": "Slot 수납칸 A10",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
+                                      "padding": [
+                                        12,
+                                        14
+                                      ],
+                                      "children": [
+                                        {
                                           "type": "frame",
-                                          "id": "g5vAaw",
-                                          "name": "09A0 M1",
-                                          "gap": 5,
+                                          "id": "YR9e0",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "iTnvM",
-                                              "name": "09A0 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
                                               "type": "text",
-                                              "id": "GR91d",
-                                              "name": "09A0 WT",
-                                              "fill": "$text-body",
-                                              "content": "1.9kg",
+                                              "id": "NLsOK",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "수산화나트륨",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
                                             }
                                           ]
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "Qm32a",
-                                          "name": "09A0 M2",
-                                          "gap": 5,
+                                          "id": "iJKtZ",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "z7AeY",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "6.0kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "l6HIw",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "in0p7",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "A10 · SHELF-0BF3",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "WT48X",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "FzgBr",
-                                              "name": "09A0 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "YE6Dh",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
-                                              "fill": "$success"
+                                              "fill": "$danger"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "PB8CP",
-                                              "name": "09A0 BT",
+                                              "id": "xezMG",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
-                                              "content": "58%",
+                                              "content": "45%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "irHOc",
+                                      "name": "Slot Empty 22",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "WCgGw",
+                                          "name": "Empty Label 22",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "GBWKT",
+                                      "name": "Slot Empty 23",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "XNX2w",
+                                          "name": "Empty Label 23",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "v6y2z",
+                                  "name": "Grid Row 3",
+                                  "gap": 12,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "B8eqvT",
+                                      "name": "Slot Empty 30",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "HCpMU",
+                                          "name": "Empty Label 30",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "wnjxS",
+                                      "name": "Slot Empty 31",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "aNtBx",
+                                          "name": "Empty Label 31",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "nkkDZ",
+                                      "name": "Slot Empty 32",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "iesip",
+                                          "name": "Empty Label 32",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "adVs3",
+                                      "name": "Slot Empty 33",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "yjNFX",
+                                          "name": "Empty Label 33",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -15658,201 +16265,28 @@
                               ]
                             },
                             {
-                              "type": "frame",
-                              "id": "BFXXx",
-                              "name": "Grid Row 2",
-                              "width": "fill_container",
-                              "gap": 12,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "Nwo8H",
-                                  "name": "Slot Empty 20",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "CVVsN",
-                                      "name": "Empty Text 20",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "CxFDH",
-                                  "name": "Slot 0BF3",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "EhNZd",
-                                      "name": "0BF3 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A10",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "ij2HX",
-                                      "name": "0BF3 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-0BF3",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "HW6qw",
-                                      "name": "0BF3 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "frame",
-                                          "id": "B65MOm",
-                                          "name": "0BF3 M1",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "ExS0t",
-                                              "name": "0BF3 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "N0sHN",
-                                              "name": "0BF3 WT",
-                                              "fill": "$text-body",
-                                              "content": "6.0kg",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "rvZXA",
-                                          "name": "0BF3 M2",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "TUPln",
-                                              "name": "0BF3 BI",
-                                              "width": 19,
-                                              "height": 19,
-                                              "icon": "battery-full",
-                                              "library": "lucide",
-                                              "fill": "$success"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "lS0L0",
-                                              "name": "0BF3 BT",
-                                              "fill": "$text-body",
-                                              "content": "45%",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "fl8y5",
-                                  "name": "Slot Empty 22",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "MOacc",
-                                      "name": "Empty Text 22",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "DHT0u",
-                                  "name": "Slot Empty 23",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "NrJXw",
-                                      "name": "Empty Text 23",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
+                              "type": "rectangle",
+                              "cornerRadius": 999,
+                              "id": "j40hX",
+                              "layoutPosition": "absolute",
+                              "x": 415,
+                              "y": 8,
+                              "name": "VScrollbar A",
+                              "fill": "$bg-deep",
+                              "width": 5,
+                              "height": 380
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 999,
+                              "id": "ngkpC",
+                              "layoutPosition": "absolute",
+                              "x": 8,
+                              "y": 501,
+                              "name": "HScrollbar A",
+                              "fill": "$bg-deep",
+                              "width": 300,
+                              "height": 5
                             }
                           ]
                         },
@@ -15861,7 +16295,7 @@
                           "id": "T7Z0M",
                           "name": "Add Col Btn",
                           "width": 56,
-                          "height": 474,
+                          "height": 512,
                           "fill": "$bg",
                           "cornerRadius": 16,
                           "layout": "vertical",
@@ -16010,124 +16444,272 @@
                       "children": [
                         {
                           "type": "frame",
-                          "id": "Xr7s6",
-                          "name": "Shelf A Grid",
+                          "id": "OXTah",
+                          "name": "Grid Viewport B",
+                          "clip": true,
                           "width": "fill_container",
+                          "height": 474,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "CkDQx",
-                              "name": "Grid Row 0",
-                              "width": "fill_container",
+                              "id": "RZApW",
+                              "name": "Shelf B Grid",
+                              "layout": "vertical",
                               "gap": 12,
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "exn9W",
-                                  "name": "Slot 01B4",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
+                                  "id": "jX9jp",
+                                  "name": "Grid Row B0",
+                                  "gap": 12,
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "FC4qM",
-                                      "name": "01B4 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A1",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "ZfPZK",
-                                      "name": "01B4 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-01B4",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
                                       "type": "frame",
-                                      "id": "fSUrX",
-                                      "name": "01B4 Meta",
-                                      "gap": 14,
+                                      "id": "W9amK",
+                                      "name": "Slot 수납칸 B1",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
+                                        12,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "VdPkh",
-                                          "name": "01B4 M1",
-                                          "gap": 5,
+                                          "id": "dE69z",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "T9elC",
-                                              "name": "01B4 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
                                               "type": "text",
-                                              "id": "X9O7u4",
-                                              "name": "01B4 WT",
-                                              "fill": "$text-body",
-                                              "content": "4.2kg",
+                                              "id": "gqO08",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "과산화수소",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
                                             }
                                           ]
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "GY9tv",
-                                          "name": "01B4 M2",
-                                          "gap": 5,
+                                          "id": "l5bOJZ",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "t9u187",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "3.5kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "l859v",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "SG0PY",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "B1 · SHELF-04F8",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "gyeHf",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "KhPKl",
-                                              "name": "01B4 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "BYL75",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "P8Pbs",
-                                              "name": "01B4 BT",
+                                              "id": "KQTZr",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
-                                              "content": "86%",
+                                              "content": "72%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "K3VXsa",
+                                      "name": "Slot 수납칸 B2",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
+                                      "padding": [
+                                        12,
+                                        14
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "pAUnK",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "XOJoS",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "톨루엔",
+                                              "fontFamily": "$font",
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "YNFZ2",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "Ds2cX",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "2.2kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "ktiIP",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "R8QUpR",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "B2 · SHELF-06C2",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "fmia1",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "icon",
+                                              "id": "UwPPm",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
+                                              "icon": "battery-full",
+                                              "library": "lucide",
+                                              "fill": "$success"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "y3TMP",
+                                              "name": "Bat Text",
+                                              "fill": "$text-body",
+                                              "content": "95%",
+                                              "fontFamily": "$font",
+                                              "fontSize": 12,
+                                              "fontWeight": "600"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "C0heXX",
+                                      "name": "Slot Empty B02",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "h6Irw",
+                                          "name": "Empty Label B02",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -16135,109 +16717,170 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "yLTkt",
-                                  "name": "Slot 02C7",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
+                                  "id": "eSwjT",
+                                  "name": "Grid Row B1",
+                                  "gap": 12,
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "P8tdA",
-                                      "name": "02C7 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A2",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "mpE0w",
-                                      "name": "02C7 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-02C7",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
                                       "type": "frame",
-                                      "id": "RCvdR",
-                                      "name": "02C7 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
+                                      "id": "UJhv7",
+                                      "name": "Slot Empty B10",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
                                       "alignItems": "center",
                                       "children": [
                                         {
+                                          "type": "text",
+                                          "id": "CiXC2",
+                                          "name": "Empty Label B10",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "ggTAO",
+                                      "name": "Slot 수납칸 B5",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
+                                      "padding": [
+                                        12,
+                                        14
+                                      ],
+                                      "children": [
+                                        {
                                           "type": "frame",
-                                          "id": "u5rKS",
-                                          "name": "02C7 M1",
-                                          "gap": 5,
+                                          "id": "mTljw",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "tfk2w",
-                                              "name": "02C7 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
                                               "type": "text",
-                                              "id": "e6cs6K",
-                                              "name": "02C7 WT",
-                                              "fill": "$text-body",
-                                              "content": "3.1kg",
+                                              "id": "GgT9n",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "암모니아수",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
                                             }
                                           ]
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "KEEio",
-                                          "name": "02C7 M2",
-                                          "gap": 5,
+                                          "id": "Fa1Cf",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "TrYPf",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "4.8kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "yxXyE",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "g8YzkU",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "B5 · SHELF-08D5",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "upVDE",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "kOXDD",
-                                              "name": "02C7 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "byO1Y",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "sDyqN",
-                                              "name": "02C7 BT",
+                                              "id": "W780SH",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
-                                              "content": "64%",
+                                              "content": "52%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "X9Wro",
+                                      "name": "Slot Empty B12",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "B0widh",
+                                          "name": "Empty Label B12",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -16245,626 +16888,172 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "h5IeWn",
-                                  "name": "Slot 05D1",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
+                                  "id": "coj2U",
+                                  "name": "Grid Row B2",
+                                  "gap": 12,
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "PmOC5",
-                                      "name": "05D1 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A3",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "Br3Hz",
-                                      "name": "05D1 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-05D1",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
                                       "type": "frame",
-                                      "id": "ZxP5n",
-                                      "name": "05D1 Meta",
-                                      "gap": 14,
+                                      "id": "R3pOzs",
+                                      "name": "Slot 수납칸 B7",
+                                      "clip": true,
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "$bg",
+                                      "cornerRadius": 16,
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
+                                        12,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "TKSoF",
-                                          "name": "05D1 M1",
-                                          "gap": 5,
+                                          "id": "jqYC7",
+                                          "name": "Chem NameRow",
+                                          "gap": 4,
                                           "alignItems": "center",
                                           "children": [
                                             {
-                                              "type": "icon",
-                                              "id": "rSchc",
-                                              "name": "05D1 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
                                               "type": "text",
-                                              "id": "e7nREz",
-                                              "name": "05D1 WT",
-                                              "fill": "$text-body",
-                                              "content": "5.1kg",
+                                              "id": "SONZc",
+                                              "name": "Chem Name",
+                                              "fill": "$text-strong",
+                                              "content": "황산 98%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
+                                              "fontSize": 16,
+                                              "fontWeight": "700"
                                             }
                                           ]
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "P7Iqxy",
-                                          "name": "05D1 M2",
-                                          "gap": 5,
+                                          "id": "Qagp1",
+                                          "name": "Remain Row",
+                                          "gap": 3,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "VzSIg",
+                                              "name": "Remain Val",
+                                              "fill": "$primary",
+                                              "content": "3.9kg",
+                                              "fontFamily": "$font",
+                                              "fontSize": 15,
+                                              "fontWeight": "700"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "W5LTU",
+                                              "name": "Remain Label",
+                                              "fill": "$text-muted",
+                                              "content": "남음",
+                                              "fontFamily": "$font",
+                                              "fontSize": 11,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "y7gLUS",
+                                          "name": "Slot Pos",
+                                          "fill": "$text-muted",
+                                          "content": "B7 · SHELF-0AE1",
+                                          "fontFamily": "$font",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "OY0vg",
+                                          "name": "Slot Meta",
+                                          "gap": 4,
+                                          "padding": [
+                                            4,
+                                            0,
+                                            0,
+                                            0
+                                          ],
                                           "alignItems": "center",
                                           "children": [
                                             {
                                               "type": "icon",
-                                              "id": "zxg8s",
-                                              "name": "05D1 BI",
-                                              "width": 19,
-                                              "height": 19,
+                                              "id": "VuPzi",
+                                              "name": "Bat Icon",
+                                              "width": 15,
+                                              "height": 15,
                                               "icon": "battery-full",
                                               "library": "lucide",
                                               "fill": "$success"
                                             },
                                             {
                                               "type": "text",
-                                              "id": "FqF70",
-                                              "name": "05D1 BT",
+                                              "id": "Er30n",
+                                              "name": "Bat Text",
                                               "fill": "$text-body",
-                                              "content": "91%",
+                                              "content": "81%",
                                               "fontFamily": "$font",
-                                              "fontSize": 15,
+                                              "fontSize": 12,
                                               "fontWeight": "600"
                                             }
                                           ]
                                         }
                                       ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "L9j22",
-                                  "name": "Slot Empty 03",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "ont3m",
-                                      "name": "Empty Text 03",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "lX6yC",
-                              "name": "Grid Row 1",
-                              "width": "fill_container",
-                              "gap": 12,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "P2slN",
-                                  "name": "Slot 07E2",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "Yh5nP",
-                                      "name": "07E2 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A5",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "M02AFf",
-                                      "name": "07E2 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-07E2",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "h3LY6b",
-                                      "name": "07E2 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
+                                      "id": "H0Swj",
+                                      "name": "Slot Empty B21",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
                                       "alignItems": "center",
                                       "children": [
                                         {
-                                          "type": "frame",
-                                          "id": "IpSHJ",
-                                          "name": "07E2 M1",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "JM5pL",
-                                              "name": "07E2 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "oZnKm",
-                                              "name": "07E2 WT",
-                                              "fill": "$text-body",
-                                              "content": "2.8kg",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "YuC2m",
-                                          "name": "07E2 M2",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "dfq1k",
-                                              "name": "07E2 BI",
-                                              "width": 19,
-                                              "height": 19,
-                                              "icon": "battery-full",
-                                              "library": "lucide",
-                                              "fill": "$success"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "uiAxd",
-                                              "name": "07E2 BT",
-                                              "fill": "$text-body",
-                                              "content": "77%",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
+                                          "type": "text",
+                                          "id": "ia6PG",
+                                          "name": "Empty Label B21",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "bhFw6",
-                                  "name": "Slot Drop 11",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$primary-soft",
-                                  "cornerRadius": 16,
-                                  "stroke": "$primary",
-                                  "strokeWidth": 2,
-                                  "layout": "vertical",
-                                  "gap": 8,
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "YDfsh",
-                                      "name": "Drop Icon",
-                                      "width": 32,
-                                      "height": 32,
-                                      "icon": "circle-plus",
-                                      "library": "lucide",
-                                      "fill": "$primary"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "YOMxu",
-                                      "name": "Drop Text",
-                                      "fill": "$primary",
-                                      "content": "여기에 배치",
-                                      "fontFamily": "$font",
-                                      "fontSize": 17,
-                                      "fontWeight": "600"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "KhEzV",
-                                  "name": "Slot Empty 12",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "p2YMjQ",
-                                      "name": "Empty Text 12",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "pgffh",
-                                  "name": "Slot 09A0",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "XDQSg",
-                                      "name": "09A0 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A8",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "CLMjv",
-                                      "name": "09A0 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-09A0",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "WBXFc",
-                                      "name": "09A0 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
+                                      "id": "fMZwv",
+                                      "name": "Slot Empty B22",
+                                      "width": 134,
+                                      "height": 150,
+                                      "fill": "#FFFFFF00",
+                                      "cornerRadius": 16,
+                                      "stroke": "$border",
+                                      "strokeWidth": 1.5,
+                                      "layout": "vertical",
+                                      "justifyContent": "center",
                                       "alignItems": "center",
                                       "children": [
                                         {
-                                          "type": "frame",
-                                          "id": "jcVa5",
-                                          "name": "09A0 M1",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "EvdZb",
-                                              "name": "09A0 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "c3hWC",
-                                              "name": "09A0 WT",
-                                              "fill": "$text-body",
-                                              "content": "1.9kg",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "RuLq1",
-                                          "name": "09A0 M2",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "vqV0N",
-                                              "name": "09A0 BI",
-                                              "width": 19,
-                                              "height": 19,
-                                              "icon": "battery-full",
-                                              "library": "lucide",
-                                              "fill": "$success"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "E43eoq",
-                                              "name": "09A0 BT",
-                                              "fill": "$text-body",
-                                              "content": "58%",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
+                                          "type": "text",
+                                          "id": "B1ZzL",
+                                          "name": "Empty Label B22",
+                                          "fill": "$text-muted",
+                                          "content": "빈 슬롯",
+                                          "fontFamily": "$font",
+                                          "fontSize": 13,
+                                          "fontWeight": "normal"
                                         }
                                       ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "Gua1p",
-                              "name": "Grid Row 2",
-                              "width": "fill_container",
-                              "gap": 12,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "elReE",
-                                  "name": "Slot Empty 20",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "miior",
-                                      "name": "Empty Text 20",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "YP0KP",
-                                  "name": "Slot 0BF3",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "$bg",
-                                  "cornerRadius": 16,
-                                  "layout": "vertical",
-                                  "gap": 4,
-                                  "padding": [
-                                    16,
-                                    18
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "Cwwl4",
-                                      "name": "0BF3 Name",
-                                      "fill": "$text-strong",
-                                      "content": "수납칸 A10",
-                                      "fontFamily": "$font",
-                                      "fontSize": 19,
-                                      "fontWeight": "700"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "g4Swb",
-                                      "name": "0BF3 Id",
-                                      "fill": "$text-muted",
-                                      "content": "SHELF-0BF3",
-                                      "fontFamily": "$font",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "DRZkL",
-                                      "name": "0BF3 Meta",
-                                      "gap": 14,
-                                      "padding": [
-                                        10,
-                                        0,
-                                        0,
-                                        0
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "frame",
-                                          "id": "rbDD2",
-                                          "name": "0BF3 M1",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "ypayy",
-                                              "name": "0BF3 WI",
-                                              "width": 17,
-                                              "height": 17,
-                                              "icon": "weight",
-                                              "library": "lucide",
-                                              "fill": "$text-muted"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "mBWMH",
-                                              "name": "0BF3 WT",
-                                              "fill": "$text-body",
-                                              "content": "6.0kg",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "L7Mp7c",
-                                          "name": "0BF3 M2",
-                                          "gap": 5,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "eOoHO",
-                                              "name": "0BF3 BI",
-                                              "width": 19,
-                                              "height": 19,
-                                              "icon": "battery-full",
-                                              "library": "lucide",
-                                              "fill": "$success"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "jdlKz",
-                                              "name": "0BF3 BT",
-                                              "fill": "$text-body",
-                                              "content": "45%",
-                                              "fontFamily": "$font",
-                                              "fontSize": 15,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "Fd6or",
-                                  "name": "Slot Empty 22",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "s48t0S",
-                                      "name": "Empty Text 22",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "nPNVB",
-                                  "name": "Slot Empty 23",
-                                  "width": "fill_container",
-                                  "height": 150,
-                                  "fill": "#FFFFFF00",
-                                  "cornerRadius": 16,
-                                  "stroke": "$border",
-                                  "strokeWidth": 1.5,
-                                  "layout": "vertical",
-                                  "justifyContent": "center",
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "u2yldk",
-                                      "name": "Empty Text 23",
-                                      "fill": "$text-muted",
-                                      "content": "빈 슬롯",
-                                      "fontFamily": "$font",
-                                      "fontSize": 15,
-                                      "fontWeight": "normal"
                                     }
                                   ]
                                 }
@@ -17254,6 +17443,131 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "n6Va9R",
+      "x": 3120,
+      "y": 7532,
+      "name": "web-order-link-modal",
+      "width": 480,
+      "fill": "$surface",
+      "cornerRadius": 20,
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#1E2A5626",
+        "offset": {
+          "x": 0,
+          "y": 16
+        },
+        "blur": 48
+      },
+      "layout": "vertical",
+      "gap": 16,
+      "padding": 28,
+      "children": [
+        {
+          "type": "frame",
+          "id": "S3NdX",
+          "name": "Modal Head",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 6,
+          "children": [
+            {
+              "type": "text",
+              "id": "V1UhEd",
+              "name": "Modal Title",
+              "fill": "$text-strong",
+              "content": "구매 링크 메모",
+              "fontFamily": "$font",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "a15DTT",
+              "name": "Modal Sub",
+              "fill": "$text-muted",
+              "content": "메탄올 1L · CH₃OH · 시그마알드리치",
+              "fontFamily": "$font",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "id": "d74w7",
+          "type": "ref",
+          "ref": "Cf6Du",
+          "name": "Link Input",
+          "width": "fill_container",
+          "descendants": {
+            "U5p1xC": {
+              "content": "구매 사이트 URL"
+            },
+            "mHXJO": {
+              "content": "https://www.sigmaaldrich.com/KR/ko/product/sial/34860",
+              "fill": "$text-body"
+            }
+          }
+        },
+        {
+          "type": "text",
+          "id": "NUWpn",
+          "name": "Modal Help",
+          "fill": "$text-muted",
+          "content": "저장하면 주문 목록에서 시약 이름을 클릭할 때 이 링크로 이동합니다.",
+          "fontFamily": "$font",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "qq4Q2",
+          "name": "Modal Actions",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "justifyContent": "end",
+          "children": [
+            {
+              "id": "SY8vA",
+              "type": "ref",
+              "ref": "To0LP",
+              "name": "Cancel Btn",
+              "descendants": {
+                "h5cPW5": {
+                  "enabled": false
+                },
+                "I9Z31": {
+                  "content": "취소"
+                }
+              }
+            },
+            {
+              "id": "sxmyo",
+              "type": "ref",
+              "ref": "P3nq1b",
+              "name": "Save Btn",
+              "descendants": {
+                "Ok24N": {
+                  "icon": "check"
+                },
+                "D3RFnz": {
+                  "content": "저장"
+                }
+              }
             }
           ]
         }

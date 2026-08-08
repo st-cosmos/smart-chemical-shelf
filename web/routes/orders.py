@@ -19,7 +19,8 @@ def create_order(req: schemas.OrderCreate, db: Session = Depends(get_db)):
         manufacturer=req.manufacturer,
         current_qty=req.current_qty,
         threshold_qty=req.threshold_qty,
-        price=req.price
+        price=req.price,
+        purchase_link=req.purchase_link
     )
     db.add(new_ord)
     db.commit()
@@ -32,10 +33,14 @@ def update_order(order_id: int, req: schemas.OrderUpdate, db: Session = Depends(
     if not ord_item:
         raise HTTPException(status_code=404, detail="주문 항목을 찾을 수 없습니다.")
         
-    ord_item.selected = req.selected
+    if req.selected is not None:
+        ord_item.selected = req.selected
     if req.status:
         ord_item.status = req.status
-        
+    if req.purchase_link is not None:
+        # 빈 문자열이 오면 링크 삭제로 처리한다
+        ord_item.purchase_link = req.purchase_link.strip() or None
+
     db.commit()
     db.refresh(ord_item)
     return ord_item

@@ -68,6 +68,7 @@ export interface Order {
   price: number;
   selected: boolean;
   status: string; // pending | ordered
+  purchase_link: string | null; // 시약 구매 사이트 URL 메모
 }
 
 export interface ExpiredAlert {

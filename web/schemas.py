@@ -96,10 +96,12 @@ class OrderCreate(BaseModel):
     current_qty: str
     threshold_qty: str
     price: int
+    purchase_link: Optional[str] = None
 
 class OrderUpdate(BaseModel):
-    selected: bool
+    selected: Optional[bool] = None
     status: Optional[str] = None
+    purchase_link: Optional[str] = None
 
 class ShelfResponse(BaseModel):
     id: str

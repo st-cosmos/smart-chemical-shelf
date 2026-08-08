@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Check, History, Minus, Plus, ShoppingCart, X } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { Check, ExternalLink, History, Minus, Plus, ShoppingCart, X } from 'lucide-react';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import ProgressBar from '../components/ProgressBar';
 import { getJSON, postJSON, putJSON } from '../api';
 import type { Order } from '../types';
@@ -13,6 +15,7 @@ const COL = {
   threshold: 100,
   qty: 150,
   price: 130,
+  link: 116,
 };
 
 function parsePct(qty: string | null): number {
@@ -30,6 +33,11 @@ export default function Orders() {
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // 구매 링크 메모 모달
+  const [linkTarget, setLinkTarget] = useState<Order | null>(null);
+  const [linkValue, setLinkValue] = useState('');
+  const [linkError, setLinkError] = useState('');
 
   const fetchOrders = async () => {
     try {
@@ -104,6 +112,24 @@ export default function Orders() {
     }
   };
 
+  const openLinkModal = (order: Order) => {
+    setLinkTarget(order);
+    setLinkValue(order.purchase_link ?? '');
+    setLinkError('');
+  };
+
+  const saveLink = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!linkTarget) return;
+    try {
+      await putJSON(`/api/orders/${linkTarget.id}`, { purchase_link: linkValue.trim() });
+      setLinkTarget(null);
+      await fetchOrders();
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : '링크 저장에 실패했습니다.');
+    }
+  };
+
   const confirmOrders = async () => {
     try {
       const res = await postJSON<{ status: string; count: number }>('/api/orders/confirm');
@@ -149,6 +175,7 @@ export default function Orders() {
           <div className="t-cell" style={{ width: COL.threshold }}>기준 수량</div>
           <div className="t-cell" style={{ width: COL.qty }}>주문 수량</div>
           <div className="t-cell" style={{ width: COL.price }}>예상 금액</div>
+          <div className="t-cell" style={{ width: COL.link }}>구매 링크</div>
         </div>
         <div className="t-body">
           {loading ? (
@@ -177,7 +204,20 @@ export default function Orders() {
                   </div>
                   <div className="t-cell grow" style={{ padding: '12px 16px' }}>
                     <div className="cell-title">
-                      <span className="cell-title-main">{order.chemical_name}</span>
+                      {order.purchase_link ? (
+                        <a
+                          className="cell-title-main cell-title-link"
+                          href={order.purchase_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="구매 사이트로 이동"
+                        >
+                          {order.chemical_name}
+                          <ExternalLink size={13} />
+                        </a>
+                      ) : (
+                        <span className="cell-title-main">{order.chemical_name}</span>
+                      )}
                       <span className="cell-title-sub">
                         {[order.formula, order.manufacturer].filter(Boolean).join(' · ')}
                       </span>
@@ -215,6 +255,27 @@ export default function Orders() {
                   >
                     {won(order.price * qtyOf(order.id))}
                   </div>
+                  <div className="t-cell" style={{ width: COL.link, padding: '12px 16px' }}>
+                    {order.purchase_link ? (
+                      <button
+                        className="link-chip"
+                        onClick={() => openLinkModal(order)}
+                        title={`링크 수정 — ${order.purchase_link}`}
+                      >
+                        <ExternalLink size={13} />
+                        링크
+                      </button>
+                    ) : (
+                      <button
+                        className="link-add-chip"
+                        onClick={() => openLinkModal(order)}
+                        title="구매 링크 추가"
+                      >
+                        <Plus size={12} />
+                        링크 추가
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })
@@ -243,6 +304,40 @@ export default function Orders() {
               선택 항목 주문 컨펌
             </Button>
           </div>
+        </div>
+      )}
+
+      {/* 구매 링크 메모 모달 */}
+      {linkTarget && (
+        <div className="modal-overlay" onClick={() => setLinkTarget(null)}>
+          <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={saveLink}>
+            <h3 className="modal-title">구매 링크 메모</h3>
+            <span className="modal-sub">
+              {[linkTarget.chemical_name, linkTarget.formula, linkTarget.manufacturer]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+
+            <Input
+              label="구매 사이트 URL"
+              placeholder="https://example.com/product/..."
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+            />
+
+            <span className="modal-help">
+              저장하면 주문 목록에서 시약 이름을 클릭할 때 이 링크로 이동합니다.
+            </span>
+
+            {linkError && <div className="form-error">{linkError}</div>}
+
+            <div className="modal-actions">
+              <Button type="button" variant="outline" onClick={() => setLinkTarget(null)}>
+                취소
+              </Button>
+              <Button type="submit" icon={Check}>저장</Button>
+            </div>
+          </form>
         </div>
       )}
     </div>
