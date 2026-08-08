@@ -176,6 +176,6 @@ class MainActivity : AppCompatActivity() {
         // 에뮬레이터에서 'PC의 localhost' 는 10.0.2.2 입니다.
         // 실제 폰에서는 PC의 실제 IP로 바꾸세요. 예: "http://192.168.0.10:8000/"
         // (끝에 슬래시 / 를 꼭 붙입니다.)
-        private const val BASE_URL = "http://10.98.81.70:8000/"
+        private const val BASE_URL = "http://10.213.122.70:8000/"
     }
 }
