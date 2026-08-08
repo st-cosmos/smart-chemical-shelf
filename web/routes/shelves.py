@@ -144,6 +144,18 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
         details=details,
     ))
 
+    # 반입 직후 인접 수납칸 혼재 금지 시약 배치 여부 검사
+    safe_id, safe_desc = llm_safety.find_recommended_safe_shelf(chem, db)
+    co_warning = None
+    import routes.chemicals as chemical_routes
+    alerts = chemical_routes.get_alerts(db)
+    for warning in alerts.get("co_storage_warnings", []):
+        if warning["chemical_1_id"] == chem.id or warning["chemical_2_id"] == chem.id:
+            co_warning = warning
+            shelf.led_on = True
+            shelf.led_message = f"🚨 혼재 위험! 추천 이송: {safe_desc}"
+            break
+
     checkin_session["active"] = False
     checkin_session["chemical_name"] = ""
     checkin_session["start_time"] = 0.0
@@ -153,6 +165,8 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
     return {
         "event": "checkin_complete",
         "restored": restored is not None,
+        "co_warning": co_warning,
+        "recommended_safe_shelf_desc": safe_desc,
         "chemical": {
             "id": chem.id,
             "name": chem.name,

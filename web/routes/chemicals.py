@@ -281,6 +281,7 @@ def get_alerts(db: Session = Depends(get_db)):
                 is_incompatible = True
 
             if is_incompatible:
+                safe_id, safe_desc = llm_safety.find_recommended_safe_shelf(c1, db)
                 s1_desc = f"{shelf1.parent_shelf}·{shelf1.row}행{shelf1.col}열"
                 s2_desc = f"{shelf2.parent_shelf}·{shelf2.row}행{shelf2.col}열"
                 co_storage_warnings.append({
@@ -290,7 +291,9 @@ def get_alerts(db: Session = Depends(get_db)):
                     "chemical_2_name": c2.name,
                     "shelf_desc": f"선반 {s1_desc} 및 {s2_desc}",
                     "message": f"🚨 [혼재 위험] {c1.name}와(과) {c2.name}은(는) 인접 보관 금지 시약입니다.",
-                    "reason": c1.incompatible_reason or c2.incompatible_reason or "인접 보관 시 격렬한 반응, 유독가스 또는 화재/폭발 위험"
+                    "reason": c1.incompatible_reason or c2.incompatible_reason or "인접 보관 시 격렬한 반응, 유독가스 또는 화재/폭발 위험",
+                    "recommended_safe_shelf_id": safe_id,
+                    "recommended_safe_shelf_desc": safe_desc
                 })
 
     return {

@@ -139,3 +139,33 @@ def ensure_chemical_incompatibility_info(chem, db):
         db.commit()
         db.refresh(chem)
     return chem
+
+
+def find_recommended_safe_shelf(chem, db):
+    """chem과 반응 위험이 없는 안전한 대체 수납칸(shelf_id, desc)을 찾아 반환합니다."""
+    import models
+    shelves = db.query(models.Shelf).all()
+    incomp_list = json.loads(chem.incompatible_chemicals) if chem.incompatible_chemicals else []
+    all_chems = db.query(models.Chemical).filter(models.Chemical.current_status == "비치중").all()
+
+    for s in shelves:
+        if s.id == chem.shelf_id:
+            continue
+        is_safe = True
+        for other in all_chems:
+            if other.id == chem.id or not other.shelf_id:
+                continue
+            other_shelf = db.query(models.Shelf).filter(models.Shelf.id == other.shelf_id).first()
+            if not other_shelf:
+                continue
+            if s.parent_shelf and other_shelf.parent_shelf and s.parent_shelf == other_shelf.parent_shelf:
+                if abs((s.row or 1) - (other_shelf.row or 1)) <= 1 and abs((s.col or 1) - (other_shelf.col or 1)) <= 1:
+                    if any(item in other.name or other.name in item for item in incomp_list):
+                        is_safe = False
+                        break
+        if is_safe:
+            parent = s.parent_shelf or "선반"
+            desc = f"선반 {parent} · {s.row}행 {s.col}열"
+            return s.id, desc
+
+    return None, "선반 C · 분리 보관 전용 구역"
