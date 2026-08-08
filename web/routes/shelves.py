@@ -119,6 +119,7 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
             weight=measured,
             current_status="비치중",
             time_in=now_str,
+            expiration_date=checkin_session.get("expiration_date")
         )
         db.add(chem)
         db.commit()
