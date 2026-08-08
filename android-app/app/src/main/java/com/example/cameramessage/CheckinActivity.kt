@@ -257,6 +257,9 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     showScanResult(response)
                     startSessionPolling()
                     learnMatch(name, barcode, learnToken)
+                    if (currentNewItem) {
+                        promptExpirationDate(ocrText)
+                    }
                 } else {
                     resumeScanning(1500)
                 }
@@ -267,6 +270,65 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     Toast.LENGTH_SHORT
                 ).show()
                 resumeScanning(2500)
+            }
+        }
+    }
+
+    /** OCR 텍스트에서 유통기한을 찾아 확인 모달을 띄우고, 없으면 직접 입력 모달로 넘어간다 (§3.9) */
+    private fun promptExpirationDate(ocrText: String) {
+        val match = Regex("(\\d{4})[-./](\\d{2})[-./](\\d{2})").find(ocrText)
+        val foundDate = match?.let {
+            "${it.groupValues[1]}-${it.groupValues[2]}-${it.groupValues[3]}"
+        }
+
+        if (foundDate != null) {
+            AppModal.show(
+                this, AppModal.Tone.PRIMARY, R.drawable.ic_calendar_check,
+                "유통기한을 확인해 주세요",
+                "라벨에서 유통기한을 인식했어요.\n날짜가 맞는지 확인해 주세요.",
+                "직접 입력", "맞아요",
+                dateBadge = foundDate,
+                onSecondary = { showManualExpirationDialog() },
+                onPrimary = { submitExpirationDate(foundDate) }
+            )
+        } else {
+            showManualExpirationDialog()
+        }
+    }
+
+    private fun showManualExpirationDialog() {
+        AppModal.show(
+            this, AppModal.Tone.WARNING, R.drawable.ic_calendar_search,
+            "유통기한 직접 입력",
+            "라벨에서 유통기한을 인식하지 못했어요.\n유통기한을 직접 입력해 주세요.",
+            null, "입력 완료",
+            inputTextHint = "YYYY-MM-DD",
+            inputType = android.text.InputType.TYPE_CLASS_DATETIME,
+            inputErrorText = "예: 2027-03-15 형식으로 입력해 주세요",
+            onInputSubmit = { text ->
+                val normalized = text.replace(Regex("[./]"), "-")
+                if (Regex("\\d{4}-\\d{2}-\\d{2}").matches(normalized)) {
+                    submitExpirationDate(normalized)
+                    true
+                } else {
+                    false
+                }
+            }
+        )
+    }
+
+    private fun submitExpirationDate(date: String) {
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.setCheckinExpiration(ExpirationRequest(date))
+                AppModal.show(
+                    this@CheckinActivity, AppModal.Tone.SUCCESS, R.drawable.ic_circle_check,
+                    "등록 완료",
+                    "새 시약 등록이 완료되었습니다.\n안내된 추천 위치에 시약을 놓아 주세요.",
+                    null, "확인"
+                )
+            } catch (e: Exception) {
+                Toast.makeText(this@CheckinActivity, "유통기한 등록 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
