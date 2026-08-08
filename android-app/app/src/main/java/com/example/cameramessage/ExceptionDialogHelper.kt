@@ -97,6 +97,9 @@ class ExceptionDialogHelper(private val activity: Activity) {
     }
 
     private fun showUnscannedCheckoutDialog(chemicalNames: List<String>) {
+        if (activity is CheckoutActivity) {
+            return
+        }
         AppModal.show(
             activity, AppModal.Tone.DANGER, R.drawable.ic_clipboard_list,
             "반출 스캔 미완료 알림",
