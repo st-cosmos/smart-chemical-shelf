@@ -74,6 +74,7 @@ class Order(Base):
     price = Column(Integer, default=0)                  # Price in KRW
     selected = Column(Boolean, default=False)
     status = Column(String, default="pending")          # pending, ordered
+    purchase_link = Column(String, nullable=True)       # 시약 구매 사이트 URL 메모
 
 class ShelfConfig(Base):
     __tablename__ = "shelf_configs"

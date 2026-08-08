@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
-import { BatteryFull, CirclePlus, Lightbulb, Pencil, Plus, Weight } from 'lucide-react';
+import type { CSSProperties, FormEvent } from 'react';
+import { BatteryFull, CirclePlus, Lightbulb, Pencil, Plus } from 'lucide-react';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import { getJSON, postJSON } from '../api';
-import type { ShelfConfig, ShelfDevice } from '../types';
+import type { Chemical, ShelfConfig, ShelfDevice } from '../types';
 import { useWebSocket } from '../useWebSocket';
 
 interface RegisterTarget {
@@ -16,6 +16,7 @@ interface RegisterTarget {
 export default function Shelves() {
   const [devices, setDevices] = useState<ShelfDevice[]>([]);
   const [configs, setConfigs] = useState<ShelfConfig[]>([]);
+  const [chemicals, setChemicals] = useState<Chemical[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [target, setTarget] = useState<RegisterTarget | null>(null);
@@ -25,12 +26,14 @@ export default function Shelves() {
 
   const fetchData = async () => {
     try {
-      const [devs, cfgs] = await Promise.all([
+      const [devs, cfgs, chems] = await Promise.all([
         getJSON<ShelfDevice[]>('/api/shelves'),
         getJSON<ShelfConfig[]>('/api/shelves/configs'),
+        getJSON<Chemical[]>('/api/chemicals'),
       ]);
       setDevices(devs);
       setConfigs(cfgs);
+      setChemicals(chems);
     } catch {
       // 폴링 실패 무시
     } finally {
@@ -71,7 +74,7 @@ export default function Shelves() {
     if (unregistered.length === 0) return;
     setTarget(t);
     setDeviceId(unregistered[0].id);
-    setSlotName(`수납칸 ${t.shelfId}${(t.row - 1) * (configs.find((c) => c.id === t.shelfId)?.cols ?? 1) + t.col}`);
+    setSlotName(`${t.shelfId}${(t.row - 1) * (configs.find((c) => c.id === t.shelfId)?.cols ?? 1) + t.col}`);
     setModalError('');
   };
 
@@ -132,69 +135,88 @@ export default function Shelves() {
               </div>
 
               <div className="shelf-grid-wrap">
-                <div className="shelf-grid">
-                  {Array.from({ length: config.rows }, (_, rIdx) => {
-                    const row = rIdx + 1;
-                    return (
-                      <div key={row} className="shelf-grid-row">
-                        {Array.from({ length: config.cols }, (_, cIdx) => {
-                          const col = cIdx + 1;
-                          const device = devices.find(
-                            (d) =>
-                              d.status === 'registered' &&
-                              d.parent_shelf === config.id &&
-                              d.row === row &&
-                              d.col === col,
-                          );
+                {/* 3행 × 3열만 보이는 뷰포트 — 그 이상은 스크롤로 노출 */}
+                <div className="shelf-grid-viewport">
+                  <div
+                    className="shelf-grid"
+                    style={{ '--cols': config.cols } as CSSProperties}
+                  >
+                    {Array.from({ length: config.rows * config.cols }, (_, idx) => {
+                      const row = Math.floor(idx / config.cols) + 1;
+                      const col = (idx % config.cols) + 1;
+                      const device = devices.find(
+                        (d) =>
+                          d.status === 'registered' &&
+                          d.parent_shelf === config.id &&
+                          d.row === row &&
+                          d.col === col,
+                      );
 
-                          if (device) {
-                            return (
-                              <div key={col} className="slot slot-occupied">
-                                <span className="slot-name">{device.name ?? device.id}</span>
-                                <span className="slot-device">{device.id}</span>
-                                <div className="slot-meta">
-                                  <span className="slot-meta-item">
-                                    <Weight size={17} />
-                                    {device.weight.toFixed(1)}kg
-                                  </span>
-                                  <span
-                                    className={`slot-meta-item battery${device.battery <= 20 ? ' low' : ''}`}
-                                  >
-                                    <BatteryFull size={19} />
-                                    {device.battery}%
-                                  </span>
-                                  {device.led_on && (
-                                    <span className="slot-meta-item led" title="LED 점등 중">
-                                      <Lightbulb size={17} />
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          }
-
-                          if (unregistered.length > 0) {
-                            return (
-                              <div
-                                key={col}
-                                className="slot slot-drop"
-                                onClick={() => openRegister({ shelfId: config.id, row, col })}
+                      if (device) {
+                        const slotChems = chemicals.filter(
+                          (c) => c.shelf_id === device.id && c.current_status === '비치중',
+                        );
+                        const mainChem = slotChems[0];
+                        return (
+                          <div key={idx} className="slot slot-occupied">
+                            <div className="slot-chem-row">
+                              <span
+                                className="slot-chem-name"
+                                title={slotChems.map((c) => c.name).join(', ') || undefined}
                               >
-                                <CirclePlus size={32} />
-                                여기에 배치
-                              </div>
-                            );
-                          }
-
-                          return (
-                            <div key={col} className="slot slot-empty">
-                              빈 슬롯
+                                {mainChem ? mainChem.name : device.name ?? device.id}
+                              </span>
+                              {slotChems.length > 1 && (
+                                <span className="slot-chem-more">+{slotChems.length - 1}</span>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
+                            <div className="slot-remain">
+                              <span className="slot-remain-val">
+                                {device.weight.toFixed(1)}kg
+                              </span>
+                              <span className="slot-remain-unit">남음</span>
+                            </div>
+                            <span className="slot-pos">
+                              {config.id}
+                              {(row - 1) * config.cols + col} · {device.id}
+                            </span>
+                            <div className="slot-meta">
+                              <span
+                                className={`slot-meta-item battery${device.battery <= 20 ? ' low' : ''}`}
+                              >
+                                <BatteryFull size={16} />
+                                {device.battery}%
+                              </span>
+                              {device.led_on && (
+                                <span className="slot-meta-item led" title="LED 점등 중">
+                                  <Lightbulb size={15} />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      if (unregistered.length > 0) {
+                        return (
+                          <div
+                            key={idx}
+                            className="slot slot-drop"
+                            onClick={() => openRegister({ shelfId: config.id, row, col })}
+                          >
+                            <CirclePlus size={32} />
+                            여기에 배치
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key={idx} className="slot slot-empty">
+                          빈 슬롯
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <button
@@ -241,8 +263,8 @@ export default function Shelves() {
             </div>
 
             <Input
-              label="수납칸 이름"
-              placeholder="예: 수납칸 A7"
+              label="슬롯 이름"
+              placeholder="예: A7"
               value={slotName}
               onChange={(e) => setSlotName(e.target.value)}
             />
