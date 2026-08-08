@@ -2,6 +2,9 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,24 +61,19 @@ def wait_for_db(retries: int = 30, delay: float = 1.0):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     wait_for_db()
-    # 기존 DB 대응: create_all 은 기존 테이블에 신규 컬럼을 추가하지 않으므로 직접 보강한다.
-    try:
-        with engine.begin() as conn:
-            for stmt in [
-                "ALTER TABLE users ADD COLUMN pin VARCHAR DEFAULT '0000';",
-                "ALTER TABLE chemicals ADD COLUMN incompatible_chemicals VARCHAR;",
-                "ALTER TABLE chemicals ADD COLUMN incompatible_reason VARCHAR;",
-            ]:
-                try:
-                    conn.execute(text(stmt))
-                except Exception:
-                    pass
-            try:
-                conn.execute(text("UPDATE users SET pin = '0000' WHERE pin IS NULL;"))
-            except Exception:
-                pass
-    except Exception as e:
-        print(f"Migration notice: {e}")
+    # 기존 DB 대응: create_all 은 기존 테이블에 신규 컬럼을 추가하지 않으므로 각각 독립 트랜잭션으로 보강한다.
+    for stmt in [
+        "ALTER TABLE users ADD COLUMN pin VARCHAR DEFAULT '0000';",
+        "ALTER TABLE chemicals ADD COLUMN incompatible_chemicals VARCHAR;",
+        "ALTER TABLE chemicals ADD COLUMN incompatible_reason VARCHAR;",
+        "UPDATE users SET pin = '0000' WHERE pin IS NULL;",
+    ]:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception:
+            pass
+
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
