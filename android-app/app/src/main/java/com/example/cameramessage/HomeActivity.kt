@@ -187,7 +187,9 @@ class HomeActivity : AppCompatActivity() {
         private fun relativeTime(timestamp: String): String {
             val normalized = timestamp.substringBefore('.').replace(' ', 'T')
             val date = try {
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(normalized)
+                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                sdf.parse(normalized)
             } catch (e: Exception) {
                 null
             } ?: return timestamp.take(16).replace('T', ' ')
