@@ -99,6 +99,9 @@ interface ApiService {
     @POST("api/checkin-session/cancel")
     suspend fun cancelCheckinSession(): Map<String, String>
 
+    @POST("api/checkin-session/expiration")
+    suspend fun setCheckinExpiration(@Body request: ExpirationRequest): Map<String, String>
+
     // --- Check-out Session (선반 무게 감소로 반출 확정) ---
     @GET("api/checkout-session")
     suspend fun getCheckoutSession(): CheckoutSessionState

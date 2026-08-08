@@ -50,6 +50,63 @@
         android:textColor="@color/text_body"
         tools:text="메시지 본문" />
 
+    <!-- 인식된 유통기한 강조 배지 (톤 색은 AppModal.show() 에서 지정) -->
+    <LinearLayout
+        android:id="@+id/modalDatePill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/shape_pill"
+        android:backgroundTint="@color/primary_soft"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/modalDateIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="7dp"
+            android:src="@drawable/ic_calendar"
+            android:contentDescription="달력 아이콘"
+            app:tint="@color/primary" />
+
+        <TextView
+            android:id="@+id/modalDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            tools:text="2027-03-15" />
+    </LinearLayout>
+
+    <!-- Input/App 스타일 입력 필드 (§1.5) -->
+    <EditText
+        android:id="@+id/modalInput"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/input_height"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_input"
+        android:drawableStart="@drawable/ic_calendar"
+        android:drawablePadding="7dp"
+        android:drawableTint="@color/text_muted"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:gravity="center_vertical"
+        android:inputType="datetime"
+        android:maxLines="1"
+        android:textSize="13sp"
+        android:textColor="@color/text_strong"
+        android:textColorHint="@color/text_muted"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

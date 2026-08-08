@@ -34,9 +34,14 @@ object AppModal {
         secondaryText: String?,
         primaryText: String,
         cancelable: Boolean = false,
-        autoDismissMs: Long? = null,  // 지정 시 그 시간 안에 버튼을 안 누르면 Primary 동작으로 자동 닫힘
+        autoDismissMs: Long? = null,
+        dateBadge: String? = null,        // 지정 시 메시지 아래에 톤 색 pill 배지로 강조 표시
+        inputTextHint: String? = null,    // 지정 시 Input/App 스타일 입력 필드 표시
+        inputType: Int? = null,
+        inputErrorText: String? = null,   // onInputSubmit 이 false 를 반환하면 표시할 오류 문구
         onSecondary: (() -> Unit)? = null,
-        onPrimary: (() -> Unit)? = null
+        onPrimary: (() -> Unit)? = null,
+        onInputSubmit: ((String) -> Boolean)? = null  // true 반환 시에만 모달을 닫는다
     ): AlertDialog? {
         if (activity.isFinishing || activity.isDestroyed) return null
 
@@ -57,6 +62,22 @@ object AppModal {
             binding.btnModalSecondary.visibility = View.GONE
         } else {
             binding.btnModalSecondary.text = secondaryText
+        }
+
+        if (dateBadge != null) {
+            binding.modalDatePill.visibility = View.VISIBLE
+            binding.modalDatePill.backgroundTintList = ColorStateList.valueOf(softColor)
+            binding.modalDateIcon.imageTintList = ColorStateList.valueOf(toneColor)
+            binding.modalDateText.setTextColor(toneColor)
+            binding.modalDateText.text = dateBadge
+        }
+
+        if (inputTextHint != null) {
+            binding.modalInput.visibility = View.VISIBLE
+            binding.modalInput.hint = inputTextHint
+            if (inputType != null) {
+                binding.modalInput.inputType = inputType
+            }
         }
 
         val dialog = AlertDialog.Builder(activity)
@@ -83,9 +104,24 @@ object AppModal {
             onSecondary?.invoke()
         }
         binding.btnModalPrimary.setOnClickListener {
+            // 입력 모달: 검증 통과(true)일 때만 닫는다
+            if (onInputSubmit != null) {
+                val ok = onInputSubmit(binding.modalInput.text.toString().trim())
+                if (!ok) {
+                    binding.modalInput.error = inputErrorText ?: "입력 형식을 확인해 주세요"
+                    return@setOnClickListener
+                }
+            }
             autoRunnable?.let { r -> binding.root.removeCallbacks(r) }
             dialog.dismiss()
             onPrimary?.invoke()
+        }
+
+        if (inputTextHint != null) {
+            binding.modalInput.requestFocus()
+            dialog.window?.setSoftInputMode(
+                android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+            )
         }
 
         dialog.show()

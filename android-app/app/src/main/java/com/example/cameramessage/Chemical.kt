@@ -66,6 +66,10 @@ data class ScanInRequest(
     val chemical_name: String? = null  // 매칭/확인이 끝난 표준명 (서버 매칭 생략)
 )
 
+data class ExpirationRequest(
+    val expiration_date: String
+)
+
 data class ScanInResponse(
     val status: String,
     val chemical_name: String,
