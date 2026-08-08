@@ -58,12 +58,22 @@ def wait_for_db(retries: int = 30, delay: float = 1.0):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     wait_for_db()
-    # PIN 도입(8fe9e9b) 이전에 만들어진 users 테이블 대응:
-    # create_all 은 기존 테이블에 컬럼을 추가하지 않으므로 직접 보강한다.
+    # 기존 DB 대응: create_all 은 기존 테이블에 신규 컬럼을 추가하지 않으므로 직접 보강한다.
     try:
         with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS pin VARCHAR DEFAULT '0000';"))
-            conn.execute(text("UPDATE users SET pin = '0000' WHERE pin IS NULL;"))
+            for stmt in [
+                "ALTER TABLE users ADD COLUMN pin VARCHAR DEFAULT '0000';",
+                "ALTER TABLE chemicals ADD COLUMN incompatible_chemicals VARCHAR;",
+                "ALTER TABLE chemicals ADD COLUMN incompatible_reason VARCHAR;",
+            ]:
+                try:
+                    conn.execute(text(stmt))
+                except Exception:
+                    pass
+            try:
+                conn.execute(text("UPDATE users SET pin = '0000' WHERE pin IS NULL;"))
+            except Exception:
+                pass
     except Exception as e:
         print(f"Migration notice: {e}")
     Base.metadata.create_all(bind=engine)

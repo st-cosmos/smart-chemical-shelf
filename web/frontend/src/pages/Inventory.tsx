@@ -308,7 +308,40 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
                   : '비치중'}
               </span>
             </div>
+            {selected.incompatible_chemicals && (
+              <div className="info-row column">
+                <span className="info-key">혼재 금지 시약 (LLM 분석)</span>
+                <span className="info-val warning-text">
+                  {(() => {
+                    try {
+                      const list = JSON.parse(selected.incompatible_chemicals);
+                      return Array.isArray(list) ? list.join(', ') : selected.incompatible_chemicals;
+                    } catch {
+                      return selected.incompatible_chemicals;
+                    }
+                  })()}
+                </span>
+                {selected.incompatible_reason && (
+                  <span className="info-sub-text">{selected.incompatible_reason}</span>
+                )}
+              </div>
+            )}
           </div>
+
+          {coAlertOf(selected.id) && (
+            <div className="co-alert-card">
+              <div className="co-alert-header">
+                <TriangleAlert size={18} />
+                <span>인접 보관 위험 경고</span>
+              </div>
+              <div className="co-alert-body">
+                {coAlertOf(selected.id)?.message}
+                {coAlertOf(selected.id)?.reason && (
+                  <p className="co-alert-reason">💡 {coAlertOf(selected.id)?.reason}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           <Button
             icon={Lightbulb}

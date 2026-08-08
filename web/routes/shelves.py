@@ -6,6 +6,7 @@ import checkout_flow
 import device_status
 import models
 import schemas
+import services.llm_safety as llm_safety
 from datetime import datetime
 
 router = APIRouter(prefix="/api/shelves", tags=["shelves"])
@@ -120,7 +121,12 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
             time_in=now_str,
         )
         db.add(chem)
+        db.commit()
+        db.refresh(chem)
         details = f"신규 반입 완료: {shelf_desc}에 적재됨 (실측 {measured}kg)"
+
+    # LLM 기반 혼재 금지 시약 정보 분석 및 저장
+    llm_safety.ensure_chemical_incompatibility_info(chem, db)
 
     # 추천 위치 안내 LED 소등
     recommended = db.query(models.Shelf).filter(
