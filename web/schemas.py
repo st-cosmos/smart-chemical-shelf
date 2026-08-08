@@ -57,6 +57,9 @@ class ScanInRequest(BaseModel):
     username: str  # who scanned it
     chemical_name: Optional[str] = None  # 앱에서 매칭/확인이 끝난 표준명 (있으면 매칭 생략)
 
+class ExpirationRequest(BaseModel):
+    expiration_date: str
+
 class ScanOutRequest(BaseModel):
     ocr_text: str
     username: str  # who scanned it

@@ -5,7 +5,8 @@ checkin_session = {
     "chemical_name": "",
     "start_time": 0.0,
     "timeout_seconds": 15.0,
-    "username": ""
+    "username": "",
+    "expiration_date": None
 }
 
 # 반출 세션: 스캔 → 선반 무게 감소 감지로 확정 (checkout_flow.py 에서 관리)
