@@ -444,6 +444,37 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         val placedShelfDesc =
             "선반 ${parentShelf ?: "?"} · ${chemical.shelf_row ?: 0}행 ${chemical.shelf_col ?: 0}열"
 
+        // 반입 즉시 인접 수납칸 혼재 금지 시약 연동 검사
+        val alerts = try { NetworkClient.api.getAlerts() } catch (e: Exception) { null }
+        val coWarning = alerts?.co_storage_warnings?.firstOrNull {
+            it.chemical_1_id == chemical.id || it.chemical_2_id == chemical.id
+        }
+
+        if (coWarning != null) {
+            val safeDesc = coWarning.recommended_safe_shelf_desc ?: "선반 C · 분리 보관 구역"
+            val reasonText = coWarning.reason ?: "반응 및 발열 위험"
+            AppModal.show(
+                this, AppModal.Tone.DANGER, R.drawable.ic_shield_alert,
+                "🚨 혼재 위험! 인접 보관 금지 수납칸에 안착됨",
+                "[${chemical.name}]이(가) 인접 보관 금지 시약과 함께 안착되었습니다.\n\n" +
+                        "${coWarning.message}\n💡 ${reasonText}\n\n" +
+                        "👉 추천 이동 위치: ${safeDesc}",
+                "이 위치 유지", "안전 위치로 이동",
+                onPrimary = {
+                    AppModal.show(
+                        this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                        "추천 안전 보관 위치 안내",
+                        "[${chemical.name}]을(를)\n${safeDesc}(으)로 이동하여 안착해 주세요.",
+                        null, "확인",
+                        autoDismissMs = 3500L,
+                        onPrimary = { resetScanState() }
+                    )
+                },
+                onSecondary = { resetScanState() }
+            )
+            return
+        }
+
         when {
             // 신규 시약 → 등록 완료 success 모달 (§3.8)
             currentNewItem -> {

@@ -48,7 +48,10 @@ data class CoStorageWarning(
     val chemical_2_id: String,
     val chemical_2_name: String,
     val shelf_desc: String,
-    val message: String
+    val message: String,
+    val reason: String? = null,
+    val recommended_safe_shelf_id: String? = null,
+    val recommended_safe_shelf_desc: String? = null
 )
 
 data class ChemicalAlerts(

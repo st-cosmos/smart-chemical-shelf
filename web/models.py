@@ -47,6 +47,9 @@ class Chemical(Base):
     time_out = Column(String, nullable=True)
     expiration_date = Column(String, nullable=True)     # YYYY-MM-DD
     manufacturer = Column(String, nullable=True)
+    incompatible_chemicals = Column(String, nullable=True)  # JSON 문자열 (LLM 추출 혼재 금지 시약 목록)
+    incompatible_reason = Column(String, nullable=True)     # LLM 반응 위험 원인 설명
+
 
 class Log(Base):
     __tablename__ = "logs"

@@ -25,7 +25,11 @@ def _resolve_chemical_name(db: Session, req, error_detail: str) -> str:
 
 @router.get("", response_model=List[schemas.ChemicalResponse])
 def get_chemicals(db: Session = Depends(get_db)):
-    return db.query(models.Chemical).all()
+    chemicals = db.query(models.Chemical).all()
+    import services.llm_safety as llm_safety
+    for c in chemicals:
+        llm_safety.ensure_chemical_incompatibility_info(c, db)
+    return chemicals
 
 @router.get("/ocr-chemicals")
 def get_ocr_chemicals(db: Session = Depends(get_db)):
@@ -234,34 +238,68 @@ def get_alerts(db: Session = Depends(get_db)):
             except ValueError:
                 pass
                 
-    # 3. Co-storage safety warning:
-    # Check if sulfuric acid (황산) and potassium cyanide (시안화칼륨) are stored adjacent
+    # 3. Co-storage safety warning (LLM / Rule-based dynamic incompatibility check):
     co_storage_warnings = []
-    cyanides = [c for c in chemicals if "시안화칼륨" in c.name]
-    acids = [c for c in chemicals if "황산" in c.name or "염산" in c.name or "질산" in c.name]
-    
-    for cy in cyanides:
-        for ac in acids:
-            if cy.shelf_id and ac.shelf_id:
-                # Find shelves
-                shelf_cy = db.query(models.Shelf).filter(models.Shelf.id == cy.shelf_id).first()
-                shelf_ac = db.query(models.Shelf).filter(models.Shelf.id == ac.shelf_id).first()
-                
-                if shelf_cy and shelf_ac and shelf_cy.parent_shelf == shelf_ac.parent_shelf:
-                    # Check row/col distance
-                    row_diff = abs(shelf_cy.row - shelf_ac.row)
-                    col_diff = abs(shelf_cy.col - shelf_ac.col)
-                    if row_diff <= 1 and col_diff <= 1:
-                        # Adjacent!
-                        co_storage_warnings.append({
-                            "chemical_1_id": cy.id,
-                            "chemical_1_name": cy.name,
-                            "chemical_2_id": ac.id,
-                            "chemical_2_name": ac.name,
-                            "shelf_desc": f"선반 {shelf_cy.parent_shelf} · 수납칸 {shelf_cy.row}행 {shelf_cy.col}열과 {shelf_ac.row}행 {shelf_ac.col}열",
-                            "message": f"{ac.name}은(는) 인접 수납칸의 {cy.name}과(와) 반응 위험이 있어 동시 보관에 주의해야 합니다."
-                        })
-                        
+    import json
+    import services.llm_safety as llm_safety
+
+    # Ensure all checked-in chemicals have incompatible_chemicals analyzed
+    for c in chemicals:
+        llm_safety.ensure_chemical_incompatibility_info(c, db)
+
+    stored_chems = [c for c in chemicals if c.shelf_id]
+    n = len(stored_chems)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            c1 = stored_chems[i]
+            c2 = stored_chems[j]
+
+            shelf1 = db.query(models.Shelf).filter(models.Shelf.id == c1.shelf_id).first()
+            shelf2 = db.query(models.Shelf).filter(models.Shelf.id == c2.shelf_id).first()
+
+            if not shelf1 or not shelf2:
+                continue
+
+            # Check if stored on adjacent positions (same parent shelf & row/col distance <= 1)
+            is_adjacent = False
+            if shelf1.parent_shelf and shelf2.parent_shelf and shelf1.parent_shelf == shelf2.parent_shelf:
+                r1, c1_col = shelf1.row or 1, shelf1.col or 1
+                r2, c2_col = shelf2.row or 1, shelf2.col or 1
+                if abs(r1 - r2) <= 1 and abs(c1_col - c2_col) <= 1:
+                    is_adjacent = True
+            elif shelf1.id == shelf2.id:
+                is_adjacent = True
+
+            if not is_adjacent:
+                continue
+
+            # Check incompatibility matching between c1 and c2
+            incomp1 = json.loads(c1.incompatible_chemicals) if c1.incompatible_chemicals else []
+            incomp2 = json.loads(c2.incompatible_chemicals) if c2.incompatible_chemicals else []
+
+            is_incompatible = False
+            if any(item in c2.name or c2.name in item for item in incomp1):
+                is_incompatible = True
+            elif any(item in c1.name or c1.name in item for item in incomp2):
+                is_incompatible = True
+
+            if is_incompatible:
+                safe_id, safe_desc = llm_safety.find_recommended_safe_shelf(c1, db)
+                s1_desc = f"{shelf1.parent_shelf}·{shelf1.row}행{shelf1.col}열"
+                s2_desc = f"{shelf2.parent_shelf}·{shelf2.row}행{shelf2.col}열"
+                co_storage_warnings.append({
+                    "chemical_1_id": c1.id,
+                    "chemical_1_name": c1.name,
+                    "chemical_2_id": c2.id,
+                    "chemical_2_name": c2.name,
+                    "shelf_desc": f"선반 {s1_desc} 및 {s2_desc}",
+                    "message": f"🚨 [혼재 위험] {c1.name}와(과) {c2.name}은(는) 인접 보관 금지 시약입니다.",
+                    "reason": c1.incompatible_reason or c2.incompatible_reason or "인접 보관 시 격렬한 반응, 유독가스 또는 화재/폭발 위험",
+                    "recommended_safe_shelf_id": safe_id,
+                    "recommended_safe_shelf_desc": safe_desc
+                })
+
     return {
         "unscanned_checkouts": unscanned_checkouts,
         "expired_chemicals": expired_chemicals,

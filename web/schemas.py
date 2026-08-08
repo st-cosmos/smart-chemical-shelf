@@ -133,6 +133,8 @@ class ChemicalResponse(BaseModel):
     time_out: Optional[str] = None
     expiration_date: Optional[str] = None
     manufacturer: Optional[str] = None
+    incompatible_chemicals: Optional[str] = None
+    incompatible_reason: Optional[str] = None
 
     class Config:
         from_attributes = True

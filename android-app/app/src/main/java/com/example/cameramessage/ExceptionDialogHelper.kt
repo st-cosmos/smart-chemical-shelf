@@ -125,13 +125,20 @@ class ExceptionDialogHelper(private val activity: Activity) {
     }
 
     private fun showCoStorageWarningDialog(warning: CoStorageWarning) {
+        val safeLoc = warning.recommended_safe_shelf_desc ?: "선반 C · 분리 보관 구역"
+        val reasonText = warning.reason ?: "반응 및 발열/가스 발생 위험"
         AppModal.show(
             activity, AppModal.Tone.DANGER, R.drawable.ic_shield_alert,
-            "함께 두면 위험한 시약",
-            "${warning.message}\n안전한 보관 위치를 다시 안내해드릴게요.",
-            "무시하고 보관", "안전 위치 안내",
+            "🚨 함께 두면 위험한 시약",
+            "${warning.message}\n\n💡 ${reasonText}\n\n👉 추천 이동 위치: ${safeLoc}",
+            "닫기", "안전 위치 안내",
             onPrimary = {
-                Toast.makeText(activity, "웹 대시보드에서 추천 보관 위치를 확인해 주세요.", Toast.LENGTH_LONG).show()
+                AppModal.show(
+                    activity, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                    "추천 안전 위치 안내",
+                    "[${warning.chemical_1_name}]을(를)\n${safeLoc}(으)로 이동하여 배치해 주세요.",
+                    null, "확인"
+                )
             }
         )
     }

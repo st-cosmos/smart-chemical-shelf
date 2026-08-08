@@ -22,6 +22,8 @@ export interface Chemical {
   time_out: string | null;
   expiration_date: string | null;
   manufacturer: string | null;
+  incompatible_chemicals?: string | null;
+  incompatible_reason?: string | null;
 }
 
 export interface TransactionLog {
@@ -83,6 +85,7 @@ export interface CoStorageAlert {
   chemical_2_name: string;
   shelf_desc: string;
   message: string;
+  reason?: string;
 }
 
 export interface UnscannedCheckout {
