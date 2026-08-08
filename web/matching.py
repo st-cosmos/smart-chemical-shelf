@@ -16,9 +16,9 @@ import models
 # 이 점수 이상이면 확인 없이 자동 확정
 AUTO_ACCEPT = 0.9
 # 이 점수 이상이면 후보로 제시하고 사용자 확인을 받음 (미만이면 no_match)
-CONFIRM_MIN = 0.55
+CONFIRM_MIN = 0.65
 # fuzzy 후보로 인정할 최소 유사도
-FUZZY_MIN = 0.62
+FUZZY_MIN = 0.70
 
 # 별칭 테이블이 비어 있을 때 시드로 넣는 기본 별칭 (구 CHEMICAL_NAME_MAPPING 대체)
 DEFAULT_ALIASES = {
@@ -34,7 +34,31 @@ DEFAULT_ALIASES = {
     "methanol": "메탄올",
     "메탄올": "메탄올",
     "sulfuric acid": "황산 0.1M",
+    "sulfuric": "황산 0.1M",
+    "h2so4": "황산 0.1M",
     "황산": "황산 0.1M",
+    "hydrochloric acid": "염산 1M",
+    "hydrochloric": "염산 1M",
+    "hcl": "염산 1M",
+    "염산": "염산 1M",
+    "nitric acid": "질산 65%",
+    "nitric": "질산 65%",
+    "hno3": "질산 65%",
+    "질산": "질산 65%",
+    "acetic acid": "아세트산",
+    "acetic": "아세트산",
+    "ch3cooh": "아세트산",
+    "아세트산": "아세트산",
+    "초산": "아세트산",
+    "acid": "황산 0.1M",
+    "sodium hydroxide": "수산화나트륨",
+    "naoh": "수산화나트륨",
+    "수산화나트륨": "수산화나트륨",
+    "hydrogen peroxide": "과산화수소",
+    "과산화수소": "과산화수소",
+    "isopropanol": "이소프로판올",
+    "ipa": "이소프로판올",
+    "이소프로판올": "이소프로판올",
     "toluene": "톨루엔",
     "톨루엔": "톨루엔",
 }
@@ -112,7 +136,7 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
     exact_names = set()
     for token in tokens:
         nt = normalize(token)
-        if len(nt) < 2:
+        if len(nt) < 3:  # 3자 미만 짧은 노이즈 토큰 제외
             continue
         for na, std in aliases:
             if nt == na:
@@ -122,13 +146,18 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
             elif na in nt:
                 # 별칭이 더 긴 토큰의 일부 ("에탄올아민" 속 "에탄올") → 확인 필요
                 put(std, 0.7, "alias", token)
-            elif len(na) >= 3:
-                ratio = SequenceMatcher(None, nt, na).ratio()
-                if ratio >= FUZZY_MIN:
-                    # 유사도 매칭은 자동 확정 금지 (최대 0.85)
-                    put(std, round(ratio * 0.85, 3), "fuzzy", token)
+            elif len(nt) >= 4 and nt in na:
+                # 토큰이 별칭의 일부분일 때 (예: "hydrochloric" -> "hydrochloric acid")
+                put(std, 0.8, "alias", token)
+            elif len(na) >= 3 and len(nt) >= 3:
+                # 길이 차이가 너무 큰 조합의 오탐 방지 (예: 노이즈 3자 vs 별칭 8자)
+                if abs(len(na) - len(nt)) <= max(len(na), len(nt)) // 2:
+                    ratio = SequenceMatcher(None, nt, na).ratio()
+                    if ratio >= FUZZY_MIN:
+                        # 유사도 매칭은 자동 확정 금지 (최대 0.85)
+                        put(std, round(ratio * 0.85, 3), "fuzzy", token)
 
-    # 여러 토큰에 걸친 별칭("에탄올 95%")은 전체 정규화 문자열에서 탐색
+    # 여러 토큰에 걸친 별칭("에탄올 95%", "sulfuric acid")은 전체 정규화 문자열에서 탐색
     for na, std in aliases:
         if len(na) >= 4 and na in norm_full:
             put(std, max(scores.get(std, (0,))[0], 0.85), "alias", na)
