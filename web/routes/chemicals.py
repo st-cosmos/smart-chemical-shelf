@@ -25,7 +25,11 @@ def _resolve_chemical_name(db: Session, req, error_detail: str) -> str:
 
 @router.get("", response_model=List[schemas.ChemicalResponse])
 def get_chemicals(db: Session = Depends(get_db)):
-    return db.query(models.Chemical).all()
+    chemicals = db.query(models.Chemical).all()
+    import services.llm_safety as llm_safety
+    for c in chemicals:
+        llm_safety.ensure_chemical_incompatibility_info(c, db)
+    return chemicals
 
 @router.get("/ocr-chemicals")
 def get_ocr_chemicals(db: Session = Depends(get_db)):
