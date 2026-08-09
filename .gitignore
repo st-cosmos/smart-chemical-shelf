@@ -32,9 +32,8 @@ android-app/.cxx/
 android-app/app/build/
 android-app/*.apk
 
-# PlatformIO / Firmware
-firmware/include/config.h
-firmware/.pio/
+# Firmware (Zephyr/NCS) — 빌드 산출물 등은 firmware/.gitignore 에서 관리
+firmware/build/
 
 # Python / FastAPI Web Server
 web/.venv/

@@ -1,0 +1,86 @@
+#
+# Smart shelf node application options
+#
+
+menu "Smart shelf application"
+
+comment "Load cell measurement"
+
+config SHELF_MEASURE_INTERVAL_MS
+	int "Load cell measurement period [ms]"
+	default 10000
+	help
+	  How often the load cell rail is switched on and a weight sample is
+	  taken. The rail is kept off between measurements.
+
+config SHELF_LOADCELL_WARMUP_MS
+	int "Load cell / CS1237 warm-up time [ms]"
+	default 300
+	help
+	  Delay between switching the load cell rail on and the first CS1237
+	  access. Needs to cover the bridge settling time and the CS1237
+	  power-on reset. Increase this if the first samples drift.
+
+config SHELF_ADC_DISCARD_SAMPLES
+	int "Samples discarded after power-up"
+	default 3
+
+config SHELF_ADC_AVG_SAMPLES
+	int "Samples averaged into one measurement"
+	default 8
+	range 1 64
+
+config SHELF_ADC_DELTA_THRESHOLD
+	int "Raw count change that triggers a report"
+	default 500
+	help
+	  A measurement is only sent to the gateway when it differs from the
+	  last reported value by at least this many raw ADC counts. Set this
+	  above the peak-to-peak noise of your load cell or the node will
+	  transmit continuously.
+
+config SHELF_HEARTBEAT_PERIOD
+	int "Force a report every N measurements (0 = never)"
+	default 30
+
+comment "Weight calibration"
+
+config SHELF_CAL_OFFSET
+	int "Raw counts at zero load (tare)"
+	default 0
+
+config SHELF_CAL_COUNTS_PER_KG
+	int "Raw counts per kilogram"
+	default 100000
+	help
+	  Only used to fill in the human readable "mg" field of the report.
+	  The change detection always works on raw counts.
+
+comment "Gateway communication"
+
+config SHELF_LED_POLL_INTERVAL_MS
+	int "LED command polling period [ms]"
+	default 700
+
+config SHELF_COAP_RESP_TIMEOUT_MS
+	int "CoAP response timeout [ms]"
+	default 400
+
+config SHELF_LED_FAILSAFE_POLLS
+	int "Turn the LED off after N consecutive failed polls (0 = hold state)"
+	default 10
+	help
+	  Prevents an LED from being stuck on forever when the node loses the
+	  gateway. Set to 0 to keep the last commanded state instead.
+
+config SHELF_COAP_BASE_PATH
+	string "First CoAP URI path segment used for all resources"
+	default "shelf"
+
+module = SHELF
+module-str = Smart shelf
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu
+
+source "Kconfig.zephyr"
