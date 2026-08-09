@@ -114,7 +114,9 @@ async def websocket_endpoint(websocket: WebSocket):
         ws_manager.disconnect(websocket)
 
 
-# --- ESP8266 로드셀 모듈용 LED 제어 및 무게 센서 API ---
+# --- 선반 디바이스용 LED 제어 및 무게 센서 API ---
+# Thread 게이트웨이(gateway/gateway.py)가 노드를 대신해 호출한다.
+# (구 ESP8266 펌웨어가 직접 호출하던 것과 같은 규격 — 하위 호환 유지)
 
 
 class LedCommand(BaseModel):
@@ -123,6 +125,7 @@ class LedCommand(BaseModel):
 
 class WeightEvent(BaseModel):
     value: int  # grams
+    battery: int | None = None  # percent, Thread 게이트웨이가 노드 배터리 전압으로 환산해 전달
 
 
 def _get_or_create_shelf(device_id: str, db: Session) -> models.Shelf:
@@ -176,7 +179,9 @@ async def post_weight(device_id: str, event: WeightEvent, db: Session = Depends(
     device_status.mark_seen(device_id)
     _get_or_create_shelf(device_id, db)
     weight_kg = round(event.value / 1000.0, 3)
-    result = shelves.update_weight(device_id, schemas.WeightUpdate(weight=weight_kg), db)
+    result = shelves.update_weight(
+        device_id, schemas.WeightUpdate(weight=weight_kg, battery=event.battery), db
+    )
     shelf = result["shelf"]
     resp_data = {
         "status": "success",
