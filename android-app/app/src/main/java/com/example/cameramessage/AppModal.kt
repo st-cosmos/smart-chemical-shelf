@@ -5,9 +5,13 @@ import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.example.cameramessage.databinding.DialogAppModalBinding
@@ -25,6 +29,15 @@ object AppModal {
         DANGER(R.color.danger, R.color.danger_soft)
     }
 
+    /** 추천 위치 안내용 선반 시각화 데이터 (행·열은 1부터 시작) */
+    data class ShelfVisual(
+        val shelfName: String,
+        val rows: Int,
+        val cols: Int,
+        val occupied: Set<Pair<Int, Int>>,
+        val recommended: Pair<Int, Int>
+    )
+
     fun show(
         activity: Activity,
         tone: Tone,
@@ -36,6 +49,7 @@ object AppModal {
         cancelable: Boolean = false,
         autoDismissMs: Long? = null,
         dateBadge: String? = null,        // 지정 시 메시지 아래에 톤 색 pill 배지로 강조 표시
+        shelfVisual: ShelfVisual? = null, // 지정 시 추천 위치 선반 그리드 시각화 표시
         inputTextHint: String? = null,    // 지정 시 Input/App 스타일 입력 필드 표시
         inputType: Int? = null,
         inputErrorText: String? = null,   // onInputSubmit 이 false 를 반환하면 표시할 오류 문구
@@ -70,6 +84,10 @@ object AppModal {
             binding.modalDateIcon.imageTintList = ColorStateList.valueOf(toneColor)
             binding.modalDateText.setTextColor(toneColor)
             binding.modalDateText.text = dateBadge
+        }
+
+        if (shelfVisual != null) {
+            renderShelfVisual(activity, binding, shelfVisual)
         }
 
         if (inputTextHint != null) {
@@ -128,5 +146,63 @@ object AppModal {
         // parent 없이 inflate 하면 루트의 layout_width 가 무시되므로 창 크기를 직접 지정
         dialog.window?.setLayout(activity.dp(360), ViewGroup.LayoutParams.WRAP_CONTENT)
         return dialog
+    }
+
+    /** 선반 미니 그리드를 동적으로 그린다 — 추천 칸(강조)·사용 중(플라스크)·빈 칸 */
+    private fun renderShelfVisual(
+        activity: Activity,
+        binding: DialogAppModalBinding,
+        visual: ShelfVisual
+    ) {
+        binding.modalShelfVisual.visibility = View.VISIBLE
+        binding.modalShelfName.text = visual.shelfName
+        binding.modalShelfCoord.text = "${visual.recommended.first}행 ${visual.recommended.second}열"
+
+        binding.modalShelfGrid.removeAllViews()
+        val cellHeight = activity.dp(42)
+        val gap = activity.dp(6)
+        val iconSize = activity.dp(15)
+
+        for (r in 1..visual.rows) {
+            val rowLayout = LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, cellHeight
+                ).apply { if (r > 1) topMargin = gap }
+            }
+            for (c in 1..visual.cols) {
+                val isRecommended = (r to c) == visual.recommended
+                val isOccupied = (r to c) in visual.occupied
+
+                val cell = FrameLayout(activity).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        0, ViewGroup.LayoutParams.MATCH_PARENT, 1f
+                    ).apply { if (c > 1) marginStart = gap }
+                    setBackgroundResource(
+                        when {
+                            isRecommended -> R.drawable.bg_cell_recommend
+                            isOccupied -> R.drawable.bg_cell_occupied
+                            else -> R.drawable.bg_cell_free
+                        }
+                    )
+                }
+                val icon = when {
+                    isRecommended -> R.drawable.ic_map_pin to R.color.success
+                    isOccupied -> R.drawable.ic_flask_conical to R.color.text_muted
+                    else -> null
+                }
+                if (icon != null) {
+                    cell.addView(ImageView(activity).apply {
+                        layoutParams = FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER)
+                        setImageResource(icon.first)
+                        imageTintList = ColorStateList.valueOf(
+                            ContextCompat.getColor(activity, icon.second)
+                        )
+                    })
+                }
+                rowLayout.addView(cell)
+            }
+            binding.modalShelfGrid.addView(rowLayout)
+        }
     }
 }

@@ -86,6 +86,125 @@
             tools:text="2027-03-15" />
     </LinearLayout>
 
+    <!-- 추천 위치 선반 시각화 (design.pen app-checkin-safe-location) -->
+    <LinearLayout
+        android:id="@+id/modalShelfVisual"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/shape_rounded_10"
+        android:backgroundTint="@color/bg"
+        android:padding="12dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/modalShelfName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_strong"
+                tools:text="선반 C" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/shape_pill"
+                android:backgroundTint="@color/success_soft"
+                android:paddingStart="9dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginEnd="3dp"
+                    android:src="@drawable/ic_map_pin"
+                    android:contentDescription="추천 위치 핀"
+                    app:tint="@color/success" />
+
+                <TextView
+                    android:id="@+id/modalShelfCoord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/success"
+                    tools:text="2행 3열" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 그리드 행들은 AppModal 에서 동적으로 추가 -->
+        <LinearLayout
+            android:id="@+id/modalShelfGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/bg_cell_recommend" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="추천 위치"
+                android:textSize="9sp"
+                android:textColor="@color/text_muted" />
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_cell_occupied" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="사용 중"
+                android:textSize="9sp"
+                android:textColor="@color/text_muted" />
+
+            <View
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_cell_free" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="빈 칸"
+                android:textSize="9sp"
+                android:textColor="@color/text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
     <!-- Input/App 스타일 입력 필드 (§1.5) -->
     <EditText
         android:id="@+id/modalInput"
