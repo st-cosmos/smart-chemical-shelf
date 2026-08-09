@@ -17258,6 +17258,2558 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "HWcnl",
+      "x": 16623,
+      "y": 3877,
+      "name": "app-checkin-expiry-scan",
+      "clip": true,
+      "width": 1200,
+      "height": 1920,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "p1zRy",
+          "type": "ref",
+          "ref": "G5eEH",
+          "name": "Status Bar"
+        },
+        {
+          "type": "frame",
+          "id": "soTRY",
+          "name": "Checkin Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            28,
+            48,
+            0,
+            48
+          ],
+          "children": [
+            {
+              "id": "TYICC",
+              "type": "ref",
+              "ref": "vBcEy",
+              "name": "Checkin Header",
+              "width": "fill_container",
+              "descendants": {
+                "JOk0c": {
+                  "content": "시약 반입"
+                },
+                "bPwfw": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "Nqja0",
+              "name": "Camera View",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A2138",
+              "cornerRadius": "$radius-lg",
+              "layout": "vertical",
+              "padding": 36,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "sbKbD",
+                  "name": "Cam Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hqdXp",
+                      "name": "Rec Chip",
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "D3dpJ",
+                          "name": "Rec Dot",
+                          "fill": "$danger",
+                          "width": 12,
+                          "height": 12
+                        },
+                        {
+                          "type": "text",
+                          "id": "e6jZL",
+                          "name": "Rec Text",
+                          "fill": "#FFFFFF",
+                          "content": "스캔 중",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "h06PFb",
+                      "name": "Flash Btn",
+                      "width": 64,
+                      "height": 64,
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "SX04J",
+                          "name": "Flash Icon",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3dSR",
+                  "name": "Scan Box",
+                  "width": 660,
+                  "height": 440,
+                  "cornerRadius": 32,
+                  "stroke": "#FFFFFF99",
+                  "strokeWidth": 2.5,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "n2X5Dp",
+                      "name": "Scan Line",
+                      "fill": "$primary",
+                      "width": 560,
+                      "height": 4,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#3D6BF5CC",
+                        "blur": 16
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xo12U",
+                  "name": "Cam Hint",
+                  "fill": "#00000080",
+                  "cornerRadius": 999,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    26
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "qUiEK",
+                      "name": "Hint Icon",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "scan-line",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "F6MAL",
+                      "name": "Hint Text",
+                      "fill": "#FFFFFF",
+                      "content": "시약통 라벨을 프레임 안에 맞춰주세요",
+                      "fontFamily": "$font",
+                      "fontSize": 19,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "x9dkdR",
+              "name": "Result Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": "$radius-lg",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1E2A5614",
+                "offset": {
+                  "x": 0,
+                  "y": 12
+                },
+                "blur": 32
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "P5V7a3",
+                  "name": "Result Head",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DyyTL",
+                      "name": "Result Title",
+                      "fill": "$text-strong",
+                      "content": "인식 결과",
+                      "fontFamily": "$font",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "pjQ52",
+                      "type": "ref",
+                      "ref": "gZTOT",
+                      "name": "Result Badge",
+                      "descendants": {
+                        "XkV6V": {
+                          "content": "인식 완료"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "izUlO",
+                  "name": "Result Row",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "NupTs",
+                      "name": "Result IconWrap",
+                      "width": 88,
+                      "height": 88,
+                      "fill": "$primary-soft",
+                      "cornerRadius": 24,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "rkakF",
+                          "name": "Result Flask",
+                          "width": 44,
+                          "height": 44,
+                          "icon": "flask-conical",
+                          "library": "lucide",
+                          "fill": "$primary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uP5Js",
+                      "name": "Result Texts",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "V4B9V",
+                          "name": "Result Name",
+                          "fill": "$text-strong",
+                          "content": "에탄올 95% (EtOH)",
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OPjbA",
+                          "name": "Result Meta1",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "wPlDB",
+                              "name": "Meta1 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "history",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "adJX8",
+                              "name": "Meta1 Text",
+                              "fill": "$text-body",
+                              "content": "기존 보유 시약 · 재반입",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "P1vdrn",
+                          "name": "Result Meta2",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "gzniA",
+                              "name": "Meta2 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "map-pin",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "yV5jY",
+                              "name": "Meta2 Text",
+                              "fill": "$primary",
+                              "content": "지정 위치 : 선반 A · 2행 3열 — LED 점등됨",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tdJDi",
+                      "name": "Done Block",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "V8OBb",
+                          "name": "Done Circle",
+                          "width": 92,
+                          "height": 92,
+                          "fill": "$success-soft",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "bswY2",
+                              "name": "Done Check",
+                              "width": 48,
+                              "height": 48,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$success"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "rIcMm",
+                          "name": "Done Text",
+                          "fill": "$success",
+                          "content": "등록 완료",
+                          "fontFamily": "$font",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "oDwq9",
+                          "name": "Done Sub",
+                          "fill": "$text-muted",
+                          "content": "지정 위치 안착 확인",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "eAijt",
+          "type": "ref",
+          "ref": "EANBb",
+          "name": "Bottom Nav",
+          "descendants": {
+            "c9wAA": {
+              "fill": "#FFFFFF00"
+            },
+            "s3amsz": {
+              "fill": "$text-muted"
+            },
+            "Un8X0": {
+              "fill": "$text-muted"
+            },
+            "eOJqO": {
+              "fill": "$primary-soft"
+            },
+            "nmX9K": {
+              "fill": "$primary"
+            },
+            "qRsLw": {
+              "fill": "$primary"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "FouvV",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Alert Overlay",
+          "width": 1200,
+          "height": 1920,
+          "fill": "$overlay",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "qTPnP",
+              "type": "ref",
+              "ref": "iZzjT",
+              "name": "Expiry OCR Modal",
+              "descendants": {
+                "iSSAj": {
+                  "fill": "$primary-soft"
+                },
+                "J03WX": {
+                  "icon": "calendar-check",
+                  "fill": "$primary"
+                },
+                "m18Fjg": {
+                  "content": "유통기한을 확인해 주세요"
+                },
+                "R4hAZ5": {
+                  "type": "frame",
+                  "id": "za2nV",
+                  "name": "Expiry Confirm Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Lrc9d",
+                      "name": "Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "라벨에서 유통기한을 인식했어요.\n날짜가 맞는지 확인해 주세요.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iF85e",
+                      "name": "Date Pill",
+                      "fill": "$primary-soft",
+                      "cornerRadius": 999,
+                      "gap": 14,
+                      "padding": [
+                        18,
+                        40
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "OZ5Ef",
+                          "name": "Cal Icon",
+                          "width": 32,
+                          "height": 32,
+                          "icon": "calendar",
+                          "library": "lucide",
+                          "fill": "$primary"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NVoAg",
+                          "name": "Date",
+                          "fill": "$primary",
+                          "content": "2027-03-15",
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "i9Blpk": {
+                  "content": "직접 입력"
+                },
+                "gjFik": {
+                  "fill": "$primary"
+                },
+                "jRxuZ": {
+                  "content": "맞아요"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Sar1y",
+      "x": 17903,
+      "y": 3877,
+      "name": "app-checkin-expiry-input",
+      "clip": true,
+      "width": 1200,
+      "height": 1920,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "o2zMH7",
+          "type": "ref",
+          "ref": "G5eEH",
+          "name": "Status Bar"
+        },
+        {
+          "type": "frame",
+          "id": "XRAwl",
+          "name": "Checkin Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            28,
+            48,
+            0,
+            48
+          ],
+          "children": [
+            {
+              "id": "QLTqL",
+              "type": "ref",
+              "ref": "vBcEy",
+              "name": "Checkin Header",
+              "width": "fill_container",
+              "descendants": {
+                "JOk0c": {
+                  "content": "시약 반입"
+                },
+                "bPwfw": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "KJxh0",
+              "name": "Camera View",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A2138",
+              "cornerRadius": "$radius-lg",
+              "layout": "vertical",
+              "padding": 36,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "irbZS",
+                  "name": "Cam Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "S3e8CR",
+                      "name": "Rec Chip",
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "Pi4c2",
+                          "name": "Rec Dot",
+                          "fill": "$danger",
+                          "width": 12,
+                          "height": 12
+                        },
+                        {
+                          "type": "text",
+                          "id": "ggPXE",
+                          "name": "Rec Text",
+                          "fill": "#FFFFFF",
+                          "content": "스캔 중",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kOxAV",
+                      "name": "Flash Btn",
+                      "width": 64,
+                      "height": 64,
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "dFmtb",
+                          "name": "Flash Icon",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eOG7q",
+                  "name": "Scan Box",
+                  "width": 660,
+                  "height": 440,
+                  "cornerRadius": 32,
+                  "stroke": "#FFFFFF99",
+                  "strokeWidth": 2.5,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "k68hf",
+                      "name": "Scan Line",
+                      "fill": "$primary",
+                      "width": 560,
+                      "height": 4,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#3D6BF5CC",
+                        "blur": 16
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cy68y",
+                  "name": "Cam Hint",
+                  "fill": "#00000080",
+                  "cornerRadius": 999,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    26
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "msR3E",
+                      "name": "Hint Icon",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "scan-line",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CBl07",
+                      "name": "Hint Text",
+                      "fill": "#FFFFFF",
+                      "content": "시약통 라벨을 프레임 안에 맞춰주세요",
+                      "fontFamily": "$font",
+                      "fontSize": 19,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "boN7o",
+              "name": "Result Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": "$radius-lg",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1E2A5614",
+                "offset": {
+                  "x": 0,
+                  "y": 12
+                },
+                "blur": 32
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xY8fk",
+                  "name": "Result Head",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "w5kdEF",
+                      "name": "Result Title",
+                      "fill": "$text-strong",
+                      "content": "인식 결과",
+                      "fontFamily": "$font",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "GE59w",
+                      "type": "ref",
+                      "ref": "gZTOT",
+                      "name": "Result Badge",
+                      "descendants": {
+                        "XkV6V": {
+                          "content": "인식 완료"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UBwZH",
+                  "name": "Result Row",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HGQiO",
+                      "name": "Result IconWrap",
+                      "width": 88,
+                      "height": 88,
+                      "fill": "$primary-soft",
+                      "cornerRadius": 24,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ULwKE",
+                          "name": "Result Flask",
+                          "width": 44,
+                          "height": 44,
+                          "icon": "flask-conical",
+                          "library": "lucide",
+                          "fill": "$primary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vhz81",
+                      "name": "Result Texts",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mlXSr",
+                          "name": "Result Name",
+                          "fill": "$text-strong",
+                          "content": "에탄올 95% (EtOH)",
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "W9rF8Z",
+                          "name": "Result Meta1",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "GZXWH",
+                              "name": "Meta1 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "history",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "utObo",
+                              "name": "Meta1 Text",
+                              "fill": "$text-body",
+                              "content": "기존 보유 시약 · 재반입",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "CRSI7",
+                          "name": "Result Meta2",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Gipgp",
+                              "name": "Meta2 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "map-pin",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Buq7u",
+                              "name": "Meta2 Text",
+                              "fill": "$primary",
+                              "content": "지정 위치 : 선반 A · 2행 3열 — LED 점등됨",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fpIBS",
+                      "name": "Done Block",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "M6JjfC",
+                          "name": "Done Circle",
+                          "width": 92,
+                          "height": 92,
+                          "fill": "$success-soft",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "uTfDe",
+                              "name": "Done Check",
+                              "width": 48,
+                              "height": 48,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$success"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZVv1x",
+                          "name": "Done Text",
+                          "fill": "$success",
+                          "content": "등록 완료",
+                          "fontFamily": "$font",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dukAU",
+                          "name": "Done Sub",
+                          "fill": "$text-muted",
+                          "content": "지정 위치 안착 확인",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "U0byJ",
+          "type": "ref",
+          "ref": "EANBb",
+          "name": "Bottom Nav",
+          "descendants": {
+            "c9wAA": {
+              "fill": "#FFFFFF00"
+            },
+            "s3amsz": {
+              "fill": "$text-muted"
+            },
+            "Un8X0": {
+              "fill": "$text-muted"
+            },
+            "eOJqO": {
+              "fill": "$primary-soft"
+            },
+            "nmX9K": {
+              "fill": "$primary"
+            },
+            "qRsLw": {
+              "fill": "$primary"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "N9N6es",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Alert Overlay",
+          "width": 1200,
+          "height": 1920,
+          "fill": "$overlay",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "j60w6p",
+              "type": "ref",
+              "ref": "iZzjT",
+              "name": "Expiry Input Modal",
+              "descendants": {
+                "iSSAj": {
+                  "fill": "$warning-soft"
+                },
+                "J03WX": {
+                  "icon": "calendar-search",
+                  "fill": "$warning"
+                },
+                "m18Fjg": {
+                  "content": "유통기한 직접 입력"
+                },
+                "R4hAZ5": {
+                  "type": "frame",
+                  "id": "YrcBC",
+                  "name": "Expiry Input Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "IRYPf",
+                      "name": "Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "라벨에서 유통기한을 인식하지 못했어요.\n유통기한을 직접 입력해 주세요.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gxZCm",
+                      "name": "Date Field",
+                      "width": "fill_container",
+                      "height": 84,
+                      "fill": "$bg",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1.5,
+                      "gap": 14,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "UEt3x",
+                          "name": "Cal Icon",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "calendar",
+                          "library": "lucide",
+                          "fill": "$text-muted"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RQbW0",
+                          "name": "Placeholder",
+                          "fill": "$text-muted",
+                          "content": "YYYY - MM - DD",
+                          "fontFamily": "$font",
+                          "fontSize": 24,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "eIJZE": {
+                  "enabled": false
+                },
+                "i9Blpk": {
+                  "content": "지정 위치로 옮기기"
+                },
+                "gjFik": {
+                  "fill": "$primary"
+                },
+                "jRxuZ": {
+                  "content": "입력 완료"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "e5BGXY",
+      "x": 19183,
+      "y": 3877,
+      "name": "app-checkin-expiry-done",
+      "clip": true,
+      "width": 1200,
+      "height": 1920,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "ZibtH",
+          "type": "ref",
+          "ref": "G5eEH",
+          "name": "Status Bar"
+        },
+        {
+          "type": "frame",
+          "id": "EOtzO",
+          "name": "Checkin Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            28,
+            48,
+            0,
+            48
+          ],
+          "children": [
+            {
+              "id": "YsW6b",
+              "type": "ref",
+              "ref": "vBcEy",
+              "name": "Checkin Header",
+              "width": "fill_container",
+              "descendants": {
+                "JOk0c": {
+                  "content": "시약 반입"
+                },
+                "bPwfw": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "RvjNY",
+              "name": "Camera View",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A2138",
+              "cornerRadius": "$radius-lg",
+              "layout": "vertical",
+              "padding": 36,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rhnMw",
+                  "name": "Cam Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HtvKA",
+                      "name": "Rec Chip",
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "dGKhq",
+                          "name": "Rec Dot",
+                          "fill": "$danger",
+                          "width": 12,
+                          "height": 12
+                        },
+                        {
+                          "type": "text",
+                          "id": "k693C",
+                          "name": "Rec Text",
+                          "fill": "#FFFFFF",
+                          "content": "스캔 중",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BbmFz",
+                      "name": "Flash Btn",
+                      "width": 64,
+                      "height": 64,
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "WrNsh",
+                          "name": "Flash Icon",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dLOdz",
+                  "name": "Scan Box",
+                  "width": 660,
+                  "height": 440,
+                  "cornerRadius": 32,
+                  "stroke": "#FFFFFF99",
+                  "strokeWidth": 2.5,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "xzNCW",
+                      "name": "Scan Line",
+                      "fill": "$primary",
+                      "width": 560,
+                      "height": 4,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#3D6BF5CC",
+                        "blur": 16
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NZdVG",
+                  "name": "Cam Hint",
+                  "fill": "#00000080",
+                  "cornerRadius": 999,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    26
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "M8UgLF",
+                      "name": "Hint Icon",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "scan-line",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YvXwU",
+                      "name": "Hint Text",
+                      "fill": "#FFFFFF",
+                      "content": "시약통 라벨을 프레임 안에 맞춰주세요",
+                      "fontFamily": "$font",
+                      "fontSize": 19,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "c2abLD",
+              "name": "Result Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": "$radius-lg",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1E2A5614",
+                "offset": {
+                  "x": 0,
+                  "y": 12
+                },
+                "blur": 32
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Z7Gtbz",
+                  "name": "Result Head",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zu65L",
+                      "name": "Result Title",
+                      "fill": "$text-strong",
+                      "content": "인식 결과",
+                      "fontFamily": "$font",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "egiWR",
+                      "type": "ref",
+                      "ref": "gZTOT",
+                      "name": "Result Badge",
+                      "descendants": {
+                        "XkV6V": {
+                          "content": "인식 완료"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RhDXI",
+                  "name": "Result Row",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "fKFXk",
+                      "name": "Result IconWrap",
+                      "width": 88,
+                      "height": 88,
+                      "fill": "$primary-soft",
+                      "cornerRadius": 24,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "d9sVM",
+                          "name": "Result Flask",
+                          "width": 44,
+                          "height": 44,
+                          "icon": "flask-conical",
+                          "library": "lucide",
+                          "fill": "$primary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NMYfq",
+                      "name": "Result Texts",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "IOwqJ",
+                          "name": "Result Name",
+                          "fill": "$text-strong",
+                          "content": "에탄올 95% (EtOH)",
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Q4WMey",
+                          "name": "Result Meta1",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "eL3GU",
+                              "name": "Meta1 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "history",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "V13Lvs",
+                              "name": "Meta1 Text",
+                              "fill": "$text-body",
+                              "content": "기존 보유 시약 · 재반입",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vrgXS",
+                          "name": "Result Meta2",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "P6Jj8r",
+                              "name": "Meta2 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "map-pin",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Uop8p",
+                              "name": "Meta2 Text",
+                              "fill": "$primary",
+                              "content": "지정 위치 : 선반 A · 2행 3열 — LED 점등됨",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "c9uWj",
+                      "name": "Done Block",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "I6wOg",
+                          "name": "Done Circle",
+                          "width": 92,
+                          "height": 92,
+                          "fill": "$success-soft",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "JvUxu",
+                              "name": "Done Check",
+                              "width": 48,
+                              "height": 48,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$success"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "MYCEJ",
+                          "name": "Done Text",
+                          "fill": "$success",
+                          "content": "등록 완료",
+                          "fontFamily": "$font",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "G6uNiV",
+                          "name": "Done Sub",
+                          "fill": "$text-muted",
+                          "content": "지정 위치 안착 확인",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "gmdbr",
+          "type": "ref",
+          "ref": "EANBb",
+          "name": "Bottom Nav",
+          "descendants": {
+            "c9wAA": {
+              "fill": "#FFFFFF00"
+            },
+            "s3amsz": {
+              "fill": "$text-muted"
+            },
+            "Un8X0": {
+              "fill": "$text-muted"
+            },
+            "eOJqO": {
+              "fill": "$primary-soft"
+            },
+            "nmX9K": {
+              "fill": "$primary"
+            },
+            "qRsLw": {
+              "fill": "$primary"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "iSAKg",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Alert Overlay",
+          "width": 1200,
+          "height": 1920,
+          "fill": "$overlay",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "bLBkh",
+              "type": "ref",
+              "ref": "iZzjT",
+              "name": "Expiry Done Modal",
+              "descendants": {
+                "iSSAj": {
+                  "fill": "$success-soft"
+                },
+                "J03WX": {
+                  "icon": "circle-check",
+                  "fill": "$success"
+                },
+                "m18Fjg": {
+                  "content": "등록 완료"
+                },
+                "R4hAZ5": {
+                  "content": "새 시약 등록이 완료되었습니다.\n안내된 추천 위치에 시약을 놓아 주세요."
+                },
+                "eIJZE": {
+                  "enabled": false
+                },
+                "i9Blpk": {
+                  "content": "지정 위치로 옮기기"
+                },
+                "gjFik": {
+                  "fill": "$success",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#27B87640",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
+                  }
+                },
+                "jRxuZ": {
+                  "content": "확인"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "n0VJMV",
+      "x": 20463,
+      "y": 3877,
+      "name": "app-checkin-safe-location",
+      "clip": true,
+      "width": 1200,
+      "height": 1920,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "e5K0Ux",
+          "type": "ref",
+          "ref": "G5eEH",
+          "name": "Status Bar"
+        },
+        {
+          "type": "frame",
+          "id": "ukTI7",
+          "name": "Checkin Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            28,
+            48,
+            0,
+            48
+          ],
+          "children": [
+            {
+              "id": "mEuth",
+              "type": "ref",
+              "ref": "vBcEy",
+              "name": "Checkin Header",
+              "width": "fill_container",
+              "descendants": {
+                "JOk0c": {
+                  "content": "시약 반입"
+                },
+                "bPwfw": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "B4BHPN",
+              "name": "Camera View",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A2138",
+              "cornerRadius": "$radius-lg",
+              "layout": "vertical",
+              "padding": 36,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "b1LVTE",
+                  "name": "Cam Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QCsJb",
+                      "name": "Rec Chip",
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "gap": 10,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "NhiLH",
+                          "name": "Rec Dot",
+                          "fill": "$danger",
+                          "width": 12,
+                          "height": 12
+                        },
+                        {
+                          "type": "text",
+                          "id": "e00rJQ",
+                          "name": "Rec Text",
+                          "fill": "#FFFFFF",
+                          "content": "스캔 중",
+                          "fontFamily": "$font",
+                          "fontSize": 17,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "k0NEJ",
+                      "name": "Flash Btn",
+                      "width": 64,
+                      "height": 64,
+                      "fill": "#00000066",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "bhetK",
+                          "name": "Flash Icon",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wCbbr",
+                  "name": "Scan Box",
+                  "width": 660,
+                  "height": 440,
+                  "cornerRadius": 32,
+                  "stroke": "#FFFFFF99",
+                  "strokeWidth": 2.5,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "txpDv",
+                      "name": "Scan Line",
+                      "fill": "$primary",
+                      "width": 560,
+                      "height": 4,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#3D6BF5CC",
+                        "blur": 16
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DKml3",
+                  "name": "Cam Hint",
+                  "fill": "#00000080",
+                  "cornerRadius": 999,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    26
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "U55zlh",
+                      "name": "Hint Icon",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "scan-line",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TmGNL",
+                      "name": "Hint Text",
+                      "fill": "#FFFFFF",
+                      "content": "시약통 라벨을 프레임 안에 맞춰주세요",
+                      "fontFamily": "$font",
+                      "fontSize": 19,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wYBaa",
+              "name": "Result Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": "$radius-lg",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1E2A5614",
+                "offset": {
+                  "x": 0,
+                  "y": 12
+                },
+                "blur": 32
+              },
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "skSV6",
+                  "name": "Result Head",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "OqsPa",
+                      "name": "Result Title",
+                      "fill": "$text-strong",
+                      "content": "인식 결과",
+                      "fontFamily": "$font",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "id": "RHt6C",
+                      "type": "ref",
+                      "ref": "gZTOT",
+                      "name": "Result Badge",
+                      "descendants": {
+                        "XkV6V": {
+                          "content": "인식 완료"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uRGkh",
+                  "name": "Result Row",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "UBUFn",
+                      "name": "Result IconWrap",
+                      "width": 88,
+                      "height": 88,
+                      "fill": "$primary-soft",
+                      "cornerRadius": 24,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "l3TUV",
+                          "name": "Result Flask",
+                          "width": 44,
+                          "height": 44,
+                          "icon": "flask-conical",
+                          "library": "lucide",
+                          "fill": "$primary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tZS3V",
+                      "name": "Result Texts",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ui3gz",
+                          "name": "Result Name",
+                          "fill": "$text-strong",
+                          "content": "에탄올 95% (EtOH)",
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Lkw6s",
+                          "name": "Result Meta1",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "PRpkz",
+                              "name": "Meta1 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "history",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "v3gPl",
+                              "name": "Meta1 Text",
+                              "fill": "$text-body",
+                              "content": "기존 보유 시약 · 재반입",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pRYiY",
+                          "name": "Result Meta2",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "vxLwS",
+                              "name": "Meta2 Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "map-pin",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BrsOu",
+                              "name": "Meta2 Text",
+                              "fill": "$primary",
+                              "content": "지정 위치 : 선반 A · 2행 3열 — LED 점등됨",
+                              "fontFamily": "$font",
+                              "fontSize": 20,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lGFlt",
+                      "name": "Done Block",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "TfEpS",
+                          "name": "Done Circle",
+                          "width": 92,
+                          "height": 92,
+                          "fill": "$success-soft",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "G2naZ",
+                              "name": "Done Check",
+                              "width": 48,
+                              "height": 48,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "$success"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "K8zyyu",
+                          "name": "Done Text",
+                          "fill": "$success",
+                          "content": "등록 완료",
+                          "fontFamily": "$font",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "qKULK",
+                          "name": "Done Sub",
+                          "fill": "$text-muted",
+                          "content": "지정 위치 안착 확인",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fP0VU",
+          "type": "ref",
+          "ref": "EANBb",
+          "name": "Bottom Nav",
+          "descendants": {
+            "c9wAA": {
+              "fill": "#FFFFFF00"
+            },
+            "s3amsz": {
+              "fill": "$text-muted"
+            },
+            "Un8X0": {
+              "fill": "$text-muted"
+            },
+            "eOJqO": {
+              "fill": "$primary-soft"
+            },
+            "nmX9K": {
+              "fill": "$primary"
+            },
+            "qRsLw": {
+              "fill": "$primary"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "FeUtC",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Alert Overlay",
+          "width": 1200,
+          "height": 1920,
+          "fill": "$overlay",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "K35HIL",
+              "type": "ref",
+              "ref": "iZzjT",
+              "name": "Safe Location Modal",
+              "descendants": {
+                "iSSAj": {
+                  "fill": "$success-soft"
+                },
+                "J03WX": {
+                  "icon": "map-pin",
+                  "fill": "$success"
+                },
+                "m18Fjg": {
+                  "content": "추천 안전 보관 위치 안내"
+                },
+                "R4hAZ5": {
+                  "type": "frame",
+                  "id": "hBs0S",
+                  "name": "Safe Location Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "iFDkr",
+                      "name": "Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "'에탄올 95%'을(를) 아래 추천 위치로\n옮겨서 안착해 주세요.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WV21V",
+                      "name": "Shelf Visual",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": "$radius-md",
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vO1z4",
+                          "name": "Shelf Visual Head",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "n4dYaU",
+                              "name": "Shelf Name",
+                              "fill": "$text-strong",
+                              "content": "선반 C",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "LoAgm",
+                              "name": "Rec Badge",
+                              "fill": "$success-soft",
+                              "cornerRadius": 999,
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                18
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "A6i1bH",
+                                  "name": "Badge Pin",
+                                  "width": 18,
+                                  "height": 18,
+                                  "icon": "map-pin",
+                                  "library": "lucide",
+                                  "fill": "$success"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "rjQJw",
+                                  "name": "Badge Text",
+                                  "fill": "$success",
+                                  "content": "2행 3열",
+                                  "fontFamily": "$font",
+                                  "fontSize": 20,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GUKdi",
+                          "name": "Mini Grid",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "H4NNDQ",
+                              "name": "Mini Row 0",
+                              "width": "fill_container",
+                              "gap": 10,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "KRSH5",
+                                  "name": "Cell 0-0 Occ",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$bg-deep",
+                                  "cornerRadius": 12,
+                                  "layout": "vertical",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "e7GbHH",
+                                      "name": "Flask",
+                                      "width": 24,
+                                      "height": 24,
+                                      "icon": "flask-conical",
+                                      "library": "lucide",
+                                      "fill": "$text-muted"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "cUglz",
+                                  "name": "Cell 0-1 Occ",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$bg-deep",
+                                  "cornerRadius": 12,
+                                  "layout": "vertical",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "n9psYH",
+                                      "name": "Flask",
+                                      "width": 24,
+                                      "height": 24,
+                                      "icon": "flask-conical",
+                                      "library": "lucide",
+                                      "fill": "$text-muted"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ATMrg",
+                                  "name": "Cell 0-2 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "wqE0q",
+                                  "name": "Cell 0-3 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "m02U44",
+                              "name": "Mini Row 1",
+                              "width": "fill_container",
+                              "gap": 10,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "ZhBJE",
+                                  "name": "Cell 1-0 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "gtzi3",
+                                  "name": "Cell 1-1 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "j2Vx3",
+                                  "name": "Cell 1-2 Rec",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$success-soft",
+                                  "cornerRadius": 12,
+                                  "stroke": "$success",
+                                  "strokeWidth": 2.5,
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "b8bmf",
+                                      "name": "Pin",
+                                      "width": 30,
+                                      "height": 30,
+                                      "icon": "map-pin",
+                                      "library": "lucide",
+                                      "fill": "$success"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "CuFuf",
+                                  "name": "Cell 1-3 Occ",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$bg-deep",
+                                  "cornerRadius": 12,
+                                  "layout": "vertical",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "OFSIO",
+                                      "name": "Flask",
+                                      "width": 24,
+                                      "height": 24,
+                                      "icon": "flask-conical",
+                                      "library": "lucide",
+                                      "fill": "$text-muted"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "o3P0F",
+                              "name": "Mini Row 2",
+                              "width": "fill_container",
+                              "gap": 10,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "B2K6sh",
+                                  "name": "Cell 2-0 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "n2deG",
+                                  "name": "Cell 2-1 Occ",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$bg-deep",
+                                  "cornerRadius": 12,
+                                  "layout": "vertical",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "H2B9C",
+                                      "name": "Flask",
+                                      "width": 24,
+                                      "height": 24,
+                                      "icon": "flask-conical",
+                                      "library": "lucide",
+                                      "fill": "$text-muted"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "af5HC",
+                                  "name": "Cell 2-2 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "UociB",
+                                  "name": "Cell 2-3 Empty",
+                                  "width": "fill_container",
+                                  "height": 84,
+                                  "fill": "$surface",
+                                  "cornerRadius": 12,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5,
+                                  "layout": "vertical"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v0ip87",
+                          "name": "Legend",
+                          "width": "fill_container",
+                          "gap": 20,
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "tokAR",
+                              "name": "Legend Rec",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "cornerRadius": 6,
+                                  "id": "JPt5y",
+                                  "name": "Sw Rec",
+                                  "fill": "$success-soft",
+                                  "width": 20,
+                                  "height": 20,
+                                  "stroke": "$success",
+                                  "strokeWidth": 2
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "AJFRa",
+                                  "name": "Legend Rec Label",
+                                  "fill": "$text-muted",
+                                  "content": "추천 위치",
+                                  "fontFamily": "$font",
+                                  "fontSize": 18,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "PRhdY",
+                              "name": "Legend Occ",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "cornerRadius": 6,
+                                  "id": "GXKvN",
+                                  "name": "Sw Occ",
+                                  "fill": "$bg-deep",
+                                  "width": 20,
+                                  "height": 20
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "W6zJ3K",
+                                  "name": "Legend Occ Label",
+                                  "fill": "$text-muted",
+                                  "content": "사용 중",
+                                  "fontFamily": "$font",
+                                  "fontSize": 18,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YH0vi",
+                              "name": "Legend Empty",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "cornerRadius": 6,
+                                  "id": "Zwevs",
+                                  "name": "Sw Empty",
+                                  "fill": "$surface",
+                                  "width": 20,
+                                  "height": 20,
+                                  "stroke": "$border",
+                                  "strokeWidth": 1.5
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "hExpp",
+                                  "name": "Legend Empty Label",
+                                  "fill": "$text-muted",
+                                  "content": "빈 칸",
+                                  "fontFamily": "$font",
+                                  "fontSize": 18,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "eIJZE": {
+                  "enabled": false
+                },
+                "i9Blpk": {
+                  "content": "지정 위치로 옮기기"
+                },
+                "gjFik": {
+                  "fill": "$success",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#27B87640",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
+                  }
+                },
+                "jRxuZ": {
+                  "content": "확인"
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
