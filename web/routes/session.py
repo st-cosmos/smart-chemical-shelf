@@ -4,6 +4,7 @@ import time
 
 import checkout_flow
 from database import get_db
+import schemas
 from session_store import checkin_session, checkout_session
 
 router = APIRouter(prefix="/api/checkin-session", tags=["session"])
@@ -46,7 +47,15 @@ def cancel_checkin_session():
     checkin_session["chemical_name"] = ""
     checkin_session["start_time"] = 0.0
     checkin_session["username"] = ""
+    checkin_session["expiration_date"] = None
     return {"status": "success"}
+
+@router.post("/expiration")
+def set_checkin_expiration(req: schemas.ExpirationRequest):
+    if checkin_session["active"]:
+        checkin_session["expiration_date"] = req.expiration_date
+        return {"status": "success"}
+    return {"status": "error", "message": "No active session"}
 
 
 # --- 반출 세션 (무게 감소 확정 대기) ---

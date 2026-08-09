@@ -257,6 +257,9 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     showScanResult(response)
                     startSessionPolling()
                     learnMatch(name, barcode, learnToken)
+                    if (currentNewItem) {
+                        promptExpirationDate(ocrText)
+                    }
                 } else {
                     resumeScanning(1500)
                 }
@@ -267,6 +270,69 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     Toast.LENGTH_SHORT
                 ).show()
                 resumeScanning(2500)
+            }
+        }
+    }
+
+    /** OCR 텍스트에서 유통기한을 찾아 확인 모달을 띄우고, 없으면 직접 입력 모달로 넘어간다 (§3.9) */
+    private fun promptExpirationDate(ocrText: String) {
+        val match = Regex("(\\d{4})[-./](\\d{2})[-./](\\d{2})").find(ocrText)
+        val foundDate = match?.let {
+            "${it.groupValues[1]}-${it.groupValues[2]}-${it.groupValues[3]}"
+        }
+
+        if (foundDate != null) {
+            AppModal.show(
+                this, AppModal.Tone.PRIMARY, R.drawable.ic_calendar_check,
+                "유통기한을 확인해 주세요",
+                "라벨에서 유통기한을 인식했어요.\n날짜가 맞는지 확인해 주세요.",
+                "직접 입력", "맞아요",
+                dateBadge = foundDate,
+                onSecondary = { showManualExpirationDialog() },
+                onPrimary = { submitExpirationDate(foundDate) }
+            )
+        } else {
+            showManualExpirationDialog()
+        }
+    }
+
+    private fun showManualExpirationDialog() {
+        AppModal.show(
+            this, AppModal.Tone.WARNING, R.drawable.ic_calendar_search,
+            "유통기한 직접 입력",
+            "라벨에서 유통기한을 인식하지 못했어요.\n유통기한을 직접 입력해 주세요.",
+            null, "입력 완료",
+            inputTextHint = "YYYYMMDD 또는 YYYY-MM-DD",
+            inputType = android.text.InputType.TYPE_CLASS_DATETIME,
+            inputErrorText = "예: 20270315 또는 2027-03-15 형식으로 입력해 주세요",
+            onInputSubmit = { text ->
+                val normalized = text.replace(Regex("[./]"), "-").trim()
+                if (Regex("\\d{4}-\\d{2}-\\d{2}").matches(normalized)) {
+                    submitExpirationDate(normalized)
+                    true
+                } else if (Regex("\\d{8}").matches(normalized)) {
+                    val formatted = "${normalized.substring(0, 4)}-${normalized.substring(4, 6)}-${normalized.substring(6, 8)}"
+                    submitExpirationDate(formatted)
+                    true
+                } else {
+                    false
+                }
+            }
+        )
+    }
+
+    private fun submitExpirationDate(date: String) {
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.setCheckinExpiration(ExpirationRequest(date))
+                AppModal.show(
+                    this@CheckinActivity, AppModal.Tone.SUCCESS, R.drawable.ic_circle_check,
+                    "등록 완료",
+                    "새 시약 등록이 완료되었습니다.\n안내된 추천 위치에 시약을 놓아 주세요.",
+                    null, "확인"
+                )
+            } catch (e: Exception) {
+                Toast.makeText(this@CheckinActivity, "유통기한 등록 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -461,14 +527,21 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                         "👉 추천 이동 위치: ${safeDesc}",
                 "이 위치 유지", "안전 위치로 이동",
                 onPrimary = {
-                    AppModal.show(
-                        this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
-                        "추천 안전 보관 위치 안내",
-                        "[${chemical.name}]을(를)\n${safeDesc}(으)로 이동하여 안착해 주세요.",
-                        null, "확인",
-                        autoDismissMs = 3500L,
-                        onPrimary = { resetScanState() }
-                    )
+                    lifecycleScope.launch {
+                        val visual = buildShelfVisual(coWarning.recommended_safe_shelf_id)
+                        AppModal.show(
+                            this@CheckinActivity, AppModal.Tone.SUCCESS, R.drawable.ic_map_pin,
+                            "추천 안전 보관 위치 안내",
+                            if (visual != null)
+                                "'${chemical.name}'을(를) 아래 추천 위치로\n옮겨서 안착해 주세요."
+                            else
+                                "[${chemical.name}]을(를)\n${safeDesc}(으)로 이동하여 안착해 주세요.",
+                            null, "확인",
+                            autoDismissMs = 6000L,
+                            shelfVisual = visual,
+                            onPrimary = { resetScanState() }
+                        )
+                    }
                 },
                 onSecondary = { resetScanState() }
             )
@@ -526,6 +599,35 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     onPrimary = { resetScanState() }
                 )
             }
+        }
+    }
+
+    /** 추천 수납칸이 속한 선반 전체의 점유 현황을 모아 모달용 시각화 데이터를 만든다 */
+    private suspend fun buildShelfVisual(recommendedShelfId: String?): AppModal.ShelfVisual? {
+        if (recommendedShelfId == null) return null
+        return try {
+            val shelves = NetworkClient.api.getShelves()
+            val target = shelves.find { it.id == recommendedShelfId } ?: return null
+            val parent = target.parent_shelf ?: return null
+            val cells = shelves.filter { it.parent_shelf == parent }
+            val cellById = cells.associateBy { it.id }
+            val occupied = NetworkClient.api.getChemicals()
+                .filter { it.current_status == "비치중" }
+                .mapNotNull { chem ->
+                    chem.shelf_id
+                        ?.let { cellById[it] }
+                        ?.let { (it.row ?: 1) to (it.col ?: 1) }
+                }
+                .toSet()
+            AppModal.ShelfVisual(
+                shelfName = "선반 $parent",
+                rows = cells.maxOf { it.row ?: 1 },
+                cols = cells.maxOf { it.col ?: 1 },
+                occupied = occupied,
+                recommended = (target.row ?: 1) to (target.col ?: 1)
+            )
+        } catch (e: Exception) {
+            null
         }
     }
 
