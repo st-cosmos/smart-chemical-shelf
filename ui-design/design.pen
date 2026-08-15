@@ -8571,6 +8571,148 @@
             },
             {
               "type": "frame",
+              "id": "E0aIyK",
+              "name": "Inv Filter Chips",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "i5CsJ",
+                  "name": "Filter Chip 전체 128",
+                  "fill": "$primary",
+                  "cornerRadius": 999,
+                  "padding": [
+                    10,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "AFl5S",
+                      "name": "Filter Chip Text 전체 128",
+                      "fill": "#FFFFFF",
+                      "content": "전체 128",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cIft3",
+                  "name": "Filter Chip 비치중 121",
+                  "fill": "$surface",
+                  "cornerRadius": 999,
+                  "stroke": "$border",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    10,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EDGoj",
+                      "name": "Filter Chip Text 비치중 121",
+                      "fill": "$text-body",
+                      "content": "비치중 121",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "C0CD5W",
+                  "name": "Filter Chip 반출중 7",
+                  "fill": "$surface",
+                  "cornerRadius": 999,
+                  "stroke": "$border",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    10,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kgewC",
+                      "name": "Filter Chip Text 반출중 7",
+                      "fill": "$text-body",
+                      "content": "반출중 7",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ou8ju",
+                  "name": "Filter Chip 유통기한 3",
+                  "fill": "$surface",
+                  "cornerRadius": 999,
+                  "stroke": "$border",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    10,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "H9O7m",
+                      "name": "Filter Chip Text 유통기한 3",
+                      "fill": "$text-body",
+                      "content": "유통기한 3",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "A5KrYT",
+                  "name": "Filter Chip 인접 보관 2",
+                  "fill": "$surface",
+                  "cornerRadius": 999,
+                  "stroke": "$border",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    10,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZyJMR",
+                      "name": "Filter Chip Text 인접 보관 2",
+                      "fill": "$text-body",
+                      "content": "인접 보관 2",
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
               "id": "xegVF",
               "name": "Inv Table Card",
               "clip": true,
@@ -15391,16 +15533,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "jnedR",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -15502,16 +15634,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "CTNyj",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -15613,16 +15735,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "EoLaC",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -15758,16 +15870,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "y6vXf",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -15932,16 +16034,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "NwmOm",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -16077,16 +16169,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "l6HIw",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -16499,16 +16581,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "l859v",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -16610,16 +16682,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "ktiIP",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -16781,16 +16843,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "yxXyE",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -16926,16 +16978,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "W5LTU",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -19940,16 +19982,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "Fs7V2",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -20077,16 +20109,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "A9QC5z",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -20214,16 +20236,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "bGKVQ",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -20385,16 +20397,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "gu2WO",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -20588,16 +20590,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "ipl1y",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -20759,16 +20751,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "qIrkD",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -21412,16 +21394,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "uxYx0",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -21523,16 +21495,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "ixnxv",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -21694,16 +21656,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "utw0l",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -21839,16 +21791,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "dROKi",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22254,16 +22196,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "YG2Pz",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22365,16 +22297,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "EITWd",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22476,16 +22398,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "WCEO7",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22621,16 +22533,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "gPulQ",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22795,16 +22697,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "V6hP8s",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -22940,16 +22832,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "yxkTD",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -23362,16 +23244,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "ZIuwb",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -23473,16 +23345,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "dMOFz",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -23644,16 +23506,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "cYF3q",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
@@ -23789,16 +23641,6 @@
                                               "fontFamily": "$font",
                                               "fontSize": 15,
                                               "fontWeight": "700"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "nVyKg",
-                                              "name": "Remain Label",
-                                              "fill": "$text-muted",
-                                              "content": "남음",
-                                              "fontFamily": "$font",
-                                              "fontSize": 11,
-                                              "fontWeight": "500"
                                             }
                                           ]
                                         },
