@@ -17350,7 +17350,7 @@
     {
       "type": "frame",
       "id": "b4lA6",
-      "x": 18294,
+      "x": 18931,
       "y": 3877,
       "name": "app-inventory",
       "clip": true,
@@ -24563,6 +24563,55 @@
                       ]
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "B3GQwY",
+              "name": "Ex Col 2-3. 시약 폐기 확인",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TPmjY",
+                  "name": "2-3. 시약 폐기 확인 Caption",
+                  "fill": "$text-muted",
+                  "content": "2-3. 시약 폐기 확인 — 재고 카드 길게 누름",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "id": "RlPHv",
+                  "type": "ref",
+                  "ref": "iZzjT",
+                  "name": "2-3. 시약 폐기 확인 Modal",
+                  "descendants": {
+                    "iSSAj": {
+                      "fill": "$danger-soft"
+                    },
+                    "J03WX": {
+                      "fill": "$danger",
+                      "icon": "trash-2"
+                    },
+                    "m18Fjg": {
+                      "content": "시약 폐기"
+                    },
+                    "R4hAZ5": {
+                      "content": "'에탄올'을(를) 폐기 등록할까요?\n재고 목록에서 삭제되며 되돌릴 수 없습니다."
+                    },
+                    "i9Blpk": {
+                      "content": "취소"
+                    },
+                    "gjFik": {
+                      "fill": "$danger"
+                    },
+                    "jRxuZ": {
+                      "content": "폐기하기"
+                    }
+                  }
                 }
               ]
             },
