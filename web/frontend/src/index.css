@@ -1253,13 +1253,15 @@ select.input-field {
 .shelf-grid-wrap {
   display: flex;
   gap: 12px;
+  position: relative;
 }
 
-/* 3행 × 3열만 보이는 스크롤 뷰포트 (행 150px × 3 + 간격 + 4행 살짝 노출) */
+/* 3행(150px × 3 + 간격 12px × 2 = 474px)만 보이는 스크롤 뷰포트.
+   높이를 고정해 모든 선반 카드의 세로 길이를 통일한다 — 4행 이상은 세로 스크롤 */
 .shelf-grid-viewport {
   flex: 1;
   min-width: 0;
-  max-height: 500px;
+  height: 474px;
   overflow: auto;
   border-radius: 16px;
 }
@@ -1286,6 +1288,7 @@ select.input-field {
 }
 
 .slot {
+  position: relative;
   min-width: 0;
   height: 150px;
   border-radius: 16px;
@@ -1333,12 +1336,6 @@ select.input-field {
   font-size: 15px;
   font-weight: 700;
   color: var(--primary);
-}
-
-.slot-remain-unit {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
 }
 
 .slot-pos {
@@ -1406,29 +1403,350 @@ select.input-field {
   cursor: pointer;
 }
 
-.add-col-btn {
-  width: 56px;
-  flex-shrink: 0;
-  align-self: stretch;
-  border-radius: 16px;
+/* 행/열 추가 — 그리드 아래 소형 버튼 (수납칸 크기에 영향 없음) */
+.add-line-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-line-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
   background: var(--bg);
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.add-line-btn:hover {
+  background: var(--primary-soft);
+}
+
+/* ---------- 선반 수정 모드 (design.pen web-shelf-manage-edit) ---------- */
+
+.shelf-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.shelf-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  white-space: nowrap;
+}
+
+.shelf-delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.shelf-edit-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  white-space: nowrap;
+}
+
+/* 열 삭제 버튼 줄 — 그리드 뷰포트와 같은 폭으로 클리핑 (스크롤 동기화는 JS) */
+.col-del-row {
+  display: flex;
+  gap: 12px;
+}
+
+.col-del-clip {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.line-del-cell {
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.line-del-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.line-del-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* 행 삭제 버튼 레일 — 카드 왼쪽 여백(패딩 28px)에 겹쳐 배치해
+   수납칸 크기에 영향을 주지 않는다. 뷰포트와 같은 높이로 클리핑 */
+.row-del-col {
+  position: absolute;
+  left: -28px;
+  top: 0;
+  width: 26px;
+  height: 474px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row-del-cell {
+  height: 150px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 셀 등록 해제 배지 (수정 모드에서 등록된 셀 우상단) */
+.slot-del-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-del-btn:hover {
+  background: #d8404f;
+}
+
+/* 신규 등록 대기 기기 스트립 */
+.unreg-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1.5px solid var(--primary);
+  padding: 14px 20px;
+}
+
+.unreg-strip-texts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.unreg-strip-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.unreg-strip-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.unreg-strip-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.unreg-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+}
+
+.unreg-chip-batt {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ---------- 재고 관리 상태 필터 칩 (design.pen web-inventory) ---------- */
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  border-radius: 999px;
+  padding: 10px 22px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.filter-chip:hover {
+  border-color: var(--primary);
   color: var(--primary);
 }
 
-.add-row-btn {
-  height: 52px;
-  border-radius: 16px;
+.filter-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ---------- 슬롯 상세 모달 (design.pen web-shelf-manage-slot) ---------- */
+
+.slot-clickable {
+  cursor: pointer;
+}
+
+.slot-clickable:hover {
+  outline: 1.5px solid var(--primary);
+  outline-offset: -1.5px;
+}
+
+.slot-selected {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.slot-modal {
+  width: 480px;
+  gap: 16px;
+}
+
+.slot-modal-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.slot-modal-title-row svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.slot-modal-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.slot-chem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot-chem-empty {
+  padding: 18px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.slot-chem-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: var(--bg);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.slot-chem-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.slot-chem-item-texts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.slot-chem-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-chem-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.slot-modal-confirm {
+  width: 100%;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px #3d6bf540;
+}
+
+.slot-modal-confirm:hover {
+  background: var(--primary-press);
 }
 
 /* ============================================================

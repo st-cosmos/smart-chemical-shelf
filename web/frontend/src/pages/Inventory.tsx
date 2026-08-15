@@ -26,6 +26,17 @@ const COL = {
   status: 150,
 };
 
+// 필터 칩 (design.pen web-inventory · 앱 재고 관리와 동일한 기준)
+type StatusFilter = 'all' | 'in' | 'out' | 'expiry' | 'co';
+
+const FILTER_LABELS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'in', label: '비치중' },
+  { key: 'out', label: '반출중' },
+  { key: 'expiry', label: '유통기한' },
+  { key: 'co', label: '인접 보관' },
+];
+
 function percentOf(weightKg: number): number {
   return Math.max(0, Math.min(100, Math.round((weightKg / CAPACITY_KG) * 100)));
 }
@@ -55,6 +66,7 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
   const [devices, setDevices] = useState<ShelfDevice[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<StatusFilter>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [ledNotice, setLedNotice] = useState<{ ok: boolean; text: string } | null>(null);
@@ -124,7 +136,32 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
     alerts.co_storage_warnings.length +
     alerts.unscanned_checkouts.length;
 
+  // 필터 대상 시약 id 집합 — 유통기한(초과+임박), 인접 보관(경고 쌍 양쪽)
+  const expiredIds = new Set(alerts.expired_chemicals.map((e) => e.chemical_id));
+  const coIds = new Set(
+    alerts.co_storage_warnings.flatMap((c) => [c.chemical_1_id, c.chemical_2_id]),
+  );
+
+  const matchesKey = (c: Chemical, key: StatusFilter): boolean => {
+    switch (key) {
+      case 'in':
+        return c.current_status !== '반출중';
+      case 'out':
+        return c.current_status === '반출중';
+      case 'expiry':
+        return expiredIds.has(c.id);
+      case 'co':
+        return coIds.has(c.id);
+      default:
+        return true;
+    }
+  };
+
+  const filterCount = (key: StatusFilter): number =>
+    chemicals.filter((c) => matchesKey(c, key)).length;
+
   const filtered = chemicals.filter((c) => {
+    if (!matchesKey(c, filter)) return false;
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -171,6 +208,19 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
             </span>
           </div>
           <SearchBar value={search} onChange={setSearch} placeholder="시약 이름·CAS 번호 검색" />
+        </div>
+
+        {/* 상태 필터 칩 (design.pen web-inventory) */}
+        <div className="filter-chips">
+          {FILTER_LABELS.map(({ key, label }) => (
+            <button
+              key={key}
+              className={`filter-chip${filter === key ? ' active' : ''}`}
+              onClick={() => setFilter(key)}
+            >
+              {label} {filterCount(key)}
+            </button>
+          ))}
         </div>
 
         <div className="card table-card">

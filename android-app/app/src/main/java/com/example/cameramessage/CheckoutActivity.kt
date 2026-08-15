@@ -49,6 +49,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 
 /**
@@ -682,45 +684,99 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
         // 완료 팝업 — 3초 내 [확인]이 없으면 자동으로 닫히며 초기화된다 (하단 카드는 유지).
         // 무게 불일치 경고만은 놓치면 안 되므로 자동 닫힘 없이 확인을 요구한다.
-        val tone: AppModal.Tone
-        val icon: Int
-        val title: String
-        val message: String
-        val autoDismiss: Long?
-        when (weightVerified) {
-            false -> {
-                tone = AppModal.Tone.WARNING
-                icon = R.drawable.ic_triangle_alert
-                title = "반출 완료 — 무게 불일치 주의"
-                message = "[${chemical.name}] 반출이 기록되었습니다.\n" +
-                        "다만 기록된 병 무게 ${chemical.weight}kg 대비 " +
-                        "실제 감소량이 ${measuredDelta ?: "-"}kg입니다.\n" +
-                        "맞는 병을 가져갔는지 확인해 주세요."
-                autoDismiss = null
+        // 유통기한 경고(경과·30일 이내 임박) 시약은 완료 대신 폐기 등록 안내 모달을 띄운다.
+        val expiry = expiryInfoOf(chemical)
+        when {
+            weightVerified == false -> {
+                AppModal.show(
+                    this, AppModal.Tone.WARNING, R.drawable.ic_triangle_alert,
+                    "반출 완료 — 무게 불일치 주의",
+                    "[${chemical.name}] 반출이 기록되었습니다.\n" +
+                            "다만 기록된 병 무게 ${chemical.weight}kg 대비 " +
+                            "실제 감소량이 ${measuredDelta ?: "-"}kg입니다.\n" +
+                            "맞는 병을 가져갔는지 확인해 주세요.",
+                    null, "확인",
+                    onPrimary = {
+                        if (expiry != null) showExpiryDisposalModal(chemical, expiry)
+                        else resetScanState()
+                    }
+                )
             }
-            true -> {
-                tone = AppModal.Tone.SUCCESS
-                icon = R.drawable.ic_check
-                title = "반출 완료"
-                message = "[${chemical.name}]이(가) 반출 처리되었습니다.\n" +
-                        "무게 검증 완료 (${measuredDelta ?: "-"}kg 감소)"
-                autoDismiss = 3000L
-            }
+            expiry != null -> showExpiryDisposalModal(chemical, expiry)
             else -> {
-                tone = AppModal.Tone.SUCCESS
-                icon = R.drawable.ic_check
-                title = "반출 완료"
-                message = "[${chemical.name}]이(가) 반출 처리되었습니다.\n" +
-                        "(무게 확인 없이 기록)"
-                autoDismiss = 3000L
+                val verifiedNote =
+                    if (weightVerified == true) "무게 검증 완료 (${measuredDelta ?: "-"}kg 감소)"
+                    else "(무게 확인 없이 기록)"
+                AppModal.show(
+                    this, AppModal.Tone.SUCCESS, R.drawable.ic_check,
+                    "반출 완료",
+                    "[${chemical.name}]이(가) 반출 처리되었습니다.\n$verifiedNote",
+                    null, "확인",
+                    autoDismissMs = 3000L,
+                    onPrimary = { resetScanState() }
+                )
             }
         }
+    }
+
+    // ---------- 유통기한 경고 · 폐기 등록 (design.pen app-exception-modals §2·2-1·2-2) ----------
+
+    /** 경과(expired=true, days=경과일) 또는 30일 이내 임박(expired=false, days=남은일). null이면 정상 */
+    private data class ExpiryInfo(val expired: Boolean, val days: Long)
+
+    private fun expiryInfoOf(chemical: ChemicalData): ExpiryInfo? {
+        val date = chemical.expiration_date
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
+        val today = LocalDate.now()
+        return when {
+            date.isBefore(today) -> ExpiryInfo(true, ChronoUnit.DAYS.between(date, today))
+            // 서버 alerts 와 동일 기준: 30일 이내 임박
+            ChronoUnit.DAYS.between(today, date) <= 30 ->
+                ExpiryInfo(false, ChronoUnit.DAYS.between(today, date))
+            else -> null
+        }
+    }
+
+    private fun showExpiryDisposalModal(chemical: ChemicalData, expiry: ExpiryInfo) {
+        val tone = if (expiry.expired) AppModal.Tone.DANGER else AppModal.Tone.WARNING
+        val title = if (expiry.expired) "유통기한 경과 시약" else "유통기한 임박 시약"
+        val message = if (expiry.expired) {
+            "'${chemical.name}' 반출이 완료되었습니다.\n" +
+                    "유통기한(${chemical.expiration_date})이 ${expiry.days}일 경과한 시약입니다.\n" +
+                    "사용을 중단하고 폐기 등록을 권장합니다."
+        } else {
+            "'${chemical.name}' 반출이 완료되었습니다.\n" +
+                    "유통기한(${chemical.expiration_date})까지 ${expiry.days}일 남은 시약입니다.\n" +
+                    "사용 계획이 없다면 폐기 등록을 권장합니다."
+        }
         AppModal.show(
-            this, tone, icon, title, message,
-            null, "확인",
-            autoDismissMs = autoDismiss,
-            onPrimary = { resetScanState() }
+            this, tone, R.drawable.ic_clock_alert, title, message,
+            "그래도 반출", "폐기 등록",
+            onSecondary = { resetScanState() },
+            onPrimary = { disposeChemical(chemical) }
         )
+    }
+
+    private fun disposeChemical(chemical: ChemicalData) {
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.disposeChemical(chemical.id, DisposeRequest(username = currentUser))
+                AppModal.show(
+                    this@CheckoutActivity, AppModal.Tone.SUCCESS, R.drawable.ic_trash_2,
+                    "폐기 등록 완료",
+                    "'${chemical.name}'이(가) 폐기 등록되었습니다.\n재고 목록에서 삭제되었습니다.",
+                    null, "확인",
+                    onPrimary = { resetScanState() }
+                )
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@CheckoutActivity,
+                    httpErrorDetail(e) ?: "폐기 등록에 실패했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                resetScanState()
+            }
+        }
     }
 
     private fun resetScanState() {

@@ -124,5 +124,32 @@
                 android:textStyle="bold"
                 android:textColor="@color/text_muted" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navInventory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+            <ImageView
+                android:id="@+id/navInventoryIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_boxes"
+                android:contentDescription="재고 관리"
+                app:tint="@color/text_muted" />
+            <TextView
+                android:id="@+id/navInventoryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="재고 관리"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_muted" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

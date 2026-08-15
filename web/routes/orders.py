@@ -7,8 +7,60 @@ import schemas
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
+# 잔량 % 환산 기준 (프런트 재고 관리와 동일: 수납칸 용량 2.0kg)
+CAPACITY_KG = 2.0
+# 이 잔량(%) 이하로 떨어지면 주문 목록에 자동 추가한다 (반출중·비치중 무관)
+LOW_STOCK_PCT = 15
+
+
+def _sync_low_stock_orders(db: Session):
+    """잔량이 LOW_STOCK_PCT 이하인 시약을 주문 대기 목록에 자동 등록한다.
+
+    - 같은 이름의 병이 여러 개면 가장 적게 남은 병 기준으로 판단
+    - 같은 이름의 pending 주문이 이미 있으면 현재 잔량 표기만 갱신
+    - ordered 상태 주문만 있으면 재추가하지 않음 (입고 대기 중으로 간주)
+    """
+    by_name: Dict[str, list] = {}
+    for o in db.query(models.Order).all():
+        by_name.setdefault(o.chemical_name, []).append(o)
+
+    lowest: Dict[str, int] = {}
+    chem_of: Dict[str, models.Chemical] = {}
+    for chem in db.query(models.Chemical).all():
+        pct = max(0, min(100, round((chem.weight or 0.0) / CAPACITY_KG * 100)))
+        if chem.name not in lowest or pct < lowest[chem.name]:
+            lowest[chem.name] = pct
+            chem_of[chem.name] = chem
+
+    changed = False
+    for name, pct in lowest.items():
+        if pct > LOW_STOCK_PCT:
+            continue
+        existing = by_name.get(name, [])
+        pending = next((o for o in existing if o.status == "pending"), None)
+        if pending is not None:
+            if pending.current_qty != f"{pct}%":
+                pending.current_qty = f"{pct}%"
+                changed = True
+        elif not existing:
+            chem = chem_of[name]
+            db.add(models.Order(
+                chemical_name=name,
+                formula=chem.formula,
+                manufacturer=chem.manufacturer,
+                current_qty=f"{pct}%",
+                threshold_qty=f"{LOW_STOCK_PCT}%",
+                price=0,
+            ))
+            changed = True
+    if changed:
+        db.commit()
+
+
 @router.get("")
 def get_orders(db: Session = Depends(get_db)):
+    # 조회 시마다 잔량 저하 시약을 주문 목록과 동기화한다
+    _sync_low_stock_orders(db)
     return db.query(models.Order).all()
 
 @router.post("")

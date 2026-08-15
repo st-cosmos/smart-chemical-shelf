@@ -195,6 +195,31 @@ def select_led(req: schemas.SelectLedRequest, db: Session = Depends(get_db)):
         "col": shelf.col
     }
 
+@router.post("/{chem_id}/dispose")
+def dispose_chemical(chem_id: str, req: Dict[str, str], db: Session = Depends(get_db)):
+    """폐기 등록: 유통기한 경고 시약을 재고에서 삭제하고 '폐기' 로그를 남긴다.
+    행 자체가 삭제되므로 재고 리스트·유통기한/혼재 경고에서 함께 사라진다."""
+    chem = db.query(models.Chemical).filter(models.Chemical.id == chem_id).first()
+    if not chem:
+        raise HTTPException(status_code=404, detail="시약을 찾을 수 없습니다.")
+
+    username = req.get("username", "")
+    user = db.query(models.User).filter(models.User.username == username).first()
+    operator_name = user.nickname if user else (username or "알수없음")
+    chem_name = chem.name
+
+    db.add(models.Log(
+        chemical_id=chem.id,
+        chemical_name=chem_name,
+        action="폐기",
+        operator_name=operator_name,
+        details=f"유통기한 경고에 따른 폐기 등록 — 재고 목록에서 삭제됨 "
+                f"(유통기한 {chem.expiration_date or '-'})",
+    ))
+    db.delete(chem)
+    db.commit()
+    return {"status": "success", "chemical_id": chem_id, "chemical_name": chem_name}
+
 @router.get("/alerts")
 def get_alerts(db: Session = Depends(get_db)):
     # 1. Un-scanned checkouts:

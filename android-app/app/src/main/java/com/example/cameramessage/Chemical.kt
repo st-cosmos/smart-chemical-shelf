@@ -158,6 +158,10 @@ data class SelectLedRequest(
     val chem_id: String
 )
 
+data class DisposeRequest(
+    val username: String
+)
+
 data class SelectLedResponse(
     val status: String,
     val shelf_id: String,
