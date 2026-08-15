@@ -27,7 +27,8 @@ gateway.py             메인 프로그램: CoAP 서버 + 웹 서버 브리지 +
 shelfcoap.py           최소 CoAP 코덱/서버 (의존성 없음, ff03::1 멀티캐스트 가입 포함)
 gateway.example.toml   설정 템플릿 (gateway.toml 로 복사해서 사용)
 pyproject.toml         의존성 (aiohttp 하나)
-systemd/               ot-daemon.service, shelf-gateway.service
+provision-thread.sh    부팅 시 Thread 데이터셋 자동 프로비저닝 (§3.1)
+systemd/               ot-daemon.service, thread-provision.service, shelf-gateway.service
 test_*.py              단위 테스트: python -m unittest (의존성 불필요)
 ```
 
@@ -138,7 +139,7 @@ sudo systemctl enable --now ot-daemon
 
 **노드 펌웨어 `../firmware/prj.conf` 의 크리덴셜과 정확히 일치해야 합니다.**
 
-> **주의: 이 빌드의 ot-daemon 은 데이터셋을 재부팅 후 유지하지 못합니다** (2026-08-09 실측 — 재부팅 뒤 `dataset active` 가 `NotFound`, `state` 가 `disabled`). POSIX 설정 저장 경로가 휘발성인 탓으로 보입니다. 파이를 재부팅했다면 아래 블록을 다시 실행하세요 (같은 값으로 다시 커밋하면 노드는 재커미셔닝 없이 그대로 붙습니다). 게이트웨이 브리지는 wpan0 이 다시 서면 자동으로 멀티캐스트에 재가입합니다.
+> **주의: 이 빌드의 ot-daemon 은 데이터셋을 재부팅 후 유지하지 못합니다** (2026-08-09 실측 — 재부팅 뒤 `dataset active` 가 `NotFound`, `state` 가 `disabled`). POSIX 설정 저장 경로가 휘발성인 탓으로 보입니다. §3.1 의 자동 프로비저닝 유닛을 설치하면 재부팅 때마다 자동 복구됩니다. 수동으로 하려면 아래 블록을 다시 실행하세요 (같은 값으로 다시 커밋하면 노드는 재커미셔닝 없이 그대로 붙습니다). 게이트웨이 브리지는 wpan0 이 다시 서면 자동으로 멀티캐스트에 재가입합니다.
 
 ```bash
 sudo ot-ctl dataset init new
@@ -154,6 +155,26 @@ sudo ot-ctl dataset commit active
 sudo ot-ctl ifconfig up
 sudo ot-ctl thread start
 ```
+
+### 3.1 부팅 시 자동 프로비저닝 (권장)
+
+위 블록을 재부팅마다 손으로 치는 대신, ot-daemon 기동 직후 자동으로 실행하는
+oneshot 유닛을 설치합니다 (2026-08-15 파이에 설치·검증 완료):
+
+```bash
+sudo install -m755 provision-thread.sh /opt/shelf-gateway/provision-thread.sh
+sudo cp systemd/thread-provision.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable thread-provision
+```
+
+스크립트는 `state` 가 `disabled` 일 때만 데이터셋을 커밋합니다. prefix 는 고정,
+타임스탬프는 `YYYYMMDDHH` 라 항상 증가 — 노드들이 재커미셔닝 없이 따라옵니다.
+비상시 수동 복구도 `sudo systemctl restart thread-provision` 한 줄이면 됩니다.
+
+> 구현 함정: `ot-ctl` 출력 라인 끝에는 CR(`\r`)이 섞여 있어, 문자열을 그대로
+> `"disabled"` 와 비교하면 항상 어긋납니다 (2026-08-15 실측 — 유닛이 "성공"으로
+> 끝나고도 Thread 는 disabled 로 방치됨). 비교 전 `tr -d '\r'` 이 필수입니다.
 
 ### 함정 — stale 데이터셋을 가진 노드는 "붙는데 통신이 안 된다" (2026-08-09 실측)
 
