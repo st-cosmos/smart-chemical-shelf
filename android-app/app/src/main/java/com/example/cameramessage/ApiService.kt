@@ -90,6 +90,13 @@ interface ApiService {
     @POST("api/chemicals/select-led")
     suspend fun selectLed(@Body request: SelectLedRequest): SelectLedResponse
 
+    // 유통기한 경고 시약 폐기 등록 — 재고에서 삭제 + '폐기' 로그
+    @POST("api/chemicals/{chemId}/dispose")
+    suspend fun disposeChemical(
+        @Path("chemId") chemId: String,
+        @Body request: DisposeRequest
+    ): Map<String, String>
+
     @GET("api/chemicals/alerts")
     suspend fun getAlerts(): ChemicalAlerts
 
