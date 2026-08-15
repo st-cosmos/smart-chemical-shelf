@@ -210,7 +210,6 @@ function ShelfCard({
                       <span className="slot-remain-val">
                         {device.weight.toFixed(1)}kg
                       </span>
-                      <span className="slot-remain-unit">남음</span>
                     </div>
                     <span className="slot-pos">
                       {config.id}

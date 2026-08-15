@@ -1337,12 +1337,6 @@ select.input-field {
   color: var(--primary);
 }
 
-.slot-remain-unit {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
 .slot-pos {
   font-size: 11px;
   color: var(--text-muted);
@@ -1585,6 +1579,36 @@ select.input-field {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+/* ---------- 재고 관리 상태 필터 칩 (design.pen web-inventory) ---------- */
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  border-radius: 999px;
+  padding: 10px 22px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.filter-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 /* ---------- 슬롯 상세 모달 (design.pen web-shelf-manage-slot) ---------- */
