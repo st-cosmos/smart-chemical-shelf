@@ -66,7 +66,9 @@ void cs1237_power_down(const struct cs1237 *dev);
 int cs1237_read(const struct cs1237 *dev, int32_t *raw, uint32_t timeout_ms);
 
 /**
- * Throw away @p discard conversions, then average @p samples of them.
+ * Throw away @p discard conversions, read @p samples (max 64) and return
+ * their interquartile mean - the middle two quartiles averaged, so a rare
+ * corrupted frame does not drag the result. Plain mean below 4 samples.
  */
 int cs1237_read_avg(const struct cs1237 *dev, uint8_t discard, uint8_t samples,
 		    int32_t *raw);

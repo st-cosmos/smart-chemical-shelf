@@ -100,6 +100,12 @@ int cs1237_read(const struct cs1237 *dev, int32_t *raw, uint32_t timeout_ms)
 		return ret;
 	}
 
+	/* The whole 27 clock frame takes ~110 us. At 640 Hz the data register
+	 * is rewritten every 1.56 ms, so a thread preemption mid-frame corrupts
+	 * the read - observed as gross outliers (2026-08-15, ACTIVE mode).
+	 * Keep the scheduler locked for the frame; interrupts still run and
+	 * the per-pulse irq_lock windows stay as short as before. */
+	k_sched_lock();
 	for (int i = 0; i < 24; i++) {
 		v = (v << 1) | (uint32_t)sck_pulse(dev, true);
 	}
@@ -107,6 +113,7 @@ int cs1237_read(const struct cs1237 *dev, int32_t *raw, uint32_t timeout_ms)
 	for (int i = 0; i < 3; i++) {
 		(void)sck_pulse(dev, false);
 	}
+	k_sched_unlock();
 
 	if (v == 0x7FFFFFu || v == 0x800000u) {
 		LOG_WRN("input saturated (raw 0x%06x) - check excitation and gain", v);
@@ -126,6 +133,10 @@ static int reg_xfer(const struct cs1237 *dev, bool write, uint8_t *val)
 	if (ret) {
 		return ret;
 	}
+
+	/* Same mid-frame preemption hazard as cs1237_read(), and a config
+	 * frame is even longer (~190 us). */
+	k_sched_lock();
 
 	/* 1..26: conversion result plus filler, all discarded. */
 	for (int i = 0; i < 26; i++) {
@@ -169,6 +180,7 @@ static int reg_xfer(const struct cs1237 *dev, bool write, uint8_t *val)
 	/* 46: the chip takes DRDY/DOUT back as an output. */
 	(void)sck_pulse(dev, false);
 
+	k_sched_unlock();
 	return 0;
 }
 
@@ -256,11 +268,13 @@ void cs1237_power_down(const struct cs1237 *dev)
 int cs1237_read_avg(const struct cs1237 *dev, uint8_t discard, uint8_t samples,
 		    int32_t *raw)
 {
+	int32_t buf[64];
 	int64_t acc = 0;
+	uint8_t lo, hi;
 	int32_t v;
 	int ret;
 
-	if (samples == 0) {
+	if (samples == 0 || samples > ARRAY_SIZE(buf)) {
 		return -EINVAL;
 	}
 
@@ -272,13 +286,33 @@ int cs1237_read_avg(const struct cs1237 *dev, uint8_t discard, uint8_t samples,
 	}
 
 	for (uint8_t i = 0; i < samples; i++) {
-		ret = cs1237_read(dev, &v, READY_TIMEOUT_MS);
+		ret = cs1237_read(dev, &buf[i], READY_TIMEOUT_MS);
 		if (ret) {
 			return ret;
 		}
-		acc += v;
 	}
 
-	*raw = (int32_t)(acc / samples);
+	/* Insertion sort - samples is at most 64. */
+	for (uint8_t i = 1; i < samples; i++) {
+		int32_t key = buf[i];
+		int8_t j = (int8_t)i - 1;
+
+		while (j >= 0 && buf[j] > key) {
+			buf[j + 1] = buf[j];
+			j--;
+		}
+		buf[j + 1] = key;
+	}
+
+	/* Interquartile mean: average the middle half so a rare corrupted
+	 * frame (see cs1237_read) lands in a discarded quartile instead of
+	 * dragging the result. With fewer than 4 samples it is a plain mean. */
+	lo = samples / 4;
+	hi = samples - lo;
+	for (uint8_t i = lo; i < hi; i++) {
+		acc += buf[i];
+	}
+
+	*raw = (int32_t)(acc / (hi - lo));
 	return 0;
 }
