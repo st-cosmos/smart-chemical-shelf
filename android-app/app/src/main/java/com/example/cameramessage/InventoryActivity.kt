@@ -1,11 +1,15 @@
 package com.example.cameramessage
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -24,6 +28,9 @@ import kotlin.math.roundToInt
 // 수납칸 용량 기준 (kg) — 잔량 % 환산용 (web Inventory.tsx 와 동일 기준)
 private const val CAPACITY_KG = 2.0
 private const val DANGER_PCT = 25
+
+// 시약 카드를 이 시간(ms) 이상 꾹 누르면 폐기 확인 모달을 띄운다
+private const val DISPOSE_HOLD_MS = 2000L
 
 /**
  * app-inventory (design.pen)
@@ -47,12 +54,16 @@ class InventoryActivity : AppCompatActivity() {
 
     private var filter = Filter.ALL
     private var query = ""
+    private var currentUser = ""
     private val chipViews = linkedMapOf<Filter, TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInventoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
+        currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
 
         exceptionHelper = ExceptionDialogHelper(this)
         NavBar.setup(binding.bottomNav, this, NavBar.TAB_INVENTORY)
@@ -254,7 +265,63 @@ class InventoryActivity : AppCompatActivity() {
         } else {
             b.invLedBtn.setOnClickListener { lightLed(chem) }
         }
+        attachDisposeHold(b.root, chem)
         return b.root
+    }
+
+    // ---------- 폐기 등록 (카드 3초 홀드 → 확인 모달, design.pen app-exception-modals §2-3) ----------
+
+    /** 카드를 DISPOSE_HOLD_MS 이상 누르고 있으면 폐기 확인 모달을 띄운다.
+     *  스크롤이 시작되면 ACTION_CANCEL 이 전달되어 타이머가 자동 취소된다. */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun attachDisposeHold(card: View, chem: ChemicalData) {
+        var pending: Runnable? = null
+        card.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    pending = Runnable {
+                        v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        showDisposeModal(chem)
+                    }.also { v.postDelayed(it, DISPOSE_HOLD_MS) }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    pending?.let { v.removeCallbacks(it) }
+                    pending = null
+                }
+            }
+            true
+        }
+    }
+
+    private fun showDisposeModal(chem: ChemicalData) {
+        AppModal.show(
+            this, AppModal.Tone.DANGER, R.drawable.ic_trash_2,
+            "시약 폐기",
+            "'${chem.name}'을(를) 폐기 등록할까요?\n재고 목록에서 삭제되며 되돌릴 수 없습니다.",
+            "취소", "폐기하기",
+            onPrimary = { disposeChemical(chem) }
+        )
+    }
+
+    private fun disposeChemical(chem: ChemicalData) {
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.disposeChemical(chem.id, DisposeRequest(username = currentUser))
+                AppModal.show(
+                    this@InventoryActivity, AppModal.Tone.SUCCESS, R.drawable.ic_trash_2,
+                    "폐기 등록 완료",
+                    "'${chem.name}'이(가) 폐기 등록되었습니다.\n재고 목록에서 삭제되었습니다.",
+                    null, "확인"
+                )
+                fetchData()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@InventoryActivity,
+                    httpErrorDetail(e) ?: "폐기 등록에 실패했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     // ---------- 데이터 유틸 ----------
