@@ -19438,41 +19438,6 @@
                                   "fontWeight": "600"
                                 }
                               ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "r1t3E",
-                              "name": "Edit Mode Chip",
-                              "fill": "$warning-soft",
-                              "cornerRadius": 999,
-                              "gap": 6,
-                              "padding": [
-                                6,
-                                14
-                              ],
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "icon",
-                                  "id": "B5eKBd",
-                                  "name": "Edit Mode Icon",
-                                  "width": 14,
-                                  "height": 14,
-                                  "icon": "pencil",
-                                  "library": "lucide",
-                                  "fill": "$warning"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "R9nGS",
-                                  "name": "Edit Mode Text",
-                                  "fill": "$warning",
-                                  "content": "수정 모드",
-                                  "fontFamily": "$font",
-                                  "fontSize": 13,
-                                  "fontWeight": "600"
-                                }
-                              ]
                             }
                           ]
                         },
@@ -19714,20 +19679,6 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "mRyTA",
-                          "name": "Col Strip Spacer RowDel",
-                          "width": 30,
-                          "height": 2
-                        },
-                        {
-                          "type": "frame",
-                          "id": "EeLXO",
-                          "name": "Col Strip Spacer AddCol",
-                          "width": 56,
-                          "height": 2
                         }
                       ]
                     },
@@ -20843,7 +20794,7 @@
                               "cornerRadius": 999,
                               "id": "Wdxhf",
                               "layoutPosition": "absolute",
-                              "x": 373,
+                              "x": 483,
                               "y": 8,
                               "name": "VScrollbar A",
                               "fill": "$bg-deep",
@@ -20867,6 +20818,9 @@
                         {
                           "type": "frame",
                           "id": "Y7IDk",
+                          "layoutPosition": "absolute",
+                          "x": -28,
+                          "y": 0,
                           "name": "Row Delete Col",
                           "clip": true,
                           "height": 356,
@@ -20877,7 +20831,7 @@
                               "type": "frame",
                               "id": "O8YRCN",
                               "name": "Row Del 1",
-                              "width": 30,
+                              "width": 26,
                               "height": 150,
                               "justifyContent": "center",
                               "alignItems": "center",
@@ -20911,7 +20865,7 @@
                               "type": "frame",
                               "id": "KEOq8",
                               "name": "Row Del 2",
-                              "width": 30,
+                              "width": 26,
                               "height": 150,
                               "justifyContent": "center",
                               "alignItems": "center",
@@ -20945,7 +20899,7 @@
                               "type": "frame",
                               "id": "IQHNe",
                               "name": "Row Del 3",
-                              "width": 30,
+                              "width": 26,
                               "height": 150,
                               "justifyContent": "center",
                               "alignItems": "center",
@@ -20979,7 +20933,7 @@
                               "type": "frame",
                               "id": "N1IarS",
                               "name": "Row Del 4",
-                              "width": 30,
+                              "width": 26,
                               "height": 150,
                               "justifyContent": "center",
                               "alignItems": "center",
@@ -21010,64 +20964,86 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "agtyb",
-                          "name": "Add Col Btn",
-                          "width": 56,
-                          "height": 356,
-                          "fill": "$bg",
-                          "cornerRadius": 16,
-                          "layout": "vertical",
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "jxTrc",
-                              "name": "Add Col Icon",
-                              "width": 26,
-                              "height": 26,
-                              "icon": "plus",
-                              "library": "lucide",
-                              "fill": "$primary"
-                            }
-                          ]
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "h5z45",
-                      "name": "Add Row Btn",
+                      "id": "E1Ryb",
+                      "name": "Add Line Row",
                       "width": "fill_container",
-                      "height": 52,
-                      "fill": "$bg",
-                      "cornerRadius": 16,
                       "gap": 8,
                       "justifyContent": "center",
-                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "icon",
-                          "id": "abOT0",
-                          "name": "Add Row Icon",
-                          "width": 24,
-                          "height": 24,
-                          "icon": "plus",
-                          "library": "lucide",
-                          "fill": "$primary"
+                          "type": "frame",
+                          "id": "OOr4B",
+                          "name": "Add 행 추가 Btn",
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            18
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "n9lhYD",
+                              "name": "Add 행 추가 Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "EzHJO",
+                              "name": "Add 행 추가 Text",
+                              "fill": "$primary",
+                              "content": "행 추가",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
                         },
                         {
-                          "type": "text",
-                          "id": "lsYuC",
-                          "name": "Add Row Text",
-                          "fill": "$primary",
-                          "content": "행 추가",
-                          "fontFamily": "$font",
-                          "fontSize": 17,
-                          "fontWeight": "600"
+                          "type": "frame",
+                          "id": "lI0ca",
+                          "name": "Add 열 추가 Btn",
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            18
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "y47Ofw",
+                              "name": "Add 열 추가 Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "hkG3L",
+                              "name": "Add 열 추가 Text",
+                              "fill": "$primary",
+                              "content": "열 추가",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
                         }
                       ]
                     }
