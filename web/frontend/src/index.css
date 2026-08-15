@@ -1416,6 +1416,31 @@ select.input-field {
 
 /* ---------- 선반 수정 모드 (design.pen web-shelf-manage-edit) ---------- */
 
+.shelf-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.shelf-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  white-space: nowrap;
+}
+
+.shelf-delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
 .shelf-edit-done {
   display: flex;
   align-items: center;
@@ -1426,6 +1451,7 @@ select.input-field {
   font-size: 14px;
   font-weight: 600;
   padding: 8px 18px;
+  white-space: nowrap;
 }
 
 .edit-mode-chip {

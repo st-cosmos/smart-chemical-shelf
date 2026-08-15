@@ -87,6 +87,26 @@ def unregister_shelf(shelf_id: str, db: Session = Depends(get_db)):
     return shelf
 
 
+@router.delete("/configs/{shelf_id}")
+def delete_config(shelf_id: str, db: Session = Depends(get_db)):
+    """선반 삭제: 선반 설정을 제거하고, 등록돼 있던 기기들은 모두 등록 해제한다."""
+    cfg = db.query(models.ShelfConfig).filter(models.ShelfConfig.id == shelf_id).first()
+    if not cfg:
+        raise HTTPException(status_code=404, detail="선반 설정을 찾을 수 없습니다.")
+
+    removed = 0
+    devices = db.query(models.Shelf).filter(
+        models.Shelf.parent_shelf == shelf_id,
+        models.Shelf.status == "registered",
+    ).all()
+    for d in devices:
+        _unregister_device(d)
+        removed += 1
+    db.delete(cfg)
+    db.commit()
+    return {"status": "success", "shelf_id": shelf_id, "removed_devices": removed}
+
+
 @router.post("/configs/{shelf_id}/delete-row")
 def delete_config_row(shelf_id: str, req: Dict[str, int], db: Session = Depends(get_db)):
     """행 삭제: 해당 행의 기기들은 등록 해제, 아래 행 기기들은 한 칸 위로 당긴다."""

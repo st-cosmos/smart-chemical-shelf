@@ -10,12 +10,13 @@ import {
   Minus,
   Pencil,
   Plus,
+  Trash2,
   X,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Input from '../components/Input';
-import { getJSON, postJSON } from '../api';
+import { deleteJSON, getJSON, postJSON } from '../api';
 import type { Chemical, ShelfConfig, ShelfDevice } from '../types';
 import { useWebSocket } from '../useWebSocket';
 
@@ -33,6 +34,7 @@ interface ShelfCardProps {
   editing: boolean;
   selectedSlotId: string | null;
   onToggleEdit: () => void;
+  onDeleteShelf: () => void;
   onOpenRegister: (t: RegisterTarget) => void;
   onOpenSlot: (device: ShelfDevice) => void;
   refresh: () => Promise<void>;
@@ -48,6 +50,7 @@ function ShelfCard({
   editing,
   selectedSlotId,
   onToggleEdit,
+  onDeleteShelf,
   onOpenRegister,
   onOpenSlot,
   refresh,
@@ -130,10 +133,16 @@ function ShelfCard({
           )}
         </div>
         {editing ? (
-          <button className="shelf-edit-done" onClick={onToggleEdit}>
-            <Check size={16} />
-            완료
-          </button>
+          <div className="shelf-head-actions">
+            <button className="shelf-delete-btn" onClick={onDeleteShelf}>
+              <Trash2 size={16} />
+              선반 삭제
+            </button>
+            <button className="shelf-edit-done" onClick={onToggleEdit}>
+              <Check size={16} />
+              완료
+            </button>
+          </div>
         ) : (
           <button className="shelf-edit-btn" title="선반 편집" onClick={onToggleEdit}>
             <Pencil size={24} />
@@ -355,6 +364,25 @@ export default function Shelves() {
     }
   };
 
+  const deleteShelf = async (config: ShelfConfig) => {
+    const cnt = devices.filter(
+      (d) => d.status === 'registered' && d.parent_shelf === config.id,
+    ).length;
+    const ok = window.confirm(
+      `선반 ${config.id}을(를) 삭제할까요?${
+        cnt > 0 ? `\n등록된 기기 ${cnt}대도 함께 등록 해제됩니다.` : ''
+      }`,
+    );
+    if (!ok) return;
+    try {
+      await deleteJSON(`/api/shelves/configs/${config.id}`);
+      setEditShelfId(null);
+      await fetchData();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : '선반 삭제에 실패했습니다.');
+    }
+  };
+
   const openRegister = (t: RegisterTarget) => {
     if (unregistered.length === 0) return;
     setTarget(t);
@@ -389,9 +417,12 @@ export default function Shelves() {
             스마트 쉘프의 구역별 선반 상태 및 적재 현황을 실시간으로 모니터링합니다.
           </span>
         </div>
-        <Button pill icon={Plus} onClick={addShelf}>
-          새 선반 추가
-        </Button>
+        {/* 새 선반 추가는 수정 모드(연필)에서만 노출 — 선반이 하나도 없을 때는 예외적으로 표시 */}
+        {(editShelfId !== null || configs.length === 0) && (
+          <Button pill icon={Plus} onClick={addShelf}>
+            새 선반 추가
+          </Button>
+        )}
       </div>
 
       {/* 신규 등록 대기 기기 스트립 (design.pen Unreg Strip) */}
@@ -432,6 +463,7 @@ export default function Shelves() {
               onToggleEdit={() =>
                 setEditShelfId(editShelfId === config.id ? null : config.id)
               }
+              onDeleteShelf={() => deleteShelf(config)}
               onOpenRegister={openRegister}
               onOpenSlot={(d) => setSlotModalId(d.id)}
               refresh={fetchData}
