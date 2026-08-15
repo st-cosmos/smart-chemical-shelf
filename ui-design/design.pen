@@ -7845,185 +7845,6 @@
     },
     {
       "type": "frame",
-      "id": "RVHFc",
-      "x": 14207,
-      "y": 3877,
-      "name": "app-exception-modals",
-      "fill": "#FBFCFF",
-      "cornerRadius": 24,
-      "layout": "vertical",
-      "gap": 32,
-      "padding": 48,
-      "children": [
-        {
-          "type": "text",
-          "id": "t9igKZ",
-          "name": "Ex Title",
-          "fill": "$text-strong",
-          "content": "예외 상황 모달 — 앱 공통",
-          "fontFamily": "$font",
-          "fontSize": 32,
-          "fontWeight": "700"
-        },
-        {
-          "type": "frame",
-          "id": "RQDCD",
-          "name": "Ex Row",
-          "gap": 40,
-          "children": [
-            {
-              "type": "frame",
-              "id": "bdrf3",
-              "name": "Ex Col 1. 반출 스캔 미완료",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "nqNnJ",
-                  "name": "1. 반출 스캔 미완료 Caption",
-                  "fill": "$text-muted",
-                  "content": "1. 반출 스캔 미완료",
-                  "fontFamily": "$font",
-                  "fontSize": 20,
-                  "fontWeight": "600"
-                },
-                {
-                  "id": "C9lEJ",
-                  "type": "ref",
-                  "ref": "iZzjT",
-                  "name": "1. 반출 스캔 미완료 Modal",
-                  "descendants": {
-                    "iSSAj": {
-                      "fill": "$danger-soft"
-                    },
-                    "J03WX": {
-                      "icon": "clipboard-list",
-                      "fill": "$danger"
-                    },
-                    "m18Fjg": {
-                      "content": "반출 스캔 미완료 알림"
-                    },
-                    "R4hAZ5": {
-                      "content": "선반에서 3개 시약의 회수가 감지되었지만 반출 스캔이 완료되지 않았습니다.\n아세톤 · 메탄올 · 톨루엔"
-                    },
-                    "i9Blpk": {
-                      "content": "나중에 하기"
-                    },
-                    "gjFik": {
-                      "fill": "$danger"
-                    },
-                    "jRxuZ": {
-                      "content": "지금 스캔하기"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "towGO",
-              "name": "Ex Col 2. 유통기한 경고",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "U1w9JD",
-                  "name": "2. 유통기한 경고 Caption",
-                  "fill": "$text-muted",
-                  "content": "2. 유통기한 경고",
-                  "fontFamily": "$font",
-                  "fontSize": 20,
-                  "fontWeight": "600"
-                },
-                {
-                  "id": "t1i8UR",
-                  "type": "ref",
-                  "ref": "iZzjT",
-                  "name": "2. 유통기한 경고 Modal",
-                  "descendants": {
-                    "iSSAj": {
-                      "fill": "$warning-soft"
-                    },
-                    "J03WX": {
-                      "icon": "clock-alert",
-                      "fill": "$warning"
-                    },
-                    "m18Fjg": {
-                      "content": "유통기한 경과 시약"
-                    },
-                    "R4hAZ5": {
-                      "content": "질산은 표준액의 유통기한(2026-06-30)이 18일 경과했습니다.\n사용을 중단하고 폐기 절차를 권장합니다."
-                    },
-                    "i9Blpk": {
-                      "content": "그래도 반출"
-                    },
-                    "gjFik": {
-                      "fill": "$warning"
-                    },
-                    "jRxuZ": {
-                      "content": "폐기 등록"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "bWN54",
-              "name": "Ex Col 3. 인접 보관 위험",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "rrkeJ",
-                  "name": "3. 인접 보관 위험 Caption",
-                  "fill": "$text-muted",
-                  "content": "3. 인접 보관 위험",
-                  "fontFamily": "$font",
-                  "fontSize": 20,
-                  "fontWeight": "600"
-                },
-                {
-                  "id": "NHJkS",
-                  "type": "ref",
-                  "ref": "iZzjT",
-                  "name": "3. 인접 보관 위험 Modal",
-                  "descendants": {
-                    "iSSAj": {
-                      "fill": "$danger-soft"
-                    },
-                    "J03WX": {
-                      "icon": "shield-alert",
-                      "fill": "$danger"
-                    },
-                    "m18Fjg": {
-                      "content": "함께 두면 위험한 시약"
-                    },
-                    "R4hAZ5": {
-                      "content": "황산 0.1M은 인접 수납칸의 시안화칼륨과 반응 위험이 있습니다.\n안전한 보관 위치를 다시 안내해드릴게요."
-                    },
-                    "i9Blpk": {
-                      "content": "무시하고 보관"
-                    },
-                    "gjFik": {
-                      "fill": "$danger"
-                    },
-                    "jRxuZ": {
-                      "content": "안전 위치 안내"
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "yWI4A",
       "x": 0,
       "y": 6532,
@@ -15331,20 +15152,6 @@
                       "fontWeight": "normal"
                     }
                   ]
-                },
-                {
-                  "id": "VCY3c",
-                  "type": "ref",
-                  "ref": "mlWhZ",
-                  "name": "Add Shelf Btn",
-                  "descendants": {
-                    "EALDX": {
-                      "icon": "plus"
-                    },
-                    "HJoNQ": {
-                      "content": "새 선반 추가"
-                    }
-                  }
                 }
               ]
             },
@@ -17543,7 +17350,7 @@
     {
       "type": "frame",
       "id": "b4lA6",
-      "x": 16705,
+      "x": 18294,
       "y": 3877,
       "name": "app-inventory",
       "clip": true,
@@ -19588,13 +19395,14 @@
                       "id": "CRkj6",
                       "name": "Shelf A Head",
                       "width": "fill_container",
-                      "justifyContent": "space_between",
+                      "gap": 10,
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "frame",
                           "id": "TgJNR",
                           "name": "Shelf A HeadL",
+                          "width": "fill_container",
                           "gap": 14,
                           "alignItems": "center",
                           "children": [
@@ -19680,6 +19488,41 @@
                           "icon": "pencil",
                           "library": "lucide",
                           "fill": "$text-muted"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KmduH",
+                          "name": "Shelf Delete Btn",
+                          "fill": "$danger-soft",
+                          "cornerRadius": 999,
+                          "gap": 6,
+                          "padding": [
+                            8,
+                            18
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "qcSyq",
+                              "name": "Shelf Delete Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "trash-2",
+                              "library": "lucide",
+                              "fill": "$danger"
+                            },
+                            {
+                              "type": "text",
+                              "id": "rYiqN",
+                              "name": "Shelf Delete Text",
+                              "fill": "$danger",
+                              "content": "선반 삭제",
+                              "fontFamily": "$font",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
                         },
                         {
                           "type": "frame",
@@ -21992,20 +21835,6 @@
                       "fontWeight": "normal"
                     }
                   ]
-                },
-                {
-                  "id": "SaAtG",
-                  "type": "ref",
-                  "ref": "mlWhZ",
-                  "name": "Add Shelf Btn",
-                  "descendants": {
-                    "EALDX": {
-                      "icon": "plus"
-                    },
-                    "HJoNQ": {
-                      "content": "새 선반 추가"
-                    }
-                  }
                 }
               ]
             },
@@ -24065,6 +23894,831 @@
                       "fontFamily": "$font",
                       "fontSize": 15,
                       "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "N9INP2",
+      "x": 14207,
+      "y": 3877,
+      "name": "app-exception-modals",
+      "fill": "#FBFCFF",
+      "cornerRadius": 24,
+      "layout": "vertical",
+      "gap": 32,
+      "padding": 48,
+      "children": [
+        {
+          "type": "text",
+          "id": "jeYej",
+          "name": "Ex Title",
+          "fill": "$text-strong",
+          "content": "예외 상황 모달 — 앱 공통",
+          "fontFamily": "$font",
+          "fontSize": 32,
+          "fontWeight": "700"
+        },
+        {
+          "type": "frame",
+          "id": "bzvXt",
+          "name": "Ex Row",
+          "gap": 40,
+          "children": [
+            {
+              "type": "frame",
+              "id": "u9vDq",
+              "name": "Ex Col 1. 반출 스캔 미완료",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jQoG9",
+                  "name": "1. 반출 스캔 미완료 Caption",
+                  "fill": "$text-muted",
+                  "content": "1. 반출 스캔 미완료",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "y18dP",
+                  "name": "1. 반출 스캔 미완료 Modal",
+                  "width": 720,
+                  "fill": "$surface",
+                  "cornerRadius": "$radius-lg",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1E2A5633",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 64
+                  },
+                  "layout": "vertical",
+                  "gap": 28,
+                  "padding": [
+                    56,
+                    48
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "lDrAR",
+                      "name": "Modal IconWrap",
+                      "width": 112,
+                      "height": 112,
+                      "fill": "$danger-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "a7pZXN",
+                          "name": "Modal Icon",
+                          "width": 52,
+                          "height": 52,
+                          "icon": "clipboard-list",
+                          "library": "lucide",
+                          "fill": "$danger"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "wIYld",
+                      "name": "Modal Title",
+                      "fill": "$text-strong",
+                      "content": "반출 스캔 미완료 알림",
+                      "fontFamily": "$font",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dx1FH",
+                      "name": "Modal Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "선반에서 3개 시약의 회수가 감지되었지만 반출 스캔이 완료되지 않았습니다.\n아세톤 · 메탄올 · 톨루엔",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "M83Z5",
+                      "name": "Modal Buttons",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "WMImI",
+                          "name": "Modal Btn Secondary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RK11T",
+                              "name": "Modal Btn Sec Label",
+                              "fill": "$text-body",
+                              "content": "나중에 하기",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "LDjVh",
+                          "name": "Modal Btn Primary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$danger",
+                          "cornerRadius": 999,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#3D6BF540",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "wqJza",
+                              "name": "Modal Btn Pri Label",
+                              "fill": "#FFFFFF",
+                              "content": "지금 스캔하기",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Isv8u",
+              "name": "Ex Col 2. 유통기한 경고",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "R0u2i0",
+                  "name": "2. 유통기한 경고 Caption",
+                  "fill": "$text-muted",
+                  "content": "2. 유통기한 경과 — 반출 완료 시",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "b9c5AC",
+                  "name": "2. 유통기한 경고 Modal",
+                  "width": 720,
+                  "fill": "$surface",
+                  "cornerRadius": "$radius-lg",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1E2A5633",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 64
+                  },
+                  "layout": "vertical",
+                  "gap": 28,
+                  "padding": [
+                    56,
+                    48
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "X3r7J",
+                      "name": "Modal IconWrap",
+                      "width": 112,
+                      "height": 112,
+                      "fill": "$danger-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "lHdlK",
+                          "name": "Modal Icon",
+                          "width": 52,
+                          "height": 52,
+                          "icon": "clock-alert",
+                          "library": "lucide",
+                          "fill": "$danger"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "D0fi5g",
+                      "name": "Modal Title",
+                      "fill": "$text-strong",
+                      "content": "유통기한 경과 시약",
+                      "fontFamily": "$font",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vtQfe",
+                      "name": "Modal Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "'질산은 표준액' 반출이 완료되었습니다.\n유통기한(2026-06-30)이 18일 경과한 시약입니다.\n사용을 중단하고 폐기 등록을 권장합니다.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vJo3F",
+                      "name": "Modal Buttons",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "MYb9P",
+                          "name": "Modal Btn Secondary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "p1tjGp",
+                              "name": "Modal Btn Sec Label",
+                              "fill": "$text-body",
+                              "content": "그래도 반출",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RpW0v",
+                          "name": "Modal Btn Primary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$danger",
+                          "cornerRadius": 999,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#3D6BF540",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dTz9o",
+                              "name": "Modal Btn Pri Label",
+                              "fill": "#FFFFFF",
+                              "content": "폐기 등록",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fW4Lq",
+              "name": "Ex Col 2-1. 유통기한 임박",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "q2dAnt",
+                  "name": "2-1. 유통기한 임박 Caption",
+                  "fill": "$text-muted",
+                  "content": "2-1. 유통기한 임박 — 반출 완료 시",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "y1BE7",
+                  "name": "2-1. 유통기한 임박 Modal",
+                  "width": 720,
+                  "fill": "$surface",
+                  "cornerRadius": "$radius-lg",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1E2A5633",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 64
+                  },
+                  "layout": "vertical",
+                  "gap": 28,
+                  "padding": [
+                    56,
+                    48
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "h5aCT",
+                      "name": "Modal IconWrap",
+                      "width": 112,
+                      "height": 112,
+                      "fill": "$warning-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "LDPfO",
+                          "name": "Modal Icon",
+                          "width": 52,
+                          "height": 52,
+                          "icon": "clock-alert",
+                          "library": "lucide",
+                          "fill": "$warning"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "r9byp",
+                      "name": "Modal Title",
+                      "fill": "$text-strong",
+                      "content": "유통기한 임박 시약",
+                      "fontFamily": "$font",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "L0fjSH",
+                      "name": "Modal Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "'아세톤' 반출이 완료되었습니다.\n유통기한(2026-08-30)까지 15일 남은 시약입니다.\n사용 계획이 없다면 폐기 등록을 권장합니다.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L3lJX",
+                      "name": "Modal Buttons",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "kLoqU",
+                          "name": "Modal Btn Secondary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RXaKa",
+                              "name": "Modal Btn Sec Label",
+                              "fill": "$text-body",
+                              "content": "그래도 반출",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ibTKB",
+                          "name": "Modal Btn Primary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$warning",
+                          "cornerRadius": 999,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#3D6BF540",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "c290xA",
+                              "name": "Modal Btn Pri Label",
+                              "fill": "#FFFFFF",
+                              "content": "폐기 등록",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "c0cjE",
+              "name": "Ex Col 2-2. 폐기 등록 완료",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fFspu",
+                  "name": "2-2. 폐기 등록 완료 Caption",
+                  "fill": "$text-muted",
+                  "content": "2-2. 폐기 등록 완료",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "B06hJ3",
+                  "name": "2-2. 폐기 등록 완료 Modal",
+                  "width": 720,
+                  "fill": "$surface",
+                  "cornerRadius": "$radius-lg",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1E2A5633",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 64
+                  },
+                  "layout": "vertical",
+                  "gap": 28,
+                  "padding": [
+                    56,
+                    48
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZbX58",
+                      "name": "Modal IconWrap",
+                      "width": 112,
+                      "height": 112,
+                      "fill": "$success-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "P0pyZw",
+                          "name": "Modal Icon",
+                          "width": 52,
+                          "height": 52,
+                          "icon": "trash-2",
+                          "library": "lucide",
+                          "fill": "$success"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "K8ZTs",
+                      "name": "Modal Title",
+                      "fill": "$text-strong",
+                      "content": "폐기 등록 완료",
+                      "fontFamily": "$font",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PGY8v",
+                      "name": "Modal Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "'질산은 표준액'이(가) 폐기 등록되었습니다.\n재고 목록에서 삭제되었습니다.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cxysH",
+                      "name": "Modal Buttons",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Zwo5G",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Modal Btn Secondary",
+                          "enabled": false,
+                          "width": "fill_container(304)",
+                          "height": 84,
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cQ93y",
+                              "name": "Modal Btn Sec Label",
+                              "fill": "$text-body",
+                              "content": "닫기",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "WDrij",
+                          "name": "Modal Btn Primary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$success",
+                          "cornerRadius": 999,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#3D6BF540",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rNxGL",
+                              "name": "Modal Btn Pri Label",
+                              "fill": "#FFFFFF",
+                              "content": "확인",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p2gJJ",
+              "name": "Ex Col 3. 인접 보관 위험",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "o8f6F6",
+                  "name": "3. 인접 보관 위험 Caption",
+                  "fill": "$text-muted",
+                  "content": "3. 인접 보관 위험",
+                  "fontFamily": "$font",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "MrCZ2",
+                  "name": "3. 인접 보관 위험 Modal",
+                  "width": 720,
+                  "fill": "$surface",
+                  "cornerRadius": "$radius-lg",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1E2A5633",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 64
+                  },
+                  "layout": "vertical",
+                  "gap": 28,
+                  "padding": [
+                    56,
+                    48
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "zTezL",
+                      "name": "Modal IconWrap",
+                      "width": 112,
+                      "height": 112,
+                      "fill": "$danger-soft",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "fBFD9",
+                          "name": "Modal Icon",
+                          "width": 52,
+                          "height": 52,
+                          "icon": "shield-alert",
+                          "library": "lucide",
+                          "fill": "$danger"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "uuu7o",
+                      "name": "Modal Title",
+                      "fill": "$text-strong",
+                      "content": "함께 두면 위험한 시약",
+                      "fontFamily": "$font",
+                      "fontSize": 32,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jhgIL",
+                      "name": "Modal Message",
+                      "fill": "$text-body",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "황산 0.1M은 인접 수납칸의 시안화칼륨과 반응 위험이 있습니다.\n안전한 보관 위치를 다시 안내해드릴게요.",
+                      "lineHeight": 1.55,
+                      "textAlign": "center",
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SvnWT",
+                      "name": "Modal Buttons",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "s9FKpX",
+                          "name": "Modal Btn Secondary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$bg",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "h3VMct",
+                              "name": "Modal Btn Sec Label",
+                              "fill": "$text-body",
+                              "content": "무시하고 보관",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mTQe8",
+                          "name": "Modal Btn Primary",
+                          "width": "fill_container",
+                          "height": 84,
+                          "fill": "$danger",
+                          "cornerRadius": 999,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#3D6BF540",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "A8YPf",
+                              "name": "Modal Btn Pri Label",
+                              "fill": "#FFFFFF",
+                              "content": "안전 위치 안내",
+                              "fontFamily": "$font",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
