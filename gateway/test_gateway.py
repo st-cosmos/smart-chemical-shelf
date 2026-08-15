@@ -245,6 +245,42 @@ class ModeBridgeTest(unittest.TestCase):
         gw._set_mode("idle")                   # 같은 모드는 아무것도 안 함
         self.assertEqual(gw.spawned, [])
 
+    def test_ws_shelf_power_event_switches_mode(self):
+        gw = make_gateway()
+        self.handle(gw, led_poll())            # 노드 등록 (addr 있음)
+        gw.spawned.clear()
+
+        gw._handle_ws_event({"type": "shelf_power", "mode": "idle", "users": 0})
+        self.assertEqual(gw.mode, "idle")
+        self.assertEqual(gw.spawned, ["_push_mode"])
+
+        gw.spawned.clear()
+        gw._handle_ws_event({"type": "shelf_power", "mode": "nonsense"})
+        self.assertEqual(gw.mode, "idle")      # 모르는 값은 무시
+        self.assertEqual(gw.spawned, [])
+
+    def test_ws_led_update_pushes_to_matching_node(self):
+        gw = make_gateway(**{HWID: "SHELF-A1"})
+        self.handle(gw, led_poll())
+        node = gw.nodes[HWID]
+        node.led_known = True                  # 캐시가 있어야 '변화'가 성립
+        node.led_on = False
+        gw.spawned.clear()
+
+        gw._handle_ws_event({"type": "led_update", "device_id": "SHELF-A1",
+                             "data": {"on": True, "time": "12:00:00"}})
+        self.assertTrue(node.led_on)
+        self.assertEqual(gw.spawned, ["_push_led"])
+
+        gw.spawned.clear()
+        gw._handle_ws_event({"type": "led_update", "device_id": "다른선반",
+                             "data": {"on": False}})
+        self.assertTrue(node.led_on)           # 다른 선반 이벤트는 무시
+        self.assertEqual(gw.spawned, [])
+
+        # 브라우저용 이벤트는 조용히 무시된다.
+        gw._handle_ws_event({"type": "weight_update", "device_id": "SHELF-A1"})
+
     def test_led_change_pushes_only_in_active(self):
         # _refresh_led 의 푸시 분기: 캐시가 바뀌었고 active 일 때만.
         async def run(mode, first, second):

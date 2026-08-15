@@ -208,7 +208,8 @@ class Gateway:
         self.base_path: str = cfg["coap"]["base_path"]
         self.id_map: dict[str, str] = dict(cfg.get("nodes") or {})
         self.nodes: dict[str, Node] = {}
-        self.http = None  # aiohttp.ClientSession, run() 에서 생성
+        self.http = None     # aiohttp.ClientSession, run() 에서 생성
+        self.http_ws = None  # ws 전용 세션 (타임아웃 없음), run() 에서 생성
         self.coap: shelfcoap.CoapServer | None = None  # run() 에서 생성
         self.started = time.time()
         self._bg: set[asyncio.Task] = set()
@@ -326,7 +327,11 @@ class Gateway:
             return
 
         self._server_state(node, True)
-        want = bool(data.get("on"))
+        self._apply_led_state(node, bool(data.get("on")))
+
+    def _apply_led_state(self, node: Node, want: bool):
+        """서버발 LED 상태를 캐시에 반영하고, 바뀌었으면 ACTIVE 노드에는
+        폴을 기다리게 하지 않고 즉시 밀어넣는다. (폴링과 ws 양쪽 공용)"""
         changed = node.led_known and want != node.led_on
         if not node.led_known or changed:
             log.info("LED %s('%s') -> %s",
@@ -334,7 +339,6 @@ class Gateway:
         node.led_on = want
         node.led_known = True
 
-        # ACTIVE 노드에는 폴을 기다리게 하지 않고 즉시 밀어넣는다.
         if changed and self.mode == "active" and node.addr is not None:
             self._spawn(self._push_led(node))
 
@@ -454,8 +458,73 @@ class Gateway:
             log.info("LED 푸시 %s('%s') -> %s (ACK)",
                      node.hwid, node.device_id, "켜짐" if want else "꺼짐")
 
+    # ------------------------------------------------------- ws 구독 (빠른 경로)
+
+    def _handle_ws_event(self, data: dict):
+        """웹 서버 ws 이벤트 한 건을 처리한다.
+
+        * shelf_power — 앱 로그인/로그아웃 전환. 백업 폴(2초)을 기다리지
+          않고 즉시 전 노드에 모드를 푸시한다.
+        * led_update — 웹/앱에서 LED 를 바꾼 것. ACTIVE 노드에 즉시 푸시.
+        나머지 타입(weight_update 등, 브라우저용)은 무시한다.
+        """
+        kind = data.get("type")
+
+        if kind == "shelf_power":
+            mode = data.get("mode")
+            if mode in ("active", "idle"):
+                self._set_mode(mode)
+            return
+
+        if kind == "led_update":
+            device_id = data.get("device_id")
+            want = bool((data.get("data") or {}).get("on"))
+            for node in self.nodes.values():
+                if node.device_id == device_id:
+                    self._apply_led_state(node, want)
+                    return
+
+    async def _ws_loop(self):
+        """웹 서버의 /ws 를 구독한다 — 폴링은 그대로 두고 지연만 없앤다.
+
+        서버가 없거나 구버전이면 백오프를 두고 재시도할 뿐, 동작은 백업
+        폴링(_power_poll_loop/_led_poll_loop)이 이어간다. 재접속 직후의
+        상태 불일치도 다음 백업 폴(≤2초)이 맞춘다.
+        """
+        import aiohttp
+
+        url = self.base_url.replace("http", "ws", 1) + "/ws"
+        backoff = 1.0
+        was_ok: bool | None = None
+        while True:
+            try:
+                # self.http 의 3초 total 타임아웃이 상시 연결을 끊지 않도록
+                # ws 전용 세션을 쓴다 (run() 에서 생성).
+                async with self.http_ws.ws_connect(url, heartbeat=30.0) as ws:
+                    if was_ok is not True:
+                        log.info("웹 서버 ws 구독: %s", url)
+                    was_ok = True
+                    backoff = 1.0
+                    async for msg in ws:
+                        if msg.type != aiohttp.WSMsgType.TEXT:
+                            continue
+                        try:
+                            self._handle_ws_event(json.loads(msg.data))
+                        except (ValueError, TypeError) as e:
+                            log.debug("ws 이벤트 무시: %s (%s)", msg.data[:80], e)
+            except Exception as e:
+                if was_ok is not False:
+                    log.warning("웹 서버 ws 연결 실패(%s) — 폴링으로 동작, "
+                                "백오프 재시도: %r", url, e)
+                was_ok = False
+            await asyncio.sleep(backoff)
+            backoff = min(backoff * 2, 30.0)
+
     async def _power_poll_loop(self):
-        """웹 서버의 앱 세션 상태(active/idle)를 폴링해 모드를 따라간다."""
+        """웹 서버의 앱 세션 상태(active/idle)를 폴링해 모드를 따라간다.
+
+        ws 구독(_ws_loop)이 빠른 경로이고, 이 폴은 ws 유실·TTL 만료·재접속
+        직후의 불일치를 주기적으로 바로잡는 신뢰성 경로다."""
         url = f"{self.base_url}/api/shelf-power"
         interval = float(self.cfg["power"]["poll_interval_s"])
         while True:
@@ -545,6 +614,8 @@ class Gateway:
 
         timeout = aiohttp.ClientTimeout(total=float(self.cfg["server"]["timeout_s"]))
         self.http = aiohttp.ClientSession(timeout=timeout)
+        # ws 상시 연결용 — total 타임아웃이 걸린 self.http 와 분리한다.
+        self.http_ws = aiohttp.ClientSession()
 
         loop = asyncio.get_running_loop()
         transport, protocol = await loop.create_datagram_endpoint(
@@ -571,6 +642,7 @@ class Gateway:
             loop.create_task(self._led_poll_loop()),
             loop.create_task(self._multicast_loop(sock)),
             loop.create_task(self._power_poll_loop()),
+            loop.create_task(self._ws_loop()),
         ]
         try:
             await stop.wait()
@@ -582,6 +654,7 @@ class Gateway:
             transport.close()
             if status_runner is not None:
                 await status_runner.cleanup()
+            await self.http_ws.close()
             await self.http.close()
 
 

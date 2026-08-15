@@ -1,3 +1,4 @@
+import asyncio
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -83,7 +84,20 @@ async def lifespan(app: FastAPI):
         matching.ensure_alias_seed(db)  # 기존 DB에도 별칭 사전이 비어 있으면 시드
     finally:
         db.close()
+
+    # 전력 모드 전환(active<->idle)을 ws 로 브로드캐스트 — 게이트웨이가 구독해
+    # 폴링 주기를 기다리지 않고 즉시 노드들을 깨우거나 재운다. login-pin 같은
+    # sync 라우트(스레드풀)에서도 불리므로 run_coroutine_threadsafe 로 넘긴다.
+    loop = asyncio.get_running_loop()
+
+    def notify_shelf_power(status: dict):
+        asyncio.run_coroutine_threadsafe(
+            ws_manager.broadcast({"type": "shelf_power", **status}), loop)
+
+    shelf_power.set_notifier(notify_shelf_power)
+
     yield
+    shelf_power.set_notifier(None)
 
 
 app = FastAPI(title="Smart Chemical Shelf", lifespan=lifespan)
@@ -169,19 +183,18 @@ def get_shelf_power():
 
 
 @app.post("/api/app-session/enter")
-async def app_session_enter(event: AppSessionEvent):
-    """앱 세션 등록/하트비트 (TTL 연장). 로그인 시엔 서버 훅이 대신한다."""
-    status = shelf_power.enter(event.username)
-    await ws_manager.broadcast({"type": "shelf_power", **status})
-    return status
+def app_session_enter(event: AppSessionEvent):
+    """앱 세션 등록/하트비트 (TTL 연장). 로그인 시엔 서버 훅이 대신한다.
+
+    모드가 뒤집히면 shelf_power 의 notifier 가 ws 브로드캐스트를 낸다.
+    """
+    return shelf_power.enter(event.username)
 
 
 @app.post("/api/app-session/leave")
-async def app_session_leave(event: AppSessionEvent):
+def app_session_leave(event: AppSessionEvent):
     """앱 로그아웃: 마지막 사용자가 나가면 선반들이 슬립으로 돌아간다."""
-    status = shelf_power.leave(event.username)
-    await ws_manager.broadcast({"type": "shelf_power", **status})
-    return status
+    return shelf_power.leave(event.username)
 
 
 @app.get("/api/led/{device_id}")
