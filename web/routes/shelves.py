@@ -62,6 +62,93 @@ def register_shelf(shelf_id: str, req: schemas.ShelfRegister, db: Session = Depe
     db.refresh(shelf)
     return shelf
 
+
+def _unregister_device(shelf: models.Shelf):
+    """기기를 미등록 상태로 되돌린다. 게이트웨이에 접속 중이면
+    get_shelves()의 is_online 조건에 따라 신규 등록 대기 목록에 다시 나타난다."""
+    shelf.status = "unregistered"
+    shelf.parent_shelf = None
+    shelf.row = None
+    shelf.col = None
+    shelf.led_on = False
+    shelf.led_message = ""
+    shelf.updated_time = datetime.now().strftime("%H:%M:%S")
+
+
+@router.post("/unregister/{shelf_id}", response_model=schemas.ShelfResponse)
+def unregister_shelf(shelf_id: str, db: Session = Depends(get_db)):
+    """선반 수정 모드에서 셀 삭제 → 해당 기기 등록 해제."""
+    shelf = db.query(models.Shelf).filter(models.Shelf.id == shelf_id).first()
+    if not shelf:
+        raise HTTPException(status_code=404, detail="기기를 찾을 수 없습니다.")
+    _unregister_device(shelf)
+    db.commit()
+    db.refresh(shelf)
+    return shelf
+
+
+@router.post("/configs/{shelf_id}/delete-row")
+def delete_config_row(shelf_id: str, req: Dict[str, int], db: Session = Depends(get_db)):
+    """행 삭제: 해당 행의 기기들은 등록 해제, 아래 행 기기들은 한 칸 위로 당긴다."""
+    cfg = db.query(models.ShelfConfig).filter(models.ShelfConfig.id == shelf_id).first()
+    if not cfg:
+        raise HTTPException(status_code=404, detail="선반 설정을 찾을 수 없습니다.")
+    row = req.get("row", 0)
+    if row < 1 or row > cfg.rows:
+        raise HTTPException(status_code=400, detail="잘못된 행 번호입니다.")
+    if cfg.rows <= 1:
+        raise HTTPException(status_code=400, detail="마지막 행은 삭제할 수 없습니다.")
+
+    removed = 0
+    devices = db.query(models.Shelf).filter(
+        models.Shelf.parent_shelf == shelf_id,
+        models.Shelf.status == "registered",
+    ).all()
+    for d in devices:
+        if d.row == row:
+            _unregister_device(d)
+            removed += 1
+        elif d.row and d.row > row:
+            d.row -= 1
+    cfg.rows -= 1
+    db.commit()
+    db.refresh(cfg)
+    return {"status": "success", "removed_devices": removed, "config": {
+        "id": cfg.id, "name": cfg.name, "rows": cfg.rows, "cols": cfg.cols
+    }}
+
+
+@router.post("/configs/{shelf_id}/delete-col")
+def delete_config_col(shelf_id: str, req: Dict[str, int], db: Session = Depends(get_db)):
+    """열 삭제: 해당 열의 기기들은 등록 해제, 오른쪽 열 기기들은 한 칸 왼쪽으로 당긴다."""
+    cfg = db.query(models.ShelfConfig).filter(models.ShelfConfig.id == shelf_id).first()
+    if not cfg:
+        raise HTTPException(status_code=404, detail="선반 설정을 찾을 수 없습니다.")
+    col = req.get("col", 0)
+    if col < 1 or col > cfg.cols:
+        raise HTTPException(status_code=400, detail="잘못된 열 번호입니다.")
+    if cfg.cols <= 1:
+        raise HTTPException(status_code=400, detail="마지막 열은 삭제할 수 없습니다.")
+
+    removed = 0
+    devices = db.query(models.Shelf).filter(
+        models.Shelf.parent_shelf == shelf_id,
+        models.Shelf.status == "registered",
+    ).all()
+    for d in devices:
+        if d.col == col:
+            _unregister_device(d)
+            removed += 1
+        elif d.col and d.col > col:
+            d.col -= 1
+    cfg.cols -= 1
+    db.commit()
+    db.refresh(cfg)
+    return {"status": "success", "removed_devices": removed, "config": {
+        "id": cfg.id, "name": cfg.name, "rows": cfg.rows, "cols": cfg.cols
+    }}
+
+
 # 노이즈로 인한 미세 변화를 반입/반출 이벤트로 오인하지 않기 위한 최소 변화량 (kg)
 MIN_EVENT_DELTA_KG = 0.05
 
