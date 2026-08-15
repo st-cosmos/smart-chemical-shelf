@@ -48,6 +48,13 @@ int cs1237_init(const struct cs1237 *dev);
 int cs1237_power_up(const struct cs1237 *dev);
 
 /**
+ * Like cs1237_power_up() but with an explicit configuration - used to run the
+ * same chip at different sample rates per power mode (docs/power-modes.md:
+ * 40 Hz gated in IDLE, 640 Hz continuous in ACTIVE).
+ */
+int cs1237_power_up_cfg(const struct cs1237 *dev, uint8_t config);
+
+/**
  * Switch the rail off and park DOUT/SCLK high impedance so that no current is
  * injected into the unpowered CS1237.
  */
@@ -59,7 +66,9 @@ void cs1237_power_down(const struct cs1237 *dev);
 int cs1237_read(const struct cs1237 *dev, int32_t *raw, uint32_t timeout_ms);
 
 /**
- * Throw away @p discard conversions, then average @p samples of them.
+ * Throw away @p discard conversions, read @p samples (max 64) and return
+ * their interquartile mean - the middle two quartiles averaged, so a rare
+ * corrupted frame does not drag the result. Plain mean below 4 samples.
  */
 int cs1237_read_avg(const struct cs1237 *dev, uint8_t discard, uint8_t samples,
 		    int32_t *raw);

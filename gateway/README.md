@@ -297,7 +297,13 @@ journalctl -u shelf-gateway -f
 
 | 방향 | CoAP (메시) | HTTP (LAN) |
 |---|---|---|
-| 무게 보고 | `POST shelf/weight` NON, `{"id","seq","raw","mg","mv"}` | `POST /api/weight/{선반ID}` `{"value": g, "battery": %}` |
-| LED 명령 | `GET shelf/led?id=<hwid>` CON → `"1"`/`"0"` | `GET /api/led/{선반ID}` → `{"on": true/false}` (1초 캐시) |
+| 무게 보고 | `POST shelf/weight` NON, `{"id","seq","raw","mg","mv","md"}` | `POST /api/weight/{선반ID}` `{"value": g, "battery": %}` |
+| LED 명령 (노드→) | `GET shelf/led?id=<hwid>` CON → `"1"`/`"0"` — ACTIVE 5초 백업 폴 + 구펌웨어 호환 | `GET /api/led/{선반ID}` → `{"on": true/false}` (캐시) |
+| LED 푸시 (게이트웨이→) | `PUT shelf/led` CON `"1"`/`"0"` → 2.04 — ACTIVE에서 즉시 반영 경로 | (위 폴링으로 변화 감지) |
+| 전력 모드 질의 | `GET shelf/mode?id=<hwid>` CON → `"active"`/`"idle"` (노드 부팅 동기화) | `GET /api/shelf-power` → `{"mode","users","ttl_s"}` (2초 백업 폴) |
+| 전력 모드 푸시 | `PUT shelf/mode` CON `"active"`/`"idle"` → 2.04 (세션 전환 시 전 노드) | `POST /api/app-session/enter\|leave` `{"username"}` (앱→서버) |
+| 즉시 알림 | (위 CoAP 푸시로 전달) | ws `GET /ws` 구독 — `{"type":"shelf_power"}`, `{"type":"led_update"}` 수신 시 폴 주기를 기다리지 않고 즉시 푸시. 끊기면 백오프 재접속, 그동안은 폴링으로 동작 |
 
 배터리 % 는 서버 `battery` 필드(웹 대시보드 표시)로 들어갑니다. USB 전원으로 판정된 보고(>4.4 V)에서는 battery 를 보내지 않아 마지막 배터리 값이 유지됩니다.
+
+`md` 는 노드가 실제로 적용 중인 전력 모드(`"a"`=active/`"i"`=idle)입니다. 게이트웨이는 이 값이 세션 상태와 어긋난 노드에 모드를 다시 푸시합니다 (웨이크/슬립 놓침 자동 교정, 백오프 포함). 전체 설계와 전력 수치는 `../docs/power-modes.md` 참고. 서버에 `/api/shelf-power` 가 없으면(구버전) 게이트웨이는 항상 active 로 동작해 절전 도입 전과 동일합니다.

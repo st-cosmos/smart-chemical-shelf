@@ -6,6 +6,7 @@ from typing import List
 from database import get_db
 import models
 import schemas
+import shelf_power
 from datetime import datetime
 
 router = APIRouter(prefix="/api/users", tags=["users"])
@@ -79,10 +80,16 @@ def login_user(req: schemas.UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/login-pin", response_model=schemas.UserResponse)
 def login_user_pin(req: schemas.UserPinLogin, db: Session = Depends(get_db)):
-    """안드로이드 앱 로그인: 4자리 PIN으로 인증."""
+    """안드로이드 앱 로그인: 4자리 PIN으로 인증.
+
+    성공하면 앱 세션을 등록해 선반들을 깨운다 (docs/power-modes.md —
+    게이트웨이가 /api/shelf-power 를 폴링해 전파하므로 앱 수정 불필요).
+    """
     user = db.query(models.User).filter(models.User.username == req.username).first()
     if not user or user.pin != req.pin:
         raise HTTPException(status_code=401, detail="PIN번호가 올바르지 않습니다.")
+
+    shelf_power.enter(user.username)
 
     return schemas.UserResponse(
         username=user.username,

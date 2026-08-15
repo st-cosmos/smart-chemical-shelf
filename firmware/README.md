@@ -9,10 +9,15 @@ Thread 메시로 게이트웨이([`../gateway`](../gateway))에 붙어서 로드
 
 ## 동작
 
-* **무게** — `SHELF_MEASURE_INTERVAL_MS`(기본 10초)마다 로드셀 전원을 켜고, CS1237 로 8샘플을 평균한 뒤 전원을 끕니다. 직전 보고값 대비 `SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 게이트웨이로 CoAP POST 를 보냅니다 (변화가 없어도 5분에 한 번 하트비트).
-* **LED** — 700 ms 주기로 게이트웨이에 CoAP GET 을 보내 명령 상태를 읽고 LED 를 켜거나 끕니다. 게이트웨이가 계속 응답하지 않으면 LED 를 끕니다.
+앱 로그인 여부에 따라 두 전력 모드를 오갑니다 (`../docs/power-modes.md`). 게이트웨이가 `PUT shelf/mode` 로 전환을 밀어넣고, 부팅 시에는 노드가 `GET shelf/mode` 로 동기화합니다.
+
+* **IDLE (평상시, 부팅 기본)** — Thread SED (라디오는 1초 데이터 폴만), 2초마다 로드셀 전원을 켜 40 Hz 로 측정 후 전원 차단, LED 소등. 임계 이상 무게 변화는 즉시, 아니어도 30초마다 하트비트 보고.
+* **ACTIVE (로그인 중)** — Thread MED (수신 상시 ON), 로드셀 전원 상시 + 640 Hz 로 0.5초마다 측정, LED 는 게이트웨이 푸시(`PUT shelf/led`)로 즉시 반영 (+5초 백업 폴). 게이트웨이가 60초간 무응답이면 스스로 IDLE 로 강등.
+* **무게 보고** — 직전 보고값 대비 `SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 게이트웨이로 CoAP POST (`md` 필드에 현재 모드 포함 — 게이트웨이가 웨이크/슬립 놓침을 교정).
 * **배터리** — 보고 시마다 SAADC 의 내부 VDDH/5 탭으로 배터리 전압(mV)을 함께 보냅니다. 4.4 V 초과면 USB 전원 상태입니다.
-* **게이트웨이 탐색** — 주소 설정이 필요 없습니다. `ff03::1` 멀티캐스트로 시작해 응답한 게이트웨이의 유니캐스트 주소를 기억합니다.
+* **게이트웨이 탐색** — 주소 설정이 필요 없습니다. `ff03::1` 멀티캐스트로 시작해 응답(또는 푸시)한 게이트웨이의 유니캐스트 주소를 기억합니다.
+
+셸 `shelf mode [idle|active|auto]` 로 모드를 강제할 수 있습니다 (벤치 테스트용).
 
 ## 구성
 
@@ -22,7 +27,8 @@ sysbuild.conf, sysbuild/               MCUboot (USB CDC 시리얼 리커버리)
 boards/nrf52840dk_nrf52840.overlay     E73 모듈 핀 배치 + USB 콘솔
 src/cs1237.[ch]                        CS1237 비트뱅 드라이버 (전원 게이팅 포함)
 src/shelf_cal.[ch]                     영점/캘리브레이션 (NVS 저장 + `shelf` 셸 명령)
-src/shelf_coap.[ch]                    CoAP 클라이언트 (리포트 + LED 폴링)
+src/shelf_coap.[ch]                    CoAP 엔드포인트 (리포트/폴 + 푸시 수신 서버)
+src/shelf_mode.[ch]                    전력 모드 상태기계 (SED/MED 런타임 전환)
 src/main.c                             측정 스레드 / LED 스레드 / 배터리 측정
 docs/build-and-flash.md                빌드, 플래싱, 부트로더, 캘리브레이션 — 삽질 기록 전체
 ```

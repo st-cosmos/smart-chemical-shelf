@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cameramessage.databinding.ActivityHomeBinding
 import com.example.cameramessage.databinding.ItemActivityBinding
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -88,11 +90,31 @@ class HomeActivity : AppCompatActivity() {
                 "현재 프로필에서 로그아웃하고\n프로필 선택 화면으로 돌아갈까요?",
                 "취소", "로그아웃",
                 onPrimary = {
-                    getSharedPreferences("smart_shelf", Context.MODE_PRIVATE).edit().clear().apply()
+                    val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
+                    notifyAppSessionLeave(prefs.getString("username", null))
+                    prefs.edit().clear().apply()
                     startActivity(Intent(this, LoginActivity::class.java))
                     finish()
                 }
             )
+        }
+    }
+
+    /**
+     * 서버에 앱 세션 해제를 알린다 (선반 전력 모드, docs/power-modes.md).
+     * 로그아웃 UX 를 네트워크에 묶지 않는 fire-and-forget — 액티비티가 곧
+     * 종료되므로 lifecycleScope 대신 프로세스 스코프에서 보낸다. 전송이
+     * 실패해도 서버 쪽 세션 TTL(30분)이 안전망이 된다.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun notifyAppSessionLeave(username: String?) {
+        if (username.isNullOrEmpty()) return
+        GlobalScope.launch {
+            try {
+                NetworkClient.api.appSessionLeave(AppSessionRequest(username))
+            } catch (_: Exception) {
+                // 서버 TTL 이 처리한다
+            }
         }
     }
 

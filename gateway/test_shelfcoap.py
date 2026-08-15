@@ -175,5 +175,93 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(rsp.token, bytes(range(1, 9)))
 
 
+class RequestTest(unittest.TestCase):
+    """CON 클라이언트(request): 토큰 매칭, 재전송, 최종 타임아웃."""
+
+    ADDR = ("fd11:22::2", 5683, 0, 0)
+
+    @staticmethod
+    def _endpoint():
+        proto = shelfcoap.CoapServer(None)   # 요청 수신은 안 쓴다
+        transport = FakeTransport()
+        proto.connection_made(transport)
+        return proto, transport
+
+    @staticmethod
+    def _mode_put():
+        return Message(type=shelfcoap.CON, code=shelfcoap.PUT,
+                       options=[(shelfcoap.OPTION_URI_PATH, b"shelf"),
+                                (shelfcoap.OPTION_URI_PATH, b"mode")],
+                       payload=b"active")
+
+    def test_answered_first_try(self):
+        async def run():
+            proto, transport = self._endpoint()
+            task = asyncio.ensure_future(
+                proto.request(self._mode_put(), self.ADDR,
+                              ack_timeout=0.5, retries=1))
+            await asyncio.sleep(0.01)
+            self.assertEqual(len(transport.sent), 1)
+
+            sent = shelfcoap.parse(transport.sent[0][0])
+            self.assertEqual(sent.type, shelfcoap.CON)
+            self.assertEqual(len(sent.token), 8)         # 자동 생성 토큰
+            ack = Message(type=shelfcoap.ACK, code=shelfcoap.CHANGED,
+                          mid=sent.mid, token=sent.token)
+            proto.datagram_received(shelfcoap.encode(ack), self.ADDR)
+
+            rsp = await task
+            self.assertEqual(rsp.code, shelfcoap.CHANGED)
+            self.assertEqual(proto._pending, {})          # 대기 목록 정리됨
+        asyncio.run(run())
+
+    def test_retransmits_until_answered(self):
+        async def run():
+            proto, transport = self._endpoint()
+            task = asyncio.ensure_future(
+                proto.request(self._mode_put(), self.ADDR,
+                              ack_timeout=0.05, retries=2))
+            # 첫 전송은 무시하고 재전송을 기다린다.
+            while len(transport.sent) < 2:
+                await asyncio.sleep(0.01)
+            first = shelfcoap.parse(transport.sent[0][0])
+            second = shelfcoap.parse(transport.sent[1][0])
+            self.assertEqual(first.mid, second.mid)       # 같은 MID 재전송
+            self.assertEqual(first.token, second.token)
+
+            ack = Message(type=shelfcoap.ACK, code=shelfcoap.CHANGED,
+                          mid=second.mid, token=second.token)
+            proto.datagram_received(shelfcoap.encode(ack), self.ADDR)
+            rsp = await task
+            self.assertEqual(rsp.code, shelfcoap.CHANGED)
+        asyncio.run(run())
+
+    def test_gives_up_after_retries(self):
+        async def run():
+            proto, transport = self._endpoint()
+            with self.assertRaises(TimeoutError):
+                await proto.request(self._mode_put(), self.ADDR,
+                                    ack_timeout=0.02, retries=2)
+            self.assertEqual(len(transport.sent), 3)      # 원 전송 + 재전송 2
+            self.assertEqual(proto._pending, {})
+        asyncio.run(run())
+
+    def test_wrong_token_is_ignored(self):
+        async def run():
+            proto, transport = self._endpoint()
+            task = asyncio.ensure_future(
+                proto.request(self._mode_put(), self.ADDR,
+                              ack_timeout=0.2, retries=0))
+            await asyncio.sleep(0.01)
+            sent = shelfcoap.parse(transport.sent[0][0])
+
+            stray = Message(type=shelfcoap.ACK, code=shelfcoap.CHANGED,
+                            mid=sent.mid, token=b"\x99" * 8)
+            proto.datagram_received(shelfcoap.encode(stray), self.ADDR)
+            with self.assertRaises(TimeoutError):
+                await task
+        asyncio.run(run())
+
+
 if __name__ == "__main__":
     unittest.main()
