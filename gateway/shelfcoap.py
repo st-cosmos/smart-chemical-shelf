@@ -1,20 +1,27 @@
-"""최소 CoAP (RFC 7252) 코덱 + asyncio UDP 서버.
+"""최소 CoAP (RFC 7252) 코덱 + asyncio UDP 엔드포인트 (서버 + CON 클라이언트).
 
 일부러 외부 의존성 없이 구현했다. 선반 노드는 CoAP 의 좁은 부분집합만 쓰고
 (URI_PATH/URI_QUERY 옵션이 붙은 CON GET, JSON 페이로드의 NON POST), 게이트웨이는
 노드의 400 ms 응답 데드라인 안에 반드시 답해야 한다. 라이브러리 버전에 따라
 동작이 달라질 여지를 없애고, ff03::1 멀티캐스트 가입을 위해 소켓을 직접 다룬다.
 
-구현하지 않은 것 (노드 프로토콜에 필요 없음): 재전송, 메시지 중복 제거,
-blockwise 전송, observe. 노드는 폴링마다 새 토큰을 쓰고 재전송하지 않으므로
-(노드의 응답 타임아웃 400 ms < CoAP ACK_TIMEOUT 2 s) 모두 생략해도 안전하다.
+클라이언트 쪽(`CoapServer.request`)은 전력 모드 도입으로 생겼다: 게이트웨이가
+노드에 `PUT shelf/mode` / `PUT shelf/led` 를 CON 으로 밀어넣는다. 잠든(SED)
+노드에는 부모가 다음 데이터 폴에 실어 배달하므로, ACK 타임아웃 재전송이
+유일하게 필요한 신뢰성 장치다 (piggyback 응답을 토큰으로 매칭).
+
+구현하지 않은 것 (노드 프로토콜에 필요 없음): 메시지 중복 제거, blockwise
+전송, observe. 노드는 폴링마다 새 토큰을 쓰고, 게이트웨이의 푸시는 멱등한
+PUT 이라 중복 수신이 무해하다.
 """
 
 from __future__ import annotations
 
 import asyncio
 import errno
+import itertools
 import logging
+import os
 import socket
 import struct
 from dataclasses import dataclass, field
@@ -173,7 +180,7 @@ def encode(msg: Message) -> bytes:
 
 
 class CoapServer(asyncio.DatagramProtocol):
-    """요청만 처리하는 CoAP 서버.
+    """CoAP 엔드포인트: 서버 역할 + CON 클라이언트(`request`).
 
     handler 는 `async def handler(msg, addr) -> (응답 코드, 페이로드 bytes)`.
     응답 규칙:
@@ -181,13 +188,15 @@ class CoapServer(asyncio.DatagramProtocol):
       * NON 요청  -> 응답 없음 (노드의 무게 보고는 NON 이고 응답을 읽지 않는다 —
                      메시 트래픽을 아끼기 위해 아예 보내지 않는다)
       * 빈 CON (CoAP ping) -> RST
-    수신한 ACK/RST/응답은 무시한다.
+    수신한 응답은 `request()` 가 기다리는 토큰과 매칭되고, 그 외는 무시한다.
     """
 
     def __init__(self, handler):
         self._handler = handler
         self._tasks: set[asyncio.Task] = set()
         self.transport: asyncio.DatagramTransport | None = None
+        self._pending: dict[bytes, asyncio.Future] = {}
+        self._mid = itertools.count(int.from_bytes(os.urandom(2), "big"))
 
     def connection_made(self, transport):
         self.transport = transport
@@ -205,11 +214,49 @@ class CoapServer(asyncio.DatagramProtocol):
             return
 
         if not msg.is_request():
+            # 우리가 보낸 CON 요청의 응답 — 토큰으로 대기자를 찾는다.
+            fut = self._pending.get(bytes(msg.token))
+            if fut is not None and not fut.done():
+                fut.set_result(msg)
             return
 
         task = asyncio.get_running_loop().create_task(self._serve(msg, addr))
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)
+
+    async def request(self, msg: Message, addr, *, ack_timeout: float = 2.0,
+                      retries: int = 3) -> Message:
+        """CON 요청을 보내고 piggyback 응답을 기다린다 (타임아웃 시 재전송).
+
+        토큰/MID 가 비어 있으면 채워 넣는다. 재전송은 CoAP 규칙대로 같은
+        MID/토큰을 그대로 다시 보낸다 (노드 쪽 PUT 은 멱등이라 중복 무해).
+        잠든(SED) 노드는 부모가 다음 데이터 폴(기본 1 s)에 실어 배달하므로
+        첫 ack_timeout 안에 대부분 응답이 온다.
+
+        응답 Message 를 반환하고, 끝내 응답이 없으면 TimeoutError.
+        """
+        if self.transport is None:
+            raise RuntimeError("transport not ready")
+        if not msg.token:
+            msg.token = os.urandom(8)
+        if msg.mid == 0:
+            msg.mid = next(self._mid) & 0xFFFF
+
+        token = bytes(msg.token)
+        data = encode(msg)
+        fut = asyncio.get_running_loop().create_future()
+        self._pending[token] = fut
+        try:
+            timeout = ack_timeout
+            for _ in range(retries + 1):
+                self.transport.sendto(data, addr)
+                try:
+                    return await asyncio.wait_for(asyncio.shield(fut), timeout)
+                except asyncio.TimeoutError:
+                    timeout *= 2
+            raise TimeoutError(f"no CoAP answer from {addr[0]}")
+        finally:
+            self._pending.pop(token, None)
 
     async def _serve(self, msg: Message, addr):
         try:

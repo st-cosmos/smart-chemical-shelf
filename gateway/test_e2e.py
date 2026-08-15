@@ -44,15 +44,18 @@ class FakeResponse:
 
 
 class FakeHttp:
-    """웹 서버 역할: LED 상태를 돌려주고, 무게 POST 를 기록한다."""
+    """웹 서버 역할: LED/전력 모드 상태를 돌려주고, 무게 POST 를 기록한다."""
 
-    def __init__(self, led_on=False):
+    def __init__(self, led_on=False, power_mode="active"):
         self.led_on = led_on
+        self.power_mode = power_mode
         self.gets = []
         self.posts = []
 
     def get(self, url):
         self.gets.append(url)
+        if url.endswith("/api/shelf-power"):
+            return FakeResponse(data={"mode": self.power_mode, "ttl_s": 600})
         return FakeResponse(data={"on": self.led_on, "time": "12:00:00"})
 
     def post(self, url, json=None):
@@ -61,12 +64,33 @@ class FakeHttp:
 
 
 class ClientProtocol(asyncio.DatagramProtocol):
-    """노드 역할의 UDP 클라이언트: 받은 데이터그램을 큐에 쌓는다."""
+    """노드 역할의 UDP 클라이언트.
+
+    응답은 inbox 큐에 원본 그대로 쌓고, 게이트웨이가 밀어넣는 CON 요청
+    (PUT shelf/mode, PUT shelf/led)은 requests 큐에 넣은 뒤 펌웨어처럼
+    2.04 piggyback ACK 로 답한다.
+    """
 
     def __init__(self):
         self.inbox = asyncio.Queue()
+        self.requests = asyncio.Queue()
+        self.transport = None
+
+    def connection_made(self, transport):
+        self.transport = transport
 
     def datagram_received(self, data, addr):
+        try:
+            msg = shelfcoap.parse(data)
+        except ValueError:
+            return
+        if msg.is_request():
+            self.requests.put_nowait(msg)
+            if msg.type == shelfcoap.CON:
+                ack = Message(type=shelfcoap.ACK, code=shelfcoap.CHANGED,
+                              mid=msg.mid, token=msg.token)
+                self.transport.sendto(shelfcoap.encode(ack), addr)
+            return
         self.inbox.put_nowait(data)
 
 
@@ -113,6 +137,7 @@ class EndToEndTest(unittest.TestCase):
             lambda: shelfcoap.CoapServer(gw.coap_handler),
             local_addr=("::1", 0), family=socket.AF_INET6)
         server_addr = server_tr.get_extra_info("sockname")[:2]
+        gw.coap = server_proto   # run() 이 하는 배선 — 푸시 경로에 필요
 
         client_tr, client = await loop.create_datagram_endpoint(
             ClientProtocol, local_addr=("::1", 0), family=socket.AF_INET6)
@@ -164,6 +189,53 @@ class EndToEndTest(unittest.TestCase):
             self.assertEqual(node.reports, 2)
             self.assertEqual(node.polls, 2)
             self.assertEqual(node.battery, 50)  # USB 값이 마지막 배터리를 덮지 않음
+
+            # 5) LED 변화 푸시 (ACTIVE) — 서버 값이 바뀌면 노드로 CON PUT.
+            gw.http.led_on = False
+            await gw._refresh_led(node)
+            push = await asyncio.wait_for(client.requests.get(), timeout=2.0)
+            self.assertEqual(push.uri_path(), ["shelf", "led"])
+            self.assertEqual(push.payload, b"0")
+            await until(lambda: node.led_pushed is False, "LED push ACK")
+
+            # 6) 로그아웃 → 전 노드 슬립 푸시.
+            gw._set_mode("idle")
+            push = await asyncio.wait_for(client.requests.get(), timeout=2.0)
+            self.assertEqual(push.uri_path(), ["shelf", "mode"])
+            self.assertEqual(push.payload, b"idle")
+            await until(lambda: node.mode_confirmed == "idle", "mode push ACK")
+
+            # 7) 부팅한 노드의 모드 질의 — 현재 모드(idle)로 답한다.
+            token = b"\x07" * 8
+            client_tr.sendto(shelfcoap.encode(Message(
+                type=shelfcoap.CON, code=shelfcoap.GET, mid=0x5555, token=token,
+                options=[(shelfcoap.OPTION_URI_PATH, b"shelf"),
+                         (shelfcoap.OPTION_URI_PATH, b"mode"),
+                         (shelfcoap.OPTION_URI_QUERY, f"id={HWID}".encode())])),
+                server_addr)
+            rsp = shelfcoap.parse(
+                await asyncio.wait_for(client.inbox.get(), timeout=1.0))
+            self.assertEqual(rsp.token, token)
+            self.assertEqual(rsp.code, shelfcoap.CONTENT)
+            self.assertEqual(rsp.payload, b"idle")
+
+            # 8) 웨이크를 놓친 노드 교정 — md:"i" 보고가 오면 (재시도 간격을
+            #    지난 뒤) active 푸시가 나간다.
+            gw._set_mode("active")
+            push = await asyncio.wait_for(client.requests.get(), timeout=2.0)
+            self.assertEqual(push.payload, b"active")     # 전환 즉시 푸시
+            await until(lambda: node.mode_confirmed == "active",
+                        "wake push ACK")
+            # 웨이크 ACK 직후에는 LED 동기화 푸시가 따라온다 (설계 §4).
+            follow = await asyncio.wait_for(client.requests.get(), timeout=2.0)
+            self.assertEqual(follow.uri_path(), ["shelf", "led"])
+            node.mode = "idle"                            # 놓친 노드로 위장
+            node.mode_push_at = 0.0                       # 재시도 간격 해제
+            client_tr.sendto(weight_report(0x6666, mg=9100000, mv=3800),
+                             server_addr)
+            push = await asyncio.wait_for(client.requests.get(), timeout=2.0)
+            self.assertEqual(push.uri_path(), ["shelf", "mode"])
+            self.assertEqual(push.payload, b"active")
         finally:
             client_tr.close()
             server_tr.close()

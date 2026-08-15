@@ -27,6 +27,16 @@ poll_interval_s = 1.0
 # 이 시간 동안 CoAP 접촉이 없는 노드는 서버 폴링을 중단 (죽은 노드가
 # 웹에서 온라인으로 남지 않게 서버 온라인 창과 같은 15초 권장).
 node_ttl_s = 15.0
+# IDLE 세션(앱 로그인 없음)에서는 노드 접촉이 30초 하트비트뿐이라
+# 폴링을 늦추고 유지 시간을 늘린다 (docs/power-modes.md).
+idle_poll_interval_s = 5.0
+idle_node_ttl_s = 90.0
+
+[power]
+# 앱 세션 상태(GET /api/shelf-power) 폴링 주기 — 로그인 감지 지연의 상한.
+poll_interval_s = 2.0
+# 모드 불일치 노드 재푸시 최소 간격 (실패 시 자동 백오프, 최대 120초).
+push_retry_s = 5.0
 
 [status]
 # 게이트웨이 상태 조회 HTTP (JSON). curl http://<pi>:8080/status

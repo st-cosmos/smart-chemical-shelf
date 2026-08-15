@@ -12,6 +12,15 @@
     역할도 겸한다 — 기존 ESP8266 이 1초 폴링하던 것과 같은 효과.
   * ff03::1 (realm-local all-nodes) 멀티캐스트에 가입해 노드의 게이트웨이
     탐색 요청을 받는다. 노드는 LED 폴에 응답한 유니캐스트 주소를 기억한다.
+  * 전력 모드 브리지 (docs/power-modes.md): 웹 서버의 `GET /api/shelf-power`
+    를 폴링해 앱 로그인 여부(active/idle)를 알아내고, 바뀌면 모든 노드에
+    `PUT shelf/mode` 를 CON 으로 밀어넣는다. 노드 부팅 시의 `GET shelf/mode`
+    에도 같은 값으로 답한다. 무게 보고의 `md` 필드로 노드의 실제 모드를
+    보고, 어긋난 노드는 백오프를 두고 다시 푸시한다 (웨이크 놓침 자동 교정).
+    ACTIVE 중 LED 상태가 바뀌면 해당 노드에 `PUT shelf/led` 를 즉시 푸시한다
+    (노드의 700 ms 폴링을 대체 — 노드는 5 s 백업 폴만 남긴다).
+    구버전 웹 서버(`/api/shelf-power` 404)에서는 active 로 간주해 절전 도입
+    전과 동일하게 동작한다.
 
 노드가 400 ms 안에 LED 응답을 받아야 하므로, CoAP 응답 경로에서는 절대
 HTTP 를 기다리지 않는다 (항상 캐시 응답 + 비동기 갱신).
@@ -57,6 +66,14 @@ DEFAULT_CONFIG: dict = {
         # 서버의 온라인 판정 창(15초)과 맞춰 두면 죽은 노드가 웹에서
         # 온라인으로 남는 시간이 최소화된다.
         "node_ttl_s": 15.0,
+        # IDLE 모드에서는 노드 접촉이 30 s 하트비트뿐이므로 폴링/유지 시간을
+        # 그에 맞춰 늘린다 (LED 캐시 갱신 + 서버 하트비트 대행은 계속한다).
+        "idle_poll_interval_s": 5.0,
+        "idle_node_ttl_s": 90.0,
+    },
+    "power": {
+        "poll_interval_s": 2.0,   # GET /api/shelf-power 주기 (로그인 감지 지연의 상한)
+        "push_retry_s": 5.0,      # 모드 미확인/불일치 노드 재푸시 최소 간격
     },
     "status": {
         "bind": "0.0.0.0",
@@ -119,12 +136,17 @@ def parse_report(payload: bytes) -> dict:
         v = data.get(key)
         return int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
 
+    # 전력 모드 펌웨어가 붙이는 "md":"a"/"i". 없으면(구펌웨어) None.
+    md = data.get("md")
+    mode = {"a": "active", "i": "idle"}.get(md) if isinstance(md, str) else None
+
     return {
         "id": hwid,
         "mg": int(mg),
         "seq": _int_or_none("seq"),
         "raw": _int_or_none("raw"),
         "mv": _int_or_none("mv"),
+        "mode": mode,
     }
 
 
@@ -149,6 +171,12 @@ class Node:
         self.http_ok: bool | None = None  # 서버 통신 상태 (전이 시에만 로그)
         self.reports = 0
         self.polls = 0
+        # 전력 모드 (docs/power-modes.md)
+        self.mode: str | None = None            # 노드가 md 필드로 보고한 실제 모드
+        self.mode_confirmed: str | None = None  # 마지막으로 ACK 받은 푸시 값
+        self.mode_push_at = 0.0                 # 마지막 푸시 시각 (재시도 간격 제한)
+        self.mode_push_interval = 0.0           # 실패 백오프 (성공/모드 변경 시 리셋)
+        self.led_pushed: bool | None = None     # 마지막으로 ACK 받은 LED 푸시 값
 
     def status(self) -> dict:
         now = time.time()
@@ -168,6 +196,8 @@ class Node:
             "last_report_age_s":
                 round(now - self.last_report, 1) if self.last_report else None,
             "server_ok": self.http_ok,
+            "mode": self.mode,
+            "mode_confirmed": self.mode_confirmed,
         }
 
 
@@ -179,8 +209,13 @@ class Gateway:
         self.id_map: dict[str, str] = dict(cfg.get("nodes") or {})
         self.nodes: dict[str, Node] = {}
         self.http = None  # aiohttp.ClientSession, run() 에서 생성
+        self.coap: shelfcoap.CoapServer | None = None  # run() 에서 생성
         self.started = time.time()
         self._bg: set[asyncio.Task] = set()
+        # 세션 모드. 서버에 물어보기 전(그리고 구버전 서버의 404)에는 active —
+        # 절전 도입 전과 같은 안전측 기본값이다.
+        self.mode = "active"
+        self._power_404_logged = False
 
     # ------------------------------------------------------------- CoAP 쪽
 
@@ -210,6 +245,16 @@ class Gateway:
             # 절대 여기서 HTTP 를 기다리지 않는다 — 노드 타임아웃이 400 ms 다.
             return shelfcoap.CONTENT, (b"1" if node.led_on else b"0")
 
+        if path == [self.base_path, "mode"]:
+            # 노드의 부팅 시 모드 동기화 질의 (docs/power-modes.md §4).
+            if msg.code != shelfcoap.GET:
+                return shelfcoap.METHOD_NOT_ALLOWED, b""
+            hwid = msg.uri_queries().get("id", "")
+            if not hwid:
+                return shelfcoap.BAD_REQUEST, b""
+            self._node_for(hwid, addr)
+            return shelfcoap.CONTENT, self.mode.encode()
+
         return shelfcoap.NOT_FOUND, b""
 
     def _node_for(self, hwid: str, addr) -> Node:
@@ -234,6 +279,8 @@ class Gateway:
         node.mg = report["mg"]
         node.mv = report["mv"]
         node.grams = round(report["mg"] / 1000)
+        if report["mode"] is not None:
+            node.mode = report["mode"]
 
         battery = battery_percent(node.mv)
         if battery is not None:
@@ -244,6 +291,8 @@ class Gateway:
                  node.mv, f" (배터리 ~{battery}%)" if battery is not None else "")
 
         self._spawn(self._post_weight(node, node.grams, battery))
+        # 웨이크/슬립을 놓친 노드는 여기서 잡힌다 (하트비트마다 md 가 온다).
+        self._maybe_push_mode(node)
 
     # ------------------------------------------------------- 웹 서버 쪽
 
@@ -278,11 +327,16 @@ class Gateway:
 
         self._server_state(node, True)
         want = bool(data.get("on"))
-        if not node.led_known or want != node.led_on:
+        changed = node.led_known and want != node.led_on
+        if not node.led_known or changed:
             log.info("LED %s('%s') -> %s",
                      node.hwid, node.device_id, "켜짐" if want else "꺼짐")
         node.led_on = want
         node.led_known = True
+
+        # ACTIVE 노드에는 폴을 기다리게 하지 않고 즉시 밀어넣는다.
+        if changed and self.mode == "active" and node.addr is not None:
+            self._spawn(self._push_led(node))
 
     def _server_state(self, node: Node, ok: bool, detail: str = ""):
         """서버 통신 성공/실패를 전이 시에만 로그로 남긴다 (스팸 방지)."""
@@ -295,9 +349,15 @@ class Gateway:
             node.http_ok = False
 
     async def _led_poll_loop(self):
-        interval = float(self.cfg["led"]["poll_interval_s"])
-        ttl = float(self.cfg["led"]["node_ttl_s"])
         while True:
+            # IDLE 세션에서는 노드 접촉이 30 s 하트비트뿐이라 폴링을 늦추고
+            # 유지 시간을 늘린다. 서버 하트비트 대행(mark_seen)은 계속된다.
+            if self.mode == "active":
+                interval = float(self.cfg["led"]["poll_interval_s"])
+                ttl = float(self.cfg["led"]["node_ttl_s"])
+            else:
+                interval = float(self.cfg["led"]["idle_poll_interval_s"])
+                ttl = float(self.cfg["led"]["idle_node_ttl_s"])
             now = time.time()
             active = [n for n in self.nodes.values()
                       if now - n.last_seen <= ttl]
@@ -306,6 +366,118 @@ class Gateway:
                 # 이 루프를 죽여 LED 캐시를 영영 묵히게 둬서는 안 된다.
                 await asyncio.gather(*(self._refresh_led(n) for n in active),
                                      return_exceptions=True)
+            await asyncio.sleep(interval)
+
+    # ------------------------------------------------------- 전력 모드 브리지
+
+    def _alive_nodes(self) -> list[Node]:
+        ttl = float(self.cfg["led"]["idle_node_ttl_s"])
+        now = time.time()
+        return [n for n in self.nodes.values()
+                if n.addr is not None and now - n.last_seen <= ttl]
+
+    def _set_mode(self, mode: str):
+        if mode == self.mode:
+            return
+        self.mode = mode
+        log.info("전력 모드 전환: %s — 노드 %d대에 푸시",
+                 mode, len(self._alive_nodes()))
+        for node in self._alive_nodes():
+            # 전환은 재시도 간격 제한 없이 즉시 나간다.
+            node.mode_push_interval = 0.0
+            node.mode_push_at = time.time()
+            self._spawn(self._push_mode(node))
+
+    def _maybe_push_mode(self, node: Node):
+        """보고된 모드(md)가 세션 상태와 어긋난 노드를 교정한다 (백오프 포함).
+
+        md 는 노드가 실제로 적용한 모드라 이것만이 근거다 — 푸시 ACK 여부
+        (mode_confirmed)는 조건에 넣지 않는다. 이미 일치하는 노드에 확인
+        푸시를 반복하면 IDLE 메시가 5 초마다 깨어나는 것과 다름없다.
+        """
+        if node.addr is None:
+            return
+        if node.mode is None or node.mode == self.mode:
+            return
+        retry = max(float(self.cfg["power"]["push_retry_s"]),
+                    node.mode_push_interval)
+        if time.time() - node.mode_push_at < retry:
+            return
+        node.mode_push_at = time.time()
+        self._spawn(self._push_mode(node))
+
+    async def _push_mode(self, node: Node):
+        want = self.mode
+        msg = shelfcoap.Message(
+            type=shelfcoap.CON, code=shelfcoap.PUT,
+            options=[(shelfcoap.OPTION_URI_PATH, self.base_path.encode()),
+                     (shelfcoap.OPTION_URI_PATH, b"mode")],
+            payload=want.encode())
+        try:
+            rsp = await self.coap.request(msg, node.addr)
+        except (TimeoutError, RuntimeError) as e:
+            # 구펌웨어(수신 소켓 없음)나 죽은 노드 — 백오프를 두 배로 (최대 120 s)
+            node.mode_push_interval = min(
+                max(node.mode_push_interval * 2,
+                    float(self.cfg["power"]["push_retry_s"])), 120.0)
+            log.debug("모드 푸시 무응답 %s('%s'): %s",
+                      node.hwid, node.device_id, e)
+            return
+        node.mode_push_interval = 0.0
+        if rsp.code == shelfcoap.CHANGED:
+            node.mode_confirmed = want
+            node.mode = want
+            log.info("모드 푸시 %s('%s') -> %s (ACK)",
+                     node.hwid, node.device_id, want)
+            if want == "active":
+                # 깨어난 노드에 현재 LED 상태를 바로 맞춰 준다.
+                await self._push_led(node)
+        else:
+            log.warning("모드 푸시 %s('%s') 거부: %s",
+                        node.hwid, node.device_id, shelfcoap.code_str(rsp.code))
+
+    async def _push_led(self, node: Node):
+        want = node.led_on
+        msg = shelfcoap.Message(
+            type=shelfcoap.CON, code=shelfcoap.PUT,
+            options=[(shelfcoap.OPTION_URI_PATH, self.base_path.encode()),
+                     (shelfcoap.OPTION_URI_PATH, b"led")],
+            payload=(b"1" if want else b"0"))
+        try:
+            rsp = await self.coap.request(msg, node.addr)
+        except (TimeoutError, RuntimeError) as e:
+            log.debug("LED 푸시 무응답 %s('%s'): %s",
+                      node.hwid, node.device_id, e)
+            return
+        if rsp.code == shelfcoap.CHANGED:
+            node.led_pushed = want
+            log.info("LED 푸시 %s('%s') -> %s (ACK)",
+                     node.hwid, node.device_id, "켜짐" if want else "꺼짐")
+
+    async def _power_poll_loop(self):
+        """웹 서버의 앱 세션 상태(active/idle)를 폴링해 모드를 따라간다."""
+        url = f"{self.base_url}/api/shelf-power"
+        interval = float(self.cfg["power"]["poll_interval_s"])
+        while True:
+            try:
+                async with self.http.get(url) as rsp:
+                    if rsp.status == 200:
+                        data = await rsp.json()
+                        mode = data.get("mode")
+                        if mode in ("active", "idle"):
+                            self._power_404_logged = False
+                            self._set_mode(mode)
+                    elif rsp.status == 404:
+                        # 구버전 웹 서버 — 항상 active 로 동작 (절전 이전과 동일)
+                        if not self._power_404_logged:
+                            log.warning("서버에 /api/shelf-power 가 없어 "
+                                        "항상 active 모드로 동작합니다")
+                            self._power_404_logged = True
+                        self._set_mode("active")
+            except Exception:
+                # 서버가 죽어 있으면 마지막 모드를 유지한다. 노드 쪽은 자체
+                # failsafe(60 s)로 IDLE 에 떨어지므로 여기서 손댈 것 없다.
+                pass
             await asyncio.sleep(interval)
 
     # ----------------------------------------------------- 멀티캐스트 유지
@@ -338,6 +510,7 @@ class Gateway:
             "uptime_s": round(time.time() - self.started, 1),
             "server": self.base_url,
             "interface": self.cfg["coap"]["interface"],
+            "mode": self.mode,
             "nodes": [n.status() for n in self.nodes.values()],
         }
 
@@ -374,11 +547,12 @@ class Gateway:
         self.http = aiohttp.ClientSession(timeout=timeout)
 
         loop = asyncio.get_running_loop()
-        transport, _protocol = await loop.create_datagram_endpoint(
+        transport, protocol = await loop.create_datagram_endpoint(
             lambda: shelfcoap.CoapServer(self.coap_handler),
             local_addr=(self.cfg["coap"]["bind"], int(self.cfg["coap"]["port"])),
             family=socket.AF_INET6,
         )
+        self.coap = protocol
         sock = transport.get_extra_info("socket")
         log.info("CoAP 서버 시작: [%s]:%s, 웹 서버: %s",
                  self.cfg["coap"]["bind"], self.cfg["coap"]["port"], self.base_url)
@@ -396,6 +570,7 @@ class Gateway:
         workers = [
             loop.create_task(self._led_poll_loop()),
             loop.create_task(self._multicast_loop(sock)),
+            loop.create_task(self._power_poll_loop()),
         ]
         try:
             await stop.wait()
