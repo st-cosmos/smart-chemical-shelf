@@ -18,6 +18,7 @@ import device_status
 import matching
 import models
 import schemas
+import shelf_power
 from database import Base, SessionLocal, engine, get_db
 from routes import chemicals, logs, orders, session, shelves, users
 
@@ -128,6 +129,10 @@ class WeightEvent(BaseModel):
     battery: int | None = None  # percent, Thread 게이트웨이가 노드 배터리 전압으로 환산해 전달
 
 
+class AppSessionEvent(BaseModel):
+    username: str
+
+
 def _get_or_create_shelf(device_id: str, db: Session) -> models.Shelf:
     shelf = db.query(models.Shelf).filter(models.Shelf.id == device_id).first()
     if not shelf:
@@ -148,6 +153,35 @@ def _weight_status(shelf: models.Shelf) -> str:
     if shelf.weight < shelf.prev_weight:
         return "감소"
     return "유지"
+
+
+# --- 선반 전력 모드 (docs/power-modes.md) ---
+# 로그인한 앱 사용자가 있으면 active, 없으면 idle. Thread 게이트웨이가
+# /api/shelf-power 를 폴링해 모든 노드에 전파한다. 로그인은
+# /api/users/login-pin 성공 시 서버가 내부에서 세션을 등록하므로(users.py)
+# 앱은 로그아웃 시 leave 호출 한 곳만 추가하면 된다.
+
+
+@app.get("/api/shelf-power")
+def get_shelf_power():
+    """게이트웨이용: 현재 선반 전력 모드."""
+    return shelf_power.status()
+
+
+@app.post("/api/app-session/enter")
+async def app_session_enter(event: AppSessionEvent):
+    """앱 세션 등록/하트비트 (TTL 연장). 로그인 시엔 서버 훅이 대신한다."""
+    status = shelf_power.enter(event.username)
+    await ws_manager.broadcast({"type": "shelf_power", **status})
+    return status
+
+
+@app.post("/api/app-session/leave")
+async def app_session_leave(event: AppSessionEvent):
+    """앱 로그아웃: 마지막 사용자가 나가면 선반들이 슬립으로 돌아간다."""
+    status = shelf_power.leave(event.username)
+    await ws_manager.broadcast({"type": "shelf_power", **status})
+    return status
 
 
 @app.get("/api/led/{device_id}")

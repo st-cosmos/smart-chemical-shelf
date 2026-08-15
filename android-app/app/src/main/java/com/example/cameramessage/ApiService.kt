@@ -20,8 +20,13 @@ interface ApiService {
     suspend fun registerUser(@Body request: UserRegisterRequest): UserData
 
     // 앱 로그인은 4자리 PIN 방식(login-pin)을 사용한다. (웹은 비밀번호 방식 /login)
+    // 성공하면 서버가 앱 세션을 등록해 선반들을 깨운다 (docs/power-modes.md).
     @POST("api/users/login-pin")
     suspend fun loginPin(@Body request: UserPinLoginRequest): UserData
+
+    // 로그아웃: 앱 세션 해제 — 마지막 사용자가 나가면 선반들이 슬립으로 돌아간다.
+    @POST("api/app-session/leave")
+    suspend fun appSessionLeave(@Body request: AppSessionRequest): AppSessionState
 
     // --- Shelves ---
     @GET("api/shelves")
