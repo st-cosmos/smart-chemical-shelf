@@ -125,12 +125,6 @@ function ShelfCard({
           <span className="shelf-size-pill">
             {config.rows}행 × {config.cols}열
           </span>
-          {editing && (
-            <span className="edit-mode-chip">
-              <Pencil size={14} />
-              수정 모드
-            </span>
-          )}
         </div>
         {editing ? (
           <div className="shelf-head-actions">
@@ -168,8 +162,6 @@ function ShelfCard({
               ))}
             </div>
           </div>
-          <div className="col-del-spacer-rowdel" />
-          <div className="col-del-spacer-addcol" />
         </div>
       )}
 
@@ -264,7 +256,7 @@ function ShelfCard({
           </div>
         </div>
 
-        {/* 행 삭제 버튼 열 — 뷰포트와 같은 높이로 클리핑, 세로 스크롤 동기화 */}
+        {/* 행 삭제 버튼 레일 — 카드 왼쪽 여백에 겹쳐 수납칸 크기에 영향 없음, 세로 스크롤 동기화 */}
         {editing && (
           <div className="row-del-col" ref={rowDelRef}>
             {Array.from({ length: config.rows }, (_, i) => (
@@ -280,22 +272,17 @@ function ShelfCard({
             ))}
           </div>
         )}
-
-        {editing && (
-          <button
-            className="add-col-btn"
-            title="열 추가"
-            onClick={() => updateConfig({ cols: config.cols + 1 })}
-          >
-            <Plus size={26} />
-          </button>
-        )}
       </div>
 
       {editing && (
-        <button className="add-row-btn" onClick={() => updateConfig({ rows: config.rows + 1 })}>
-          <Plus size={24} />행 추가
-        </button>
+        <div className="add-line-row">
+          <button className="add-line-btn" onClick={() => updateConfig({ rows: config.rows + 1 })}>
+            <Plus size={16} />행 추가
+          </button>
+          <button className="add-line-btn" onClick={() => updateConfig({ cols: config.cols + 1 })}>
+            <Plus size={16} />열 추가
+          </button>
+        </div>
       )}
     </div>
   );

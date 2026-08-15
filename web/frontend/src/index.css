@@ -1253,6 +1253,7 @@ select.input-field {
 .shelf-grid-wrap {
   display: flex;
   gap: 12px;
+  position: relative;
 }
 
 /* 3행(150px × 3 + 간격 12px × 2 = 474px)만 보이는 스크롤 뷰포트.
@@ -1402,16 +1403,27 @@ select.input-field {
   cursor: pointer;
 }
 
-.add-col-btn {
-  width: 56px;
-  flex-shrink: 0;
-  align-self: stretch;
-  border-radius: 16px;
-  background: var(--bg);
+/* 행/열 추가 — 그리드 아래 소형 버튼 (수납칸 크기에 영향 없음) */
+.add-line-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-line-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--bg);
   color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.add-line-btn:hover {
+  background: var(--primary-soft);
 }
 
 /* ---------- 선반 수정 모드 (design.pen web-shelf-manage-edit) ---------- */
@@ -1454,19 +1466,6 @@ select.input-field {
   white-space: nowrap;
 }
 
-.edit-mode-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  background: var(--warning-soft);
-  color: var(--warning);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 14px;
-  white-space: nowrap;
-}
-
 /* 열 삭제 버튼 줄 — 그리드 뷰포트와 같은 폭으로 클리핑 (스크롤 동기화는 JS) */
 .col-del-row {
   display: flex;
@@ -1477,16 +1476,6 @@ select.input-field {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-}
-
-.col-del-spacer-rowdel {
-  width: 30px;
-  flex-shrink: 0;
-}
-
-.col-del-spacer-addcol {
-  width: 56px;
-  flex-shrink: 0;
 }
 
 .line-del-cell {
@@ -1513,11 +1502,14 @@ select.input-field {
   color: #fff;
 }
 
-/* 행 삭제 버튼 열 — 뷰포트와 같은 높이로 클리핑 */
+/* 행 삭제 버튼 레일 — 카드 왼쪽 여백(패딩 28px)에 겹쳐 배치해
+   수납칸 크기에 영향을 주지 않는다. 뷰포트와 같은 높이로 클리핑 */
 .row-del-col {
-  width: 30px;
+  position: absolute;
+  left: -28px;
+  top: 0;
+  width: 26px;
   height: 474px;
-  flex-shrink: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1755,19 +1747,6 @@ select.input-field {
 
 .slot-modal-confirm:hover {
   background: var(--primary-press);
-}
-
-.add-row-btn {
-  height: 52px;
-  border-radius: 16px;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--primary);
 }
 
 /* ============================================================
