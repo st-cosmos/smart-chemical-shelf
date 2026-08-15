@@ -48,6 +48,13 @@ int cs1237_init(const struct cs1237 *dev);
 int cs1237_power_up(const struct cs1237 *dev);
 
 /**
+ * Like cs1237_power_up() but with an explicit configuration - used to run the
+ * same chip at different sample rates per power mode (docs/power-modes.md:
+ * 40 Hz gated in IDLE, 640 Hz continuous in ACTIVE).
+ */
+int cs1237_power_up_cfg(const struct cs1237 *dev, uint8_t config);
+
+/**
  * Switch the rail off and park DOUT/SCLK high impedance so that no current is
  * injected into the unpowered CS1237.
  */

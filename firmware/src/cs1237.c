@@ -204,7 +204,7 @@ int cs1237_init(const struct cs1237 *dev)
 	return 0;
 }
 
-int cs1237_power_up(const struct cs1237 *dev)
+int cs1237_power_up_cfg(const struct cs1237 *dev, uint8_t config)
 {
 	uint8_t cur;
 	int ret;
@@ -227,9 +227,9 @@ int cs1237_power_up(const struct cs1237 *dev)
 		return ret;
 	}
 
-	if (cur != dev->config) {
-		LOG_DBG("config 0x%02x -> 0x%02x", cur, dev->config);
-		ret = cs1237_write_config(dev, dev->config);
+	if (cur != config) {
+		LOG_DBG("config 0x%02x -> 0x%02x", cur, config);
+		ret = cs1237_write_config(dev, config);
 		if (ret) {
 			return ret;
 		}
@@ -238,6 +238,11 @@ int cs1237_power_up(const struct cs1237 *dev)
 	}
 
 	return 0;
+}
+
+int cs1237_power_up(const struct cs1237 *dev)
+{
+	return cs1237_power_up_cfg(dev, dev->config);
 }
 
 void cs1237_power_down(const struct cs1237 *dev)

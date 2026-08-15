@@ -471,7 +471,7 @@ ot ipaddr         # mesh-local / link-local 주소
 
 커미셔너로 붙이려면 위 블록을 지우고 `CONFIG_OPENTHREAD_JOINER=y` 를 쓰세요.
 
-역할은 **MED (Minimal End Device, 수신 상시 ON)** 입니다. 배터리 구동이라 SED 로 바꾸려면 `CONFIG_OPENTHREAD_MTD_SED=y` 로 두고 폴 주기를 CoAP 응답 타임아웃(400 ms)보다 짧게 잡아야 700 ms LED 폴링이 제때 응답을 받습니다.
+역할은 전력 모드에 따라 바뀝니다 (`../../docs/power-modes.md`): **IDLE 에서는 SED**(`CONFIG_OPENTHREAD_MTD_SED=y`, 데이터 폴 1 초)로 잠들고, 게이트웨이가 `PUT shelf/mode "active"` 를 밀어넣으면 `shelf_mode.c` 가 `otThreadSetLinkMode()` 로 **MED (수신 상시 ON)** 로 전환합니다. 예전의 "700 ms LED 폴링 때문에 SED 불가" 제약은 LED 를 게이트웨이 푸시로 바꾸면서 해소됐습니다. 잠든 노드로 가는 푸시는 부모(파이)가 큐에 뒀다가 다음 데이터 폴에 실어 배달합니다.
 
 ---
 
@@ -480,15 +480,15 @@ ot ipaddr         # mesh-local / link-local 주소
 > 이 인터페이스의 구현(라즈베리파이 + RCP 동글 + Python 브리지)은 **[../../gateway](../../gateway/README.md)** 에 있습니다.
 > 이 장은 노드 쪽 규격의 기준 문서로 유지합니다.
 
-노드는 게이트웨이 주소를 설정받지 않습니다. 처음에는 **realm-local 멀티캐스트 `ff03::1`** 로 요청을 보내고, LED 폴에 응답한 상대의 유니캐스트 주소를 기억해 이후에는 그쪽으로만 보냅니다. 3회 연속 무응답이면 다시 멀티캐스트 탐색으로 돌아갑니다.
+노드는 게이트웨이 주소를 설정받지 않습니다. 처음에는 **realm-local 멀티캐스트 `ff03::1`** 로 요청을 보내고, 폴/질의에 응답했거나 푸시를 보낸 상대의 유니캐스트 주소를 기억해 이후에는 그쪽으로만 보냅니다. 3회 연속 무응답이면 다시 멀티캐스트 탐색으로 돌아갑니다.
 
-게이트웨이는 UDP **5683** 에서 CoAP 서버로 아래 두 리소스를 제공하면 됩니다.
+노드는 **:5683 소켓 하나로 클라이언트와 서버를 겸합니다** — 게이트웨이도 5683 에서 서버 리소스(7.1~7.3)를 제공하고, 노드로 푸시(7.4)를 보낼 수 있어야 합니다.
 
 ### 7.1 무게 리포트 (노드 → 게이트웨이)
 
 ```
 POST coap://<gw>/shelf/weight        (NON-confirmable)
-Content: {"id":"f4ce36a1b2c3d4e5","seq":12,"raw":842317,"mg":8423,"mv":4915}
+Content: {"id":"f4ce36a1b2c3d4e5","seq":12,"raw":842317,"mg":8423,"mv":4915,"md":"a"}
 ```
 
 * `id` — 노드 하드웨어 ID (16자리 hex)
@@ -496,10 +496,11 @@ Content: {"id":"f4ce36a1b2c3d4e5","seq":12,"raw":842317,"mg":8423,"mv":4915}
 * `raw` — CS1237 원시 카운트 (부호 있는 24비트)
 * `mg` — `SHELF_CAL_OFFSET` / `SHELF_CAL_COUNTS_PER_KG` 로 환산한 밀리그램
 * `mv` — VDDH 전압 (SAADC VDDH/5 탭). 배터리 구동이면 배터리 전압, USB 연결 중이면 Q5 가 배터리를 분리하므로 VBUS-다이오드 값(~4.9 V). **4.4 V 초과 = USB 전원으로 해석**하면 됩니다. 음수는 측정 실패.
+* `md` — 노드가 실제 적용 중인 전력 모드 (`"a"`=active / `"i"`=idle). 게이트웨이는 세션 상태와 어긋나면 7.4 의 모드 푸시로 교정합니다.
 
-`SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 전송하고, 변화가 없어도 `SHELF_HEARTBEAT_PERIOD`(기본 30회 = 5분)마다 한 번은 보냅니다.
+`SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 전송하고, 변화가 없어도 모드별 하트비트(`SHELF_HEARTBEAT_IDLE_S` 30 초 / `SHELF_HEARTBEAT_ACTIVE_S` 10 초)마다 한 번은 보냅니다. 측정 주기는 IDLE 2 초(레일 게이트, 40 Hz) / ACTIVE 0.5 초(레일 상시 ON, 640 Hz)입니다.
 
-### 7.2 LED 명령 폴링 (노드 → 게이트웨이, 700 ms 주기)
+### 7.2 LED 백업 폴 (노드 → 게이트웨이, ACTIVE 에서 5 초 주기)
 
 ```
 GET coap://<gw>/shelf/led?id=f4ce36a1b2c3d4e5     (CON)
@@ -508,9 +509,25 @@ GET coap://<gw>/shelf/led?id=f4ce36a1b2c3d4e5     (CON)
 
 응답 페이로드는 아래 형태를 모두 받아들입니다: `0` / `1`, `on` / `off`, `{"led":1}`, `{"led":true}`.
 
-응답이 400 ms 안에 오지 않으면 그 회차는 실패로 처리하고, 10회 연속 실패하면 LED 를 끕니다(`SHELF_LED_FAILSAFE_POLLS`, 0 으로 두면 마지막 상태 유지).
+빠른 경로는 7.4 의 LED 푸시이고, 이 폴은 유실된 푸시의 복구와 게이트웨이 생존 확인을 겸합니다. ACTIVE 에서 게이트웨이 접촉이 `SHELF_ACTIVE_FAILSAFE_S`(60 초) 동안 없으면 노드는 스스로 IDLE 로 내려갑니다 (배터리 보호). IDLE 에서는 LED 를 끄고 폴도 하지 않습니다.
 
-> 참고: 700 ms 폴링은 노드당 초당 약 1.4 요청입니다. 선반 노드가 수십 개로 늘어나면 메시 트래픽이 부담이 되니, 그 단계에서는 CoAP Observe 나 게이트웨이 푸시로 바꾸는 걸 권합니다. 지금 요구사항대로 폴링으로 구현해 두었습니다.
+### 7.3 전력 모드 질의 (노드 → 게이트웨이, 부팅 시 1회)
+
+```
+GET coap://<gw>/shelf/mode?id=f4ce36a1b2c3d4e5    (CON)
+→ 2.05 Content, payload: "active" 또는 "idle"
+```
+
+노드는 IDLE 로 부팅한 뒤 이 질의로 현재 세션 상태를 동기화합니다. 응답이 없으면 2/4/8…60 초 백오프로 재시도하고, 먼저 도착한 모드 푸시(7.4)가 있으면 그만둡니다.
+
+### 7.4 게이트웨이 → 노드 푸시 (CON, piggyback 2.04)
+
+```
+PUT coap://<node>/shelf/mode   payload: "active" | "idle"
+PUT coap://<node>/shelf/led    payload: "1" | "0"
+```
+
+노드는 2.04 Changed 로 ACK 합니다. IDLE(SED) 노드로 가는 푸시는 Thread 부모가 큐에 보관했다가 다음 데이터 폴(1 초)에 배달하므로, CoAP 재전송(2 초 × 수 회)이면 충분합니다. 모드 푸시는 멱등이고, IDLE 상태의 노드는 `led "1"` 푸시를 무시합니다 (아무도 안 보는 LED 를 켜 두지 않기 위해).
 
 ---
 

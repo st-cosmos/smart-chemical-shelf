@@ -11,6 +11,7 @@ target_sources(app PRIVATE
   src/cs1237.c
   src/shelf_cal.c
   src/shelf_coap.c
+  src/shelf_mode.c
 )
 
 target_include_directories(app PRIVATE src)

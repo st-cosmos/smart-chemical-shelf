@@ -7,6 +7,7 @@
  */
 
 #include "shelf_cal.h"
+#include "shelf_mode.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -317,6 +318,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(shelf_cmds,
 	SHELL_CMD(battery, NULL,
 		  "Read VDDH (battery) voltage via the SAADC VDDH/5 tap",
 		  cmd_battery),
+	SHELL_CMD_ARG(mode, NULL,
+		      "Show or force the power mode: shelf mode [idle|active|auto]",
+		      shelf_mode_shell_cmd, 1, 1),
 	SHELL_SUBCMD_SET_END
 );
 
