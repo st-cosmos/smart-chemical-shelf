@@ -38,6 +38,7 @@ object NavBar {
     const val TAB_CHECKIN = 1
     const val TAB_CHECKOUT = 2
     const val TAB_SHELF = 3
+    const val TAB_INVENTORY = 4
 
     fun setup(nav: ComponentBottomNavBinding, activity: Activity, activeTab: Int) {
         val primary = ContextCompat.getColor(activity, R.color.primary)
@@ -48,7 +49,8 @@ object NavBar {
             Triple(nav.navHome, nav.navHomeIcon, nav.navHomeLabel),
             Triple(nav.navCheckin, nav.navCheckinIcon, nav.navCheckinLabel),
             Triple(nav.navCheckout, nav.navCheckoutIcon, nav.navCheckoutLabel),
-            Triple(nav.navShelf, nav.navShelfIcon, nav.navShelfLabel)
+            Triple(nav.navShelf, nav.navShelfIcon, nav.navShelfLabel),
+            Triple(nav.navInventory, nav.navInventoryIcon, nav.navInventoryLabel)
         )
 
         tabs.forEachIndexed { index, (tab, icon, label) ->
@@ -71,6 +73,7 @@ object NavBar {
                     TAB_CHECKIN -> navigate(activity, CheckinActivity::class.java)
                     TAB_CHECKOUT -> navigate(activity, CheckoutActivity::class.java)
                     TAB_SHELF -> navigate(activity, ShelfManageActivity::class.java)
+                    TAB_INVENTORY -> navigate(activity, InventoryActivity::class.java)
                 }
             }
         }
