@@ -1612,23 +1612,25 @@ select.input-field {
   color: var(--text-muted);
 }
 
-/* 방금 리셋 버튼이 눌려 다시 잡힌 기기 — 블링크로 식별 */
+/* 방금 리셋 버튼이 눌려 다시 잡힌 기기 — 주황으로 3번 깜빡인 뒤
+   기본(파란) 스타일로 돌아온다. 재렌더에도 같은 DOM 이 유지되어
+   애니메이션은 클래스가 처음 붙을 때 한 번만 재생된다. */
 @keyframes unreg-chip-blink {
   0%,
   100% {
     background: var(--warning-soft);
+    color: var(--warning);
     box-shadow: 0 0 0 0 rgb(245 166 35 / 45%);
   }
   50% {
     background: #ffe4b3;
+    color: var(--warning);
     box-shadow: 0 0 0 6px rgb(245 166 35 / 0%);
   }
 }
 
 .unreg-chip-reset {
-  color: var(--warning);
-  border: 1.5px solid var(--warning);
-  animation: unreg-chip-blink 0.9s ease-in-out infinite;
+  animation: unreg-chip-blink 0.7s ease-in-out 3;
 }
 
 .unreg-chip-reset-tag {

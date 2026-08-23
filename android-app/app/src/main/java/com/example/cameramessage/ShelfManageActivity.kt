@@ -113,8 +113,13 @@ class ShelfManageActivity : AppCompatActivity() {
 
     // ---------- 미등록 기기 스트립 ----------
 
+    // 리셋 블링크를 이미 보여준 기기 — 폴링 재렌더마다 다시 깜빡이지 않게 한다
+    private val blinkShown = mutableSetOf<String>()
+
     private fun updateUnregisteredStrip(shelves: List<ShelfDevice>) {
         val unregistered = shelves.filter { it.status == "unregistered" }
+        // 리셋 표시가 꺼진 기기는 기록을 지워, 다음 리셋 때 다시 깜빡일 수 있게 한다
+        unregistered.filter { !it.recently_reset }.forEach { blinkShown.remove(it.id) }
         if (unregistered.isEmpty()) {
             binding.unregisteredStripCard.visibility = View.GONE
             return
@@ -146,13 +151,22 @@ class ShelfManageActivity : AppCompatActivity() {
             ).apply { marginEnd = dp(8) }
         }
 
-        if (device.recently_reset) {
+        // 리셋 직후 1회만: 주황으로 3번 깜빡인 뒤 파란색으로 돌아온다
+        if (device.recently_reset && blinkShown.add(device.id)) {
             chip.backgroundTintList = ColorStateList.valueOf(color(R.color.warning_soft))
             chip.startAnimation(
                 android.view.animation.AlphaAnimation(1f, 0.3f).apply {
-                    duration = 450
+                    duration = 350
                     repeatMode = Animation.REVERSE
-                    repeatCount = Animation.INFINITE
+                    repeatCount = 5  // 왕복 3회
+                    setAnimationListener(object : Animation.AnimationListener {
+                        override fun onAnimationStart(a: Animation?) {}
+                        override fun onAnimationRepeat(a: Animation?) {}
+                        override fun onAnimationEnd(a: Animation?) {
+                            chip.backgroundTintList =
+                                ColorStateList.valueOf(color(R.color.primary_soft))
+                        }
+                    })
                 }
             )
         }
