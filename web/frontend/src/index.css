@@ -1403,6 +1403,19 @@ select.input-field {
   cursor: pointer;
 }
 
+.shelf-grid-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0 24px;
+}
+
 /* 행/열 추가 — 그리드 아래 소형 버튼 (수납칸 크기에 영향 없음) */
 .add-line-row {
   display: flex;
@@ -1597,6 +1610,113 @@ select.input-field {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+/* 방금 리셋 버튼이 눌려 다시 잡힌 기기 — 블링크로 식별 */
+@keyframes unreg-chip-blink {
+  0%,
+  100% {
+    background: var(--warning-soft);
+    box-shadow: 0 0 0 0 rgb(245 166 35 / 45%);
+  }
+  50% {
+    background: #ffe4b3;
+    box-shadow: 0 0 0 6px rgb(245 166 35 / 0%);
+  }
+}
+
+.unreg-chip-reset {
+  color: var(--warning);
+  border: 1.5px solid var(--warning);
+  animation: unreg-chip-blink 0.9s ease-in-out infinite;
+}
+
+.unreg-chip-reset-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warning);
+}
+
+/* ---------- 유통기한 후입력 · 기본값 설정 ---------- */
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expiry-setting-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 16px;
+  white-space: nowrap;
+}
+
+.expiry-setting-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.exp-missing {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.expiry-val {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expiry-edit-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.expiry-edit-link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.expiry-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expiry-date-input {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-strong);
+  background: var(--surface);
+}
+
+.expiry-save-btn {
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+}
+
+.expiry-save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* ---------- 재고 관리 상태 필터 칩 (design.pen web-inventory) ---------- */

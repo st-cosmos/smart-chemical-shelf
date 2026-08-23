@@ -49,6 +49,7 @@ export interface ShelfDevice {
   led_on: boolean;
   led_message: string;
   updated_time: string;
+  recently_reset?: boolean; // 방금 리셋 버튼이 눌려 다시 잡힌 기기 (블링크 식별용)
 }
 
 export interface ShelfConfig {

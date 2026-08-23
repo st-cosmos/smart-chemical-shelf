@@ -79,7 +79,9 @@ export default function App() {
         onProfile={() => setActiveTab('profile')}
         onLogout={handleLogout}
       />
-      {activeTab === 'inventory' && <Inventory alerts={alerts} refreshAlerts={refreshAlerts} />}
+      {activeTab === 'inventory' && (
+        <Inventory alerts={alerts} refreshAlerts={refreshAlerts} user={user} />
+      )}
       {activeTab === 'shelves' && <Shelves />}
       {activeTab === 'orders' && <Orders />}
       {activeTab === 'users' && <UserRegister />}

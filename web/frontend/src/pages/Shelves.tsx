@@ -168,6 +168,13 @@ function ShelfCard({
       <div className="shelf-grid-wrap">
         {/* 3행만 보이는 뷰포트 — 그 이상은 세로 스크롤로 노출 (선반 카드 높이 통일) */}
         <div className="shelf-grid-viewport" onScroll={editing ? syncScroll : undefined}>
+          {config.rows * config.cols === 0 && (
+            <div className="shelf-grid-empty">
+              {editing
+                ? '아래 [행 추가]·[열 추가] 버튼으로 수납칸을 만드세요'
+                : '빈 선반입니다 — 연필 아이콘을 눌러 행과 열을 추가하세요'}
+            </div>
+          )}
           <div className="shelf-grid" style={{ '--cols': config.cols } as CSSProperties}>
             {Array.from({ length: config.rows * config.cols }, (_, idx) => {
               const row = Math.floor(idx / config.cols) + 1;
@@ -343,8 +350,11 @@ export default function Shelves() {
     const used = new Set(configs.map((c) => c.id));
     let code = 'A'.charCodeAt(0);
     while (used.has(String.fromCharCode(code))) code += 1;
+    const id = String.fromCharCode(code);
     try {
-      await postJSON(`/api/shelves/configs/${String.fromCharCode(code)}`, { rows: 3, cols: 3 });
+      // 1×1 최소 크기로 만들고, 바로 수정 모드로 열어 사용자가 행/열을 늘리게 한다
+      await postJSON(`/api/shelves/configs/${id}`, { rows: 1, cols: 1 });
+      setEditShelfId(id);
       await fetchData();
     } catch {
       // 무시
@@ -423,13 +433,23 @@ export default function Shelves() {
             </span>
           </div>
           <div className="unreg-strip-chips">
-            {unregistered.map((d) => (
-              <span key={d.id} className="unreg-chip">
-                <HardDrive size={18} />
-                {d.id}
-                <span className="unreg-chip-batt">{d.battery}%</span>
-              </span>
-            ))}
+            {/* 방금 리셋 버튼이 눌린 기기는 맨 앞 + 블링크로 식별 */}
+            {[...unregistered]
+              .sort((a, b) => Number(b.recently_reset ?? false) - Number(a.recently_reset ?? false))
+              .map((d) => (
+                <span
+                  key={d.id}
+                  className={`unreg-chip${d.recently_reset ? ' unreg-chip-reset' : ''}`}
+                >
+                  <HardDrive size={18} />
+                  {d.id}
+                  {d.recently_reset ? (
+                    <span className="unreg-chip-reset-tag">방금 리셋됨</span>
+                  ) : (
+                    <span className="unreg-chip-batt">{d.battery}%</span>
+                  )}
+                </span>
+              ))}
           </div>
         </div>
       )}
