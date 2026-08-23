@@ -258,14 +258,17 @@ static void led_push_handler(bool on)
 
 /*
  * One-time boot synchronisation: ask the gateway which mode we should be in.
- * Ends as soon as an answer arrives or any mode push beats us to it. Backs
- * off so an old gateway (no mode resource) only costs one request a minute.
+ * Ends as soon as an answer arrives, any mode push beats us to it, or the
+ * shell forces a mode (bench work without a gateway - the LED thread must
+ * not stay parked here or forced ACTIVE never runs the wake animation).
+ * Backs off so an old gateway (no mode resource) only costs one request a
+ * minute.
  */
 static void boot_mode_sync(void)
 {
 	uint32_t delay_s = 2;
 
-	while (!shelf_mode_is_synced()) {
+	while (!shelf_mode_is_synced() && !shelf_mode_is_forced()) {
 		enum shelf_mode m;
 
 		if (shelf_coap_get_mode(&m) == 0) {
@@ -273,7 +276,9 @@ static void boot_mode_sync(void)
 			return;
 		}
 
-		for (uint32_t i = 0; i < delay_s && !shelf_mode_is_synced(); i++) {
+		for (uint32_t i = 0;
+		     i < delay_s && !shelf_mode_is_synced() &&
+		     !shelf_mode_is_forced(); i++) {
 			k_sleep(K_SECONDS(1));
 		}
 		delay_s = MIN(delay_s * 2, 60);
