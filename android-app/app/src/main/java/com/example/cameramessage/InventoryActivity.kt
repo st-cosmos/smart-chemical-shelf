@@ -25,8 +25,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-// 수납칸 용량 기준 (kg) — 잔량 % 환산용 (web Inventory.tsx 와 동일 기준)
-private const val CAPACITY_KG = 2.0
+// 잔량 % 환산 기준: 가득 = 500g (시연 약품 최대 무게, web Inventory.tsx 와 동일)
+private const val CAPACITY_KG = 0.5
 private const val DANGER_PCT = 25
 
 // 시약 카드를 이 시간(ms) 이상 꾹 누르면 폐기 확인 모달을 띄운다

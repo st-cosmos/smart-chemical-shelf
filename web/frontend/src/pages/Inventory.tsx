@@ -31,8 +31,8 @@ function monthsFromToday(m: number): string {
   ).padStart(2, '0')}`;
 }
 
-// 수납칸 용량 기준 (kg) — 잔량 % 환산용
-const CAPACITY_KG = 2.0;
+// 잔량 % 환산 기준: 가득 = 500g (시연 약품 최대 무게)
+const CAPACITY_KG = 0.5;
 const DANGER_PCT = 25;
 
 // 테이블 컬럼 폭 (design-spec §4.2)
