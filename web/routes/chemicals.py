@@ -320,12 +320,11 @@ def get_alerts(db: Session = Depends(get_db)):
             if not shelf1 or not shelf2:
                 continue
 
-            # Check if stored on adjacent positions (same parent shelf & row/col distance <= 1)
+            # 혼재 판정 범위: 같은 선반의 같은 행 (열 무관).
+            # 이전의 8방향 거리 1 기준에서 행 단위 기준으로 변경.
             is_adjacent = False
             if shelf1.parent_shelf and shelf2.parent_shelf and shelf1.parent_shelf == shelf2.parent_shelf:
-                r1, c1_col = shelf1.row or 1, shelf1.col or 1
-                r2, c2_col = shelf2.row or 1, shelf2.col or 1
-                if abs(r1 - r2) <= 1 and abs(c1_col - c2_col) <= 1:
+                if (shelf1.row or 1) == (shelf2.row or 1):
                     is_adjacent = True
             elif shelf1.id == shelf2.id:
                 is_adjacent = True
