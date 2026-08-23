@@ -21,7 +21,7 @@ import models
 import schemas
 import shelf_power
 from database import Base, SessionLocal, engine, get_db
-from routes import chemicals, logs, orders, session, shelves, users
+from routes import chemicals, logs, orders, session, settings, shelves, users
 
 
 class ConnectionManager:
@@ -117,6 +117,7 @@ app.include_router(orders.router)
 app.include_router(logs.router)
 app.include_router(session.router)
 app.include_router(session.checkout_router)
+app.include_router(settings.router)
 
 
 @app.websocket("/ws")
