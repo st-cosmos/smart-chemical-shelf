@@ -498,7 +498,7 @@ Content: {"id":"f4ce36a1b2c3d4e5","seq":12,"raw":842317,"mg":8423,"mv":4915,"md"
 * `mv` — VDDH 전압 (SAADC VDDH/5 탭). 배터리 구동이면 배터리 전압, USB 연결 중이면 Q5 가 배터리를 분리하므로 VBUS-다이오드 값(~4.9 V). **4.4 V 초과 = USB 전원으로 해석**하면 됩니다. 음수는 측정 실패.
 * `md` — 노드가 실제 적용 중인 전력 모드 (`"a"`=active / `"i"`=idle). 게이트웨이는 세션 상태와 어긋나면 7.4 의 모드 푸시로 교정합니다.
 
-`SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 전송하고, 변화가 없어도 모드별 하트비트(`SHELF_HEARTBEAT_IDLE_S` 30 초 / `SHELF_HEARTBEAT_ACTIVE_S` 10 초)마다 한 번은 보냅니다. 측정 주기는 IDLE 2 초(레일 게이트, 40 Hz) / ACTIVE 0.5 초(레일 상시 ON, 640 Hz)입니다.
+`SHELF_ADC_DELTA_THRESHOLD` 이상 변했을 때만 전송하고, 변화가 없어도 모드별 하트비트(`SHELF_HEARTBEAT_IDLE_S` 30 초 / `SHELF_HEARTBEAT_ACTIVE_S` 10 초)마다 한 번은 보냅니다. 측정 주기는 IDLE 2 초(레일 게이트, 40 Hz) / ACTIVE 0.2 초(레일 상시 ON, 640 Hz)입니다. 변화 보고에는 안정화 필터가 걸립니다 — 연속 측정이 `SHELF_SETTLE_THRESHOLD_G`(기본 10 g) 이내로 일치할 때만 보고하므로, 병을 내려놓는 도중의 과도값(0 → 300 g → 500 g)이 서버로 새지 않습니다.
 
 ### 7.2 LED 백업 폴 (노드 → 게이트웨이, ACTIVE 에서 5 초 주기)
 
