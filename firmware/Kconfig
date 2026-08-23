@@ -26,7 +26,23 @@ config SHELF_IDLE_MEASURE_INTERVAL_MS
 
 config SHELF_ACTIVE_MEASURE_INTERVAL_MS
 	int "ACTIVE: load cell measurement period [ms]"
-	default 500
+	default 200
+	help
+	  ACTIVE is the mode where power is deliberately spent (rail already
+	  on, radio already listening), and one 640 Hz measurement only costs
+	  ~14 ms - so sample fast. Faster sampling also makes the settling
+	  filter converge sooner after something is placed on the shelf.
+
+config SHELF_SETTLE_THRESHOLD_G
+	int "Report only when consecutive measurements agree within this [g]"
+	default 10
+	help
+	  A change is reported only once the reading has settled: the current
+	  measurement differs from the previous one by no more than this many
+	  grams. This suppresses the mid-placement transients (0 -> 300 g ->
+	  500 g) that used to reach the server as two separate changes while a
+	  bottle was still being put down. Converted to raw counts at runtime
+	  using the stored calibration; heartbeats ignore it.
 
 config SHELF_ACTIVE_AVG_SAMPLES
 	int "ACTIVE: samples averaged per measurement (640 Hz)"

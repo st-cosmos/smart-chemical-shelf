@@ -108,6 +108,18 @@ static uint32_t abs_delta(int32_t a, int32_t b)
 	return (uint32_t)((a > b) ? (a - b) : (b - a));
 }
 
+/* SHELF_SETTLE_THRESHOLD_G converted to raw counts with the active
+ * calibration. counts_per_kg is negative on reverse-wired load cells. */
+static uint32_t settle_threshold_counts(void)
+{
+	int64_t cpkg = shelf_cal_counts_per_kg();
+
+	if (cpkg < 0) {
+		cpkg = -cpkg;
+	}
+	return (uint32_t)((cpkg * CONFIG_SHELF_SETTLE_THRESHOLD_G) / 1000);
+}
+
 /* The measurement thread and the `shelf` shell commands both drive the rail
  * and the bit-banged bus, so everything is serialised by this mutex. It also
  * guards rail_held: in ACTIVE mode the measurement thread keeps the rail
@@ -164,8 +176,10 @@ static void measure_thread_fn(void *p1, void *p2, void *p3)
 {
 	enum shelf_mode cur = SHELF_MODE_IDLE;
 	int32_t last_reported = 0;
+	int32_t last_meas = 0;
 	int64_t last_report_ms = 0;
 	bool have_last = false;
+	bool have_meas = false;
 	uint32_t seq = 0;
 	int64_t next;
 
@@ -205,13 +219,24 @@ static void measure_thread_fn(void *p1, void *p2, void *p3)
 			bool changed = !have_last ||
 				abs_delta(raw, last_reported) >=
 					(uint32_t)CONFIG_SHELF_ADC_DELTA_THRESHOLD;
+			/* Settling filter: while something is being placed the
+			 * reading moves between cycles (0 -> 300 g -> 500 g).
+			 * Only report once two consecutive measurements agree,
+			 * so the server sees a single settled change instead of
+			 * every mid-placement transient. */
+			bool settled = have_meas &&
+				abs_delta(raw, last_meas) <= settle_threshold_counts();
 			bool heartbeat = (heartbeat_s > 0) &&
 				(now - last_report_ms >= (int64_t)heartbeat_s * 1000);
 
-			LOG_DBG("raw=%d mg=%d%s", raw, shelf_raw_to_mg(raw),
-				changed ? " (changed)" : "");
+			last_meas = raw;
+			have_meas = true;
 
-			if (changed || heartbeat) {
+			LOG_DBG("raw=%d mg=%d%s%s", raw, shelf_raw_to_mg(raw),
+				changed ? " (changed)" : "",
+				settled ? "" : " (settling)");
+
+			if ((changed && settled) || heartbeat) {
 				int32_t batt_mv = -1;
 
 				(void)shelf_battery_read_mv(&batt_mv);
