@@ -282,6 +282,8 @@ static void boot_mode_sync(void)
 
 static void led_thread_fn(void *p1, void *p2, void *p3)
 {
+	enum shelf_mode prev = SHELF_MODE_IDLE;
+
 	ARG_UNUSED(p1);
 	ARG_UNUSED(p2);
 	ARG_UNUSED(p3);
@@ -290,7 +292,21 @@ static void led_thread_fn(void *p1, void *p2, void *p3)
 	boot_mode_sync();
 
 	while (true) {
-		if (shelf_mode_get() != SHELF_MODE_ACTIVE) {
+		enum shelf_mode m = shelf_mode_get();
+
+		if (m == SHELF_MODE_ACTIVE && prev != SHELF_MODE_ACTIVE) {
+			/* Wake animation: one 0->255->0 breathe so the user sees
+			 * the shelf come alive on login. Runs here (not in the
+			 * CoAP RX thread that received the push) so the mode-push
+			 * ACK is not delayed by the ~4 s sweep. A LED push that
+			 * lands mid-sweep is re-asserted right after. */
+			LOG_INF("wake animation");
+			shelf_led_breathe(1);
+			led_apply(atomic_get(&led_commanded));
+		}
+		prev = m;
+
+		if (m != SHELF_MODE_ACTIVE) {
 			if (atomic_get(&led_commanded)) {
 				LOG_INF("idle mode, LED off");
 			}
