@@ -18,11 +18,31 @@ ONLINE_WINDOW_SECONDS = 15.0
 # IDLE 모드: 게이트웨이 대행 폴링 5초 + 노드 하트비트 30초 대비 여유
 IDLE_ONLINE_WINDOW_SECONDS = 90.0
 
+# 접속 공백이 이 시간을 넘겼다가 돌아오면 리셋(재부팅)으로 판정한다.
+# ACTIVE 모드 폴링이 1초라 정상 상태에선 공백이 생기지 않고,
+# 리셋 버튼을 누르면 부팅+Thread 재합류로 수 초 이상 끊긴다.
+RESET_GAP_SECONDS = 8.0
+# 리셋 판정 후 이 시간 동안 recently_reset 로 표시한다 (앱/웹 블링크 식별용)
+RESET_HIGHLIGHT_SECONDS = 30.0
+
 _last_seen = {}
+_boot_at = {}
 
 
 def mark_seen(device_id: str):
-    _last_seen[device_id] = time.time()
+    now = time.time()
+    prev = _last_seen.get(device_id)
+    # 이전 접속 기록이 있어야 리셋으로 본다 — 서버 재시작 직후의 첫 접촉을
+    # 전부 리셋으로 오인해 일제히 깜빡이는 것을 막는다.
+    if prev is not None and (now - prev) >= RESET_GAP_SECONDS:
+        _boot_at[device_id] = now
+    _last_seen[device_id] = now
+
+
+def recently_reset(device_id: str) -> bool:
+    """방금(RESET_HIGHLIGHT_SECONDS 이내) 리셋되어 다시 잡힌 기기인가."""
+    boot = _boot_at.get(device_id)
+    return boot is not None and (time.time() - boot) <= RESET_HIGHLIGHT_SECONDS
 
 
 def is_online(device_id: str) -> bool:
