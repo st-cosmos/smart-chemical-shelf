@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.DragEvent
 import android.view.Gravity
 import android.view.View
+import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -112,8 +113,13 @@ class ShelfManageActivity : AppCompatActivity() {
 
     // ---------- 미등록 기기 스트립 ----------
 
+    // 리셋 블링크를 이미 보여준 기기 — 폴링 재렌더마다 다시 깜빡이지 않게 한다
+    private val blinkShown = mutableSetOf<String>()
+
     private fun updateUnregisteredStrip(shelves: List<ShelfDevice>) {
         val unregistered = shelves.filter { it.status == "unregistered" }
+        // 리셋 표시가 꺼진 기기는 기록을 지워, 다음 리셋 때 다시 깜빡일 수 있게 한다
+        unregistered.filter { !it.recently_reset }.forEach { blinkShown.remove(it.id) }
         if (unregistered.isEmpty()) {
             binding.unregisteredStripCard.visibility = View.GONE
             return
@@ -123,12 +129,14 @@ class ShelfManageActivity : AppCompatActivity() {
         binding.unregCountText.text = "미등록 기기 ${unregistered.size}대"
         binding.unregisteredDevicesLayout.removeAllViews()
 
-        unregistered.forEach { device ->
+        // 방금 리셋된 기기를 맨 앞으로 — 블링크와 함께 바로 눈에 띄게
+        unregistered.sortedByDescending { it.recently_reset }.forEach { device ->
             binding.unregisteredDevicesLayout.addView(buildDeviceChip(device))
         }
     }
 
-    /** 드래그 소스가 되는 기기 칩 (§3.4-2) */
+    /** 드래그 소스가 되는 기기 칩 (§3.4-2)
+     *  방금 리셋 버튼이 눌린 기기는 블링크로 강조해 어떤 기기인지 식별하게 한다. */
     private fun buildDeviceChip(device: ShelfDevice): View {
         val primary = color(R.color.primary)
         val chip = LinearLayout(this).apply {
@@ -141,6 +149,26 @@ class ShelfManageActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { marginEnd = dp(8) }
+        }
+
+        // 리셋 직후 1회만: 주황으로 3번 깜빡인 뒤 파란색으로 돌아온다
+        if (device.recently_reset && blinkShown.add(device.id)) {
+            chip.backgroundTintList = ColorStateList.valueOf(color(R.color.warning_soft))
+            chip.startAnimation(
+                android.view.animation.AlphaAnimation(1f, 0.3f).apply {
+                    duration = 350
+                    repeatMode = Animation.REVERSE
+                    repeatCount = 5  // 왕복 3회
+                    setAnimationListener(object : Animation.AnimationListener {
+                        override fun onAnimationStart(a: Animation?) {}
+                        override fun onAnimationRepeat(a: Animation?) {}
+                        override fun onAnimationEnd(a: Animation?) {
+                            chip.backgroundTintList =
+                                ColorStateList.valueOf(color(R.color.primary_soft))
+                        }
+                    })
+                }
+            )
         }
 
         chip.addView(ImageView(this).apply {
@@ -272,6 +300,21 @@ class ShelfManageActivity : AppCompatActivity() {
                 rowLayout.addView(buildCell(config, r, c, device))
             }
             gridColumn.addView(rowLayout)
+        }
+        // 행이나 열이 0이면 그리드가 완전히 접혀 열 추가 버튼까지 사라지므로
+        // 빈 상태 안내를 셀 높이만큼 넣어 추가 버튼들이 항상 보이게 한다
+        if (config.rows == 0 || config.cols == 0) {
+            gridColumn.addView(TextView(this).apply {
+                text = "빈 선반입니다\n행과 열을 추가해 수납칸을 만드세요"
+                textSize = 10f
+                gravity = Gravity.CENTER
+                setTextColor(color(R.color.text_muted))
+                setBackgroundResource(R.drawable.shape_rounded_8)
+                backgroundTintList = ColorStateList.valueOf(color(R.color.bg))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(78)
+                ).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
+            })
         }
         gridWrap.addView(gridColumn)
 
@@ -567,7 +610,8 @@ class ShelfManageActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             try {
-                NetworkClient.api.updateShelfConfig(nextId, mapOf("rows" to 3, "cols" to 4))
+                // 1×1 최소 크기로 만든다 — 행/열은 사용자가 카드에서 직접 늘린다
+                NetworkClient.api.updateShelfConfig(nextId, mapOf("rows" to 1, "cols" to 1))
                 Toast.makeText(this@ShelfManageActivity, "선반 ${nextId}가 추가되었습니다.", Toast.LENGTH_SHORT).show()
                 expandedShelves.add(nextId)
                 refreshOnce()

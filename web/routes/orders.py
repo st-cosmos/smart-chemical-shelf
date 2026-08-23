@@ -7,8 +7,8 @@ import schemas
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
-# 잔량 % 환산 기준 (프런트 재고 관리와 동일: 수납칸 용량 2.0kg)
-CAPACITY_KG = 2.0
+# 잔량 % 환산 기준 (프런트 재고 관리와 동일: 가득 = 500g, 시연 약품 최대 무게)
+CAPACITY_KG = 0.5
 # 이 잔량(%) 이하로 떨어지면 주문 목록에 자동 추가한다 (반출중·비치중 무관)
 LOW_STOCK_PCT = 15
 

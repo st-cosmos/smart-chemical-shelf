@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Size
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
@@ -20,6 +21,8 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -131,12 +134,25 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
             }
 
+            // 기본 해상도(640x480)로는 라벨의 작은 글자가 뭉개져 OCR 인식률이 낮다.
+            // KEEP_ONLY_LATEST 라 고해상도여도 프레임이 밀리지 않는다.
             val analysis = ImageAnalysis.Builder()
+                .setResolutionSelector(
+                    ResolutionSelector.Builder()
+                        .setResolutionStrategy(
+                            ResolutionStrategy(
+                                Size(1920, 1080),
+                                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                            )
+                        )
+                        .build()
+                )
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             analysis.setAnalyzer(cameraExecutor, ScanAnalyzer())
 
-            val selector = CameraSelector.DEFAULT_BACK_CAMERA
+            // 태블릿 거치 방향상 사용자 쪽(전면) 카메라로 라벨을 스캔한다
+            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
             try {
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(this, selector, preview, analysis)
@@ -218,10 +234,15 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         isScanned = true
         val name = result.chemical_name ?: run { resumeScanning(); return }
         val percent = (result.confidence * 100).toInt()
+        val message = if (result.method == "llm") {
+            "AI 분석 결과: $name\n맞다면 다음부터는 즉시 인식돼요."
+        } else {
+            "인식 결과: $name\n(일치율 ${percent}%)"
+        }
         AppModal.show(
             this, AppModal.Tone.PRIMARY, R.drawable.ic_flask_conical,
             "이 시약이 맞나요?",
-            "인식 결과: $name\n(일치율 ${percent}%)",
+            message,
             "아니요", "맞아요",
             onSecondary = {
                 scanner.declineCandidate(name)
@@ -274,62 +295,59 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         }
     }
 
-    /** OCR 텍스트에서 유통기한을 찾아 확인 모달을 띄우고, 없으면 직접 입력 모달로 넘어간다 (§3.9) */
+    /** 유통기한 등록 — 시약 라벨에는 보통 유통기한이 없으므로 사용자에게 묻지 않는다.
+     *  라벨에서 '확실한' 날짜(형식·범위 검증을 통과한 미래의 실제 날짜)를 찾으면 자동 등록,
+     *  없으면 기본값(반입일 + N개월, 웹 관리자 설정)으로 조용히 등록한다.
+     *  CAS 번호·로트번호 등 날짜처럼 생긴 숫자를 날짜로 되묻던 문제를 없앤다. */
     private fun promptExpirationDate(ocrText: String) {
-        val match = Regex("(\\d{4})[-./](\\d{2})[-./](\\d{2})").find(ocrText)
-        val foundDate = match?.let {
-            "${it.groupValues[1]}-${it.groupValues[2]}-${it.groupValues[3]}"
-        }
-
-        if (foundDate != null) {
-            AppModal.show(
-                this, AppModal.Tone.PRIMARY, R.drawable.ic_calendar_check,
-                "유통기한을 확인해 주세요",
-                "라벨에서 유통기한을 인식했어요.\n날짜가 맞는지 확인해 주세요.",
-                "직접 입력", "맞아요",
-                dateBadge = foundDate,
-                onSecondary = { showManualExpirationDialog() },
-                onPrimary = { submitExpirationDate(foundDate) }
-            )
-        } else {
-            showManualExpirationDialog()
-        }
-    }
-
-    private fun showManualExpirationDialog() {
-        AppModal.show(
-            this, AppModal.Tone.WARNING, R.drawable.ic_calendar_search,
-            "유통기한 직접 입력",
-            "라벨에서 유통기한을 인식하지 못했어요.\n유통기한을 직접 입력해 주세요.",
-            null, "입력 완료",
-            inputTextHint = "YYYYMMDD 또는 YYYY-MM-DD",
-            inputType = android.text.InputType.TYPE_CLASS_DATETIME,
-            inputErrorText = "예: 20270315 또는 2027-03-15 형식으로 입력해 주세요",
-            onInputSubmit = { text ->
-                val normalized = text.replace(Regex("[./]"), "-").trim()
-                if (Regex("\\d{4}-\\d{2}-\\d{2}").matches(normalized)) {
-                    submitExpirationDate(normalized)
-                    true
-                } else if (Regex("\\d{8}").matches(normalized)) {
-                    val formatted = "${normalized.substring(0, 4)}-${normalized.substring(4, 6)}-${normalized.substring(6, 8)}"
-                    submitExpirationDate(formatted)
-                    true
-                } else {
-                    false
+        lifecycleScope.launch {
+            val found = findCertainExpirationDate(ocrText)
+            if (found != null) {
+                submitExpirationDate(found, note = "라벨에서 인식")
+            } else {
+                val months = try {
+                    NetworkClient.api.getDefaultExpiry().months
+                } catch (e: Exception) {
+                    12
                 }
+                val date = java.time.LocalDate.now().plusMonths(months.toLong()).toString()
+                submitExpirationDate(date, note = "기본값 · 반입일로부터 ${months}개월")
             }
-        )
+        }
     }
 
-    private fun submitExpirationDate(date: String) {
+    /** 확실한 유통기한만 인정: 앞뒤에 다른 숫자가 붙지 않은 YYYY-MM-DD 꼴이면서
+     *  실제 달력에 존재하는 미래 날짜(오늘 이후 ~ 20년 이내). CAS 번호(7647-01-0)처럼
+     *  월/일 범위를 벗어나거나 과거(제조일자)인 값은 걸러진다. */
+    private fun findCertainExpirationDate(ocrText: String): String? {
+        val today = java.time.LocalDate.now()
+        for (m in Regex("(?<!\\d)(\\d{4})[-./](\\d{2})[-./](\\d{2})(?!\\d)").findAll(ocrText)) {
+            val date = try {
+                java.time.LocalDate.of(
+                    m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()
+                )
+            } catch (e: Exception) {
+                continue
+            }
+            if (!date.isBefore(today) && date.year <= today.year + 20) {
+                return date.toString()
+            }
+        }
+        return null
+    }
+
+    private fun submitExpirationDate(date: String, note: String) {
         lifecycleScope.launch {
             try {
                 NetworkClient.api.setCheckinExpiration(ExpirationRequest(date))
                 AppModal.show(
                     this@CheckinActivity, AppModal.Tone.SUCCESS, R.drawable.ic_circle_check,
                     "등록 완료",
-                    "새 시약 등록이 완료되었습니다.\n안내된 추천 위치에 시약을 놓아 주세요.",
-                    null, "확인"
+                    "새 시약 등록이 완료되었습니다.\n" +
+                            "유통기한: $date ($note)\n" +
+                            "잘못됐다면 웹 재고 관리에서 수정할 수 있어요.",
+                    null, "확인",
+                    dateBadge = date
                 )
             } catch (e: Exception) {
                 Toast.makeText(this@CheckinActivity, "유통기한 등록 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()

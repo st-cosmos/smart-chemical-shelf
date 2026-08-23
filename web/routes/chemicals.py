@@ -47,6 +47,26 @@ def match_chemical(req: schemas.MatchRequest, db: Session = Depends(get_db)):
     확신이 없으면 needs_confirmation 으로 후보를 돌려준다."""
     return matching.match(db, req.ocr_text, req.barcode)
 
+@router.post("/match/llm")
+def match_chemical_llm(req: schemas.MatchRequest, db: Session = Depends(get_db)):
+    """사전 매칭 실패가 지속될 때의 LLM 폴백 — 결과는 항상 사용자 확인을 거친다.
+    확인되면 /match/confirm 이 label 문구를 별칭으로 학습해 다음부터 즉시 인식된다."""
+    import services.llm_match as llm_match
+    result = llm_match.identify_chemical_from_ocr(req.ocr_text, matching.known_names(db))
+    if not result:
+        return {
+            "status": "no_match", "method": "llm", "chemical_name": None,
+            "confidence": 0.0, "candidates": [], "matched_token": None,
+        }
+    name = result["name"]
+    return {
+        "status": "needs_confirmation", "method": "llm",
+        "chemical_name": name, "confidence": 0.75,
+        "candidates": [{"name": name, "score": 0.75}],
+        "matched_token": result.get("label_text"),
+    }
+
+
 @router.post("/match/confirm")
 def confirm_match(req: schemas.MatchConfirmRequest, db: Session = Depends(get_db)):
     """확정된 (바코드/토큰 → 시약) 매핑을 학습해 다음 스캔부터 즉시 인식되게 한다."""
@@ -195,6 +215,20 @@ def select_led(req: schemas.SelectLedRequest, db: Session = Depends(get_db)):
         "col": shelf.col
     }
 
+@router.post("/{chem_id}/expiration")
+def set_chemical_expiration(chem_id: str, req: schemas.ExpirationRequest, db: Session = Depends(get_db)):
+    """반입 때 '나중에 입력하기'로 미뤄둔 유통기한을 웹에서 입력한다."""
+    import re as _re
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", req.expiration_date):
+        raise HTTPException(status_code=400, detail="날짜는 YYYY-MM-DD 형식이어야 합니다.")
+    chem = db.query(models.Chemical).filter(models.Chemical.id == chem_id).first()
+    if not chem:
+        raise HTTPException(status_code=404, detail="시약을 찾을 수 없습니다.")
+    chem.expiration_date = req.expiration_date
+    db.commit()
+    return {"status": "success", "chemical_id": chem_id, "expiration_date": req.expiration_date}
+
+
 @router.post("/{chem_id}/dispose")
 def dispose_chemical(chem_id: str, req: Dict[str, str], db: Session = Depends(get_db)):
     """폐기 등록: 유통기한 경고 시약을 재고에서 삭제하고 '폐기' 로그를 남긴다.
@@ -286,12 +320,11 @@ def get_alerts(db: Session = Depends(get_db)):
             if not shelf1 or not shelf2:
                 continue
 
-            # Check if stored on adjacent positions (same parent shelf & row/col distance <= 1)
+            # 혼재 판정 범위: 같은 선반의 같은 행 (열 무관).
+            # 이전의 8방향 거리 1 기준에서 행 단위 기준으로 변경.
             is_adjacent = False
             if shelf1.parent_shelf and shelf2.parent_shelf and shelf1.parent_shelf == shelf2.parent_shelf:
-                r1, c1_col = shelf1.row or 1, shelf1.col or 1
-                r2, c2_col = shelf2.row or 1, shelf2.col or 1
-                if abs(r1 - r2) <= 1 and abs(c1_col - c2_col) <= 1:
+                if (shelf1.row or 1) == (shelf2.row or 1):
                     is_adjacent = True
             elif shelf1.id == shelf2.id:
                 is_adjacent = True

@@ -119,6 +119,8 @@ class ShelfResponse(BaseModel):
     led_on: bool
     led_message: str
     updated_time: str
+    # 방금 리셋 버튼이 눌려 다시 잡힌 기기 — 미등록 기기 목록에서 블링크 식별용
+    recently_reset: bool = False
 
     class Config:
         from_attributes = True

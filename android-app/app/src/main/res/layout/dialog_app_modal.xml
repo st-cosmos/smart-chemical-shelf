@@ -205,6 +205,16 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- 달력 날짜 선택 (유통기한 직접 입력용) -->
+    <DatePicker
+        android:id="@+id/modalDatePicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:datePickerMode="calendar"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <!-- Input/App 스타일 입력 필드 (§1.5) -->
     <EditText
         android:id="@+id/modalInput"

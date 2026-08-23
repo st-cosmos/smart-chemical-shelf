@@ -21,7 +21,7 @@ import models
 import schemas
 import shelf_power
 from database import Base, SessionLocal, engine, get_db
-from routes import chemicals, logs, orders, session, shelves, users
+from routes import chemicals, logs, orders, session, settings, shelves, users
 
 
 class ConnectionManager:
@@ -117,6 +117,7 @@ app.include_router(orders.router)
 app.include_router(logs.router)
 app.include_router(session.router)
 app.include_router(session.checkout_router)
+app.include_router(settings.router)
 
 
 @app.websocket("/ws")
@@ -195,6 +196,17 @@ def app_session_enter(event: AppSessionEvent):
 def app_session_leave(event: AppSessionEvent):
     """앱 로그아웃: 마지막 사용자가 나가면 선반들이 슬립으로 돌아간다."""
     return shelf_power.leave(event.username)
+
+
+@app.post("/api/device-reset/{device_id}")
+def post_device_reset(device_id: str, db: Session = Depends(get_db)):
+    """게이트웨이가 노드 재부팅(리셋 버튼)을 감지해 알린다.
+
+    미등록 기기 식별용 recently_reset 블링크(앱/웹 선반 관리)에 쓰인다."""
+    device_status.mark_reset(device_id)
+    device_status.mark_seen(device_id)
+    _get_or_create_shelf(device_id, db)
+    return {"status": "success", "device_id": device_id}
 
 
 @app.get("/api/led/{device_id}")

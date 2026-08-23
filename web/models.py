@@ -84,6 +84,14 @@ class ShelfConfig(Base):
     rows = Column(Integer, default=3)
     cols = Column(Integer, default=4)
 
+class Setting(Base):
+    """연구실 공통 설정 (key-value). 예: default_expiry_months = "12"."""
+    __tablename__ = "settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+
+
 class ChemicalAlias(Base):
     """OCR 매칭용 별칭 사전. alias 는 정규화된 문자열(소문자, 한글/영문/숫자만)."""
     __tablename__ = "chemical_aliases"

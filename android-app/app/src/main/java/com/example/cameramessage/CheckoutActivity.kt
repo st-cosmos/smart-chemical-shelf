@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,8 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -174,12 +177,25 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
             }
 
+            // 기본 해상도(640x480)로는 라벨의 작은 글자가 뭉개져 OCR 인식률이 낮다.
+            // KEEP_ONLY_LATEST 라 고해상도여도 프레임이 밀리지 않는다.
             val analysis = ImageAnalysis.Builder()
+                .setResolutionSelector(
+                    ResolutionSelector.Builder()
+                        .setResolutionStrategy(
+                            ResolutionStrategy(
+                                Size(1920, 1080),
+                                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                            )
+                        )
+                        .build()
+                )
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             analysis.setAnalyzer(cameraExecutor, ScanAnalyzer())
 
-            val selector = CameraSelector.DEFAULT_BACK_CAMERA
+            // 태블릿 거치 방향상 사용자 쪽(전면) 카메라로 라벨을 스캔한다
+            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
             try {
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(this, selector, preview, analysis)
@@ -394,10 +410,15 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
         isScanned = true
         val name = result.chemical_name ?: run { resumeScanning(); return }
         val percent = (result.confidence * 100).toInt()
+        val message = if (result.method == "llm") {
+            "AI 분석 결과: $name\n맞다면 다음부터는 즉시 인식돼요."
+        } else {
+            "인식 결과: $name\n(일치율 ${percent}%)"
+        }
         AppModal.show(
             this, AppModal.Tone.PRIMARY, R.drawable.ic_flask_conical,
             "이 시약이 맞나요?",
-            "인식 결과: $name\n(일치율 ${percent}%)",
+            message,
             "아니요", "맞아요",
             onSecondary = {
                 scanner.declineCandidate(name)

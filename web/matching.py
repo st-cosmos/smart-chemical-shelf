@@ -50,7 +50,7 @@ DEFAULT_ALIASES = {
     "ch3cooh": "아세트산",
     "아세트산": "아세트산",
     "초산": "아세트산",
-    "acid": "황산 0.1M",
+    "빙초산": "아세트산",
     "sodium hydroxide": "수산화나트륨",
     "naoh": "수산화나트륨",
     "수산화나트륨": "수산화나트륨",
@@ -58,13 +58,73 @@ DEFAULT_ALIASES = {
     "과산화수소": "과산화수소",
     "isopropanol": "이소프로판올",
     "ipa": "이소프로판올",
+    "isopropyl alcohol": "이소프로판올",
+    "이소프로필알코올": "이소프로판올",
+    "2propanol": "이소프로판올",
     "이소프로판올": "이소프로판올",
     "toluene": "톨루엔",
     "톨루엔": "톨루엔",
+    # 영문/한글 동의어 — methyl↔ethyl 하이재킹 방지를 위해 반드시 전체 구절로 등록
+    "methyl alcohol": "메탄올",
+    "메틸알코올": "메탄올",
+    "ethyl alcohol": "에탄올 95%",
+    "에틸알코올": "에탄올 95%",
+    # 실험실 상용 시약 어휘 확장
+    "benzene": "벤젠",
+    "벤젠": "벤젠",
+    "chloroform": "클로로포름",
+    "chcl3": "클로로포름",
+    "클로로포름": "클로로포름",
+    "acetonitrile": "아세토니트릴",
+    "acn": "아세토니트릴",
+    "mecn": "아세토니트릴",
+    "아세토니트릴": "아세토니트릴",
+    "dichloromethane": "디클로로메탄",
+    "dcm": "디클로로메탄",
+    "디클로로메탄": "디클로로메탄",
+    "ethyl acetate": "에틸아세테이트",
+    "etoac": "에틸아세테이트",
+    "에틸아세테이트": "에틸아세테이트",
+    "hexane": "헥산",
+    "nhexane": "헥산",
+    "헥산": "헥산",
+    "xylene": "자일렌",
+    "자일렌": "자일렌",
+    "ammonia": "암모니아수",
+    "nh4oh": "암모니아수",
+    "암모니아": "암모니아수",
+    "암모니아수": "암모니아수",
+    "potassium permanganate": "과망간산칼륨",
+    "kmno4": "과망간산칼륨",
+    "과망간산칼륨": "과망간산칼륨",
+    "formaldehyde": "포름알데히드",
+    "formalin": "포름알데히드",
+    "포르말린": "포름알데히드",
+    "포름알데히드": "포름알데히드",
+    "glycerol": "글리세롤",
+    "glycerin": "글리세롤",
+    "글리세린": "글리세롤",
+    "글리세롤": "글리세롤",
+    "phenol": "페놀",
+    "페놀": "페놀",
+    "dimethyl sulfoxide": "DMSO",
+    "dmso": "DMSO",
+    "dimethylformamide": "DMF",
+    "dmf": "DMF",
+    "tetrahydrofuran": "THF",
+    "thf": "THF",
 }
 
 CAS_RE = re.compile(r"(\d{2,7})-(\d{2})-(\d)")
 TOKEN_RE = re.compile(r"[0-9A-Za-z가-힣%.]+")
+KOREAN_ONLY_RE = re.compile(r"^[가-힣]+$")
+
+
+def _usable_short(s: str) -> bool:
+    """2자여도 순수 한글이면 유효 토큰/별칭으로 인정한다.
+    '황산'·'질산'·'염산' 등 2자 한글 시약명이 3자 미만 노이즈 필터에
+    걸려 원천적으로 매칭 불가능해지는 문제를 막는다. (영문 2자는 여전히 제외)"""
+    return len(s) >= 2 and bool(KOREAN_ONLY_RE.match(s))
 
 
 def normalize(s: str) -> str:
@@ -94,6 +154,15 @@ def _load_aliases(db: Session) -> list:
     """[(정규화 별칭, 표준명)] — 긴 별칭 우선(부분 일치 오탐 최소화)."""
     rows = db.query(models.ChemicalAlias).all()
     pairs = [(r.alias, r.standard_name) for r in rows if r.alias]
+    
+    # 추가: 실제 등록된 시약 이름들도 자동 별칭으로 포함하여 OCR 인식을 지원한다.
+    for chem in db.query(models.Chemical).all():
+        if chem.name:
+            norm = normalize(chem.name)
+            if norm:
+                pairs.append((norm, chem.name))
+                
+    pairs = list(set(pairs))
     pairs.sort(key=lambda p: len(p[0]), reverse=True)
     return pairs
 
@@ -136,17 +205,25 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
     exact_names = set()
     for token in tokens:
         nt = normalize(token)
-        if len(nt) < 3:  # 3자 미만 짧은 노이즈 토큰 제외
+        if len(nt) < 3 and not _usable_short(nt):  # 짧은 노이즈 토큰 제외 (2자 한글은 허용)
             continue
+        # "토큰이 별칭의 일부" 규칙용: 이 토큰을 포함하는 별칭들의 표준명 집합.
+        # 여러 표준명에 걸치면("acid" ⊂ 염산·질산·황산·아세트산) 정보가 없는
+        # 조각이므로 해당 규칙을 적용하지 않는다 — boric acid → 염산 오탐 방지.
+        contained_stds = (
+            {std for na, std in aliases if nt != na and nt in na}
+            if len(nt) >= 4 else set()
+        )
         for na, std in aliases:
             if nt == na:
                 # 토큰이 별칭과 정확히 일치 → 자동 확정 후보
                 put(std, 0.95, "alias", token)
                 exact_names.add(std)
-            elif na in nt:
-                # 별칭이 더 긴 토큰의 일부 ("에탄올아민" 속 "에탄올") → 확인 필요
+            elif nt.startswith(na):
+                # 별칭이 더 긴 토큰의 접두("에탄올아민" 속 "에탄올") → 확인 필요.
+                # 임의 위치 부분 일치는 금지 — "methyl" 속 "ethyl" 같은 하이재킹 방지.
                 put(std, 0.7, "alias", token)
-            elif len(nt) >= 4 and nt in na:
+            elif len(nt) >= 4 and nt in na and len(contained_stds) == 1:
                 # 토큰이 별칭의 일부분일 때 (예: "hydrochloric" -> "hydrochloric acid")
                 put(std, 0.8, "alias", token)
             elif len(na) >= 3 and len(nt) >= 3:
@@ -158,9 +235,17 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
                         put(std, round(ratio * 0.85, 3), "fuzzy", token)
 
     # 여러 토큰에 걸친 별칭("에탄올 95%", "sulfuric acid")은 전체 정규화 문자열에서 탐색
-    for na, std in aliases:
-        if len(na) >= 4 and na in norm_full:
-            put(std, max(scores.get(std, (0,))[0], 0.85), "alias", na)
+    # (2~3자 한글 별칭도 허용 — OCR이 "황 산"처럼 띄어 읽어 토큰이 깨지는 경우 대비)
+    full_hits = [
+        (na, std) for na, std in aliases
+        if (len(na) >= 4 or _usable_short(na)) and na in norm_full
+    ]
+    for na, std in full_hits:
+        # 더 긴 다른 매칭 별칭에 통째로 포함되는 별칭은 무시 —
+        # "methylalcohol" 안의 "ethylalcohol"처럼 겹쳐 잡히는 오탐 방지
+        if any(na != nb and na in nb for nb, _ in full_hits):
+            continue
+        put(std, max(scores.get(std, (0,))[0], 0.85), "alias", na)
 
     if not scores:
         return {
@@ -207,7 +292,9 @@ def confirm(db: Session, chemical_name: str, barcode: Optional[str] = None,
 
     if matched_token:
         alias = normalize(matched_token)
-        if len(alias) >= 2:
+        # 짧은 영문/숫자 조각("eth", "thy" 등)은 부분 일치 오탐의 씨앗이 되므로
+        # 학습하지 않는다. 한글은 2자부터, 그 외는 5자부터 별칭으로 인정.
+        if _usable_short(alias) or len(alias) >= 5:
             row = db.query(models.ChemicalAlias).filter(models.ChemicalAlias.alias == alias).first()
             if not row:
                 db.add(models.ChemicalAlias(alias=alias, standard_name=chemical_name))
@@ -225,9 +312,18 @@ def known_names(db: Session) -> list:
 
 
 def ensure_alias_seed(db: Session):
-    """별칭 테이블이 비어 있으면 기본 별칭을 시드한다. (기존 DB에도 안전)"""
-    if db.query(models.ChemicalAlias).first() is not None:
-        return
+    """DEFAULT_ALIASES 중 DB에 없는 항목을 보충 시드한다.
+
+    과거에는 테이블이 비어 있을 때만 시드해서, 사전에 나중에 추가된
+    별칭(질산·염산 등)이 기존 DB에 영영 반영되지 않는 문제가 있었다.
+    학습으로 쌓인 별칭은 건드리지 않고 누락분만 추가한다."""
+    existing = {r.alias for r in db.query(models.ChemicalAlias).all()}
+    added = False
     for raw, std in DEFAULT_ALIASES.items():
-        db.add(models.ChemicalAlias(alias=normalize(raw), standard_name=std))
-    db.commit()
+        alias = normalize(raw)
+        if alias and alias not in existing:
+            db.add(models.ChemicalAlias(alias=alias, standard_name=std))
+            existing.add(alias)
+            added = True
+    if added:
+        db.commit()

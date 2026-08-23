@@ -89,7 +89,9 @@ def fetch_incompatible_chemicals_from_llm(chemical_name: str) -> Dict[str, Any]:
     }}
     """
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    # 반입 처리 경로를 막지 않도록 응답이 빠른 lite 를 기본으로 쓴다 (GEMINI_MODEL 로 변경 가능)
+    model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     payload = {
         "contents": [
             {
@@ -159,7 +161,8 @@ def find_recommended_safe_shelf(chem, db):
             if not other_shelf:
                 continue
             if s.parent_shelf and other_shelf.parent_shelf and s.parent_shelf == other_shelf.parent_shelf:
-                if abs((s.row or 1) - (other_shelf.row or 1)) <= 1 and abs((s.col or 1) - (other_shelf.col or 1)) <= 1:
+                # 혼재 판정 범위와 동일: 같은 선반의 같은 행에 혼재 금지 시약이 없어야 안전
+                if (s.row or 1) == (other_shelf.row or 1):
                     if any(item in other.name or other.name in item for item in incomp_list):
                         is_safe = False
                         break

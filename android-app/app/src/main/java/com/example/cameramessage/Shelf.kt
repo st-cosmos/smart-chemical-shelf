@@ -12,7 +12,9 @@ data class ShelfDevice(
     val status: String,
     val led_on: Boolean,
     val led_message: String,
-    val updated_time: String
+    val updated_time: String,
+    // 방금 리셋 버튼이 눌려 다시 잡힌 기기 — 미등록 목록에서 블링크로 식별
+    val recently_reset: Boolean = false
 )
 
 data class ShelfConfig(

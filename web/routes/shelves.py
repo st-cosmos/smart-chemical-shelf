@@ -17,10 +17,14 @@ def get_shelves(db: Session = Depends(get_db)):
     살아 있는 경우)일 때만 노출한다. 꺼진 기기의 잔여 행이 앱/웹의
     '신규 선반 기기 감지' 알림을 계속 띄우는 문제를 막는다."""
     shelves = db.query(models.Shelf).all()
-    return [
+    visible = [
         s for s in shelves
         if s.status == "registered" or device_status.is_online(s.id)
     ]
+    # 리셋 버튼으로 방금 다시 잡힌 기기 표시 (미등록 기기 식별 블링크용)
+    for s in visible:
+        s.recently_reset = device_status.recently_reset(s.id)
+    return visible
 
 @router.get("/configs")
 def get_shelf_configs(db: Session = Depends(get_db)):
@@ -116,8 +120,7 @@ def delete_config_row(shelf_id: str, req: Dict[str, int], db: Session = Depends(
     row = req.get("row", 0)
     if row < 1 or row > cfg.rows:
         raise HTTPException(status_code=400, detail="잘못된 행 번호입니다.")
-    if cfg.rows <= 1:
-        raise HTTPException(status_code=400, detail="마지막 행은 삭제할 수 없습니다.")
+    # 행/열 없는 빈 선반도 유효한 상태이므로 마지막 행 삭제를 허용한다
 
     removed = 0
     devices = db.query(models.Shelf).filter(
@@ -147,8 +150,7 @@ def delete_config_col(shelf_id: str, req: Dict[str, int], db: Session = Depends(
     col = req.get("col", 0)
     if col < 1 or col > cfg.cols:
         raise HTTPException(status_code=400, detail="잘못된 열 번호입니다.")
-    if cfg.cols <= 1:
-        raise HTTPException(status_code=400, detail="마지막 열은 삭제할 수 없습니다.")
+    # 행/열 없는 빈 선반도 유효한 상태이므로 마지막 열 삭제를 허용한다
 
     removed = 0
     devices = db.query(models.Shelf).filter(

@@ -53,6 +53,7 @@ object AppModal {
         inputTextHint: String? = null,    // 지정 시 Input/App 스타일 입력 필드 표시
         inputType: Int? = null,
         inputErrorText: String? = null,   // onInputSubmit 이 false 를 반환하면 표시할 오류 문구
+        datePickerDefault: String? = null, // 지정 시(YYYY-MM-DD) 달력 UI 표시, 결과는 onInputSubmit 으로 전달
         onSecondary: (() -> Unit)? = null,
         onPrimary: (() -> Unit)? = null,
         onInputSubmit: ((String) -> Boolean)? = null  // true 반환 시에만 모달을 닫는다
@@ -98,6 +99,17 @@ object AppModal {
             }
         }
 
+        if (datePickerDefault != null) {
+            binding.modalDatePicker.visibility = View.VISIBLE
+            Regex("(\\d{4})-(\\d{2})-(\\d{2})").find(datePickerDefault)?.let { m ->
+                binding.modalDatePicker.updateDate(
+                    m.groupValues[1].toInt(),
+                    m.groupValues[2].toInt() - 1,  // DatePicker 의 month 는 0부터
+                    m.groupValues[3].toInt()
+                )
+            }
+        }
+
         val dialog = AlertDialog.Builder(activity)
             .setView(binding.root)
             .setCancelable(cancelable)
@@ -124,7 +136,14 @@ object AppModal {
         binding.btnModalPrimary.setOnClickListener {
             // 입력 모달: 검증 통과(true)일 때만 닫는다
             if (onInputSubmit != null) {
-                val ok = onInputSubmit(binding.modalInput.text.toString().trim())
+                val value = if (datePickerDefault != null) {
+                    // 달력 모달: 선택된 날짜를 YYYY-MM-DD 로 전달
+                    val p = binding.modalDatePicker
+                    String.format("%04d-%02d-%02d", p.year, p.month + 1, p.dayOfMonth)
+                } else {
+                    binding.modalInput.text.toString().trim()
+                }
+                val ok = onInputSubmit(value)
                 if (!ok) {
                     binding.modalInput.error = inputErrorText ?: "입력 형식을 확인해 주세요"
                     return@setOnClickListener

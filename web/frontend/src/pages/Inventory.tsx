@@ -1,20 +1,38 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight, ClockAlert, Lightbulb, TriangleAlert, X } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  CalendarClock,
+  ClockAlert,
+  Lightbulb,
+  TriangleAlert,
+  X,
+} from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import { getJSON, postJSON } from '../api';
-import type { Alerts, Chemical, ShelfDevice, TransactionLog, User } from '../types';
+import type { Alerts, Chemical, SessionUser, ShelfDevice, TransactionLog, User } from '../types';
 import { useWebSocket } from '../useWebSocket';
 
 interface InventoryProps {
   alerts: Alerts;
   refreshAlerts: () => void;
+  user: SessionUser;
 }
 
-// 수납칸 용량 기준 (kg) — 잔량 % 환산용
-const CAPACITY_KG = 2.0;
+// 오늘로부터 m개월 뒤 날짜 (YYYY-MM-DD) — 유통기한 입력 기본값
+function monthsFromToday(m: number): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + m);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate(),
+  ).padStart(2, '0')}`;
+}
+
+// 잔량 % 환산 기준: 가득 = 500g (시연 약품 최대 무게)
+const CAPACITY_KG = 0.5;
 const DANGER_PCT = 25;
 
 // 테이블 컬럼 폭 (design-spec §4.2)
@@ -60,7 +78,7 @@ function timeOnly(ts: string | null): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
+export default function Inventory({ alerts, refreshAlerts, user }: InventoryProps) {
   const [chemicals, setChemicals] = useState<Chemical[]>([]);
   const [logs, setLogs] = useState<TransactionLog[]>([]);
   const [devices, setDevices] = useState<ShelfDevice[]>([]);
@@ -70,6 +88,17 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [ledNotice, setLedNotice] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // 기본 유통기한 설정 (반입일 + N개월) — 관리자는 수정 가능
+  const [defaultMonths, setDefaultMonths] = useState(12);
+  const [monthsModalOpen, setMonthsModalOpen] = useState(false);
+  const [monthsInput, setMonthsInput] = useState('12');
+  const [monthsError, setMonthsError] = useState('');
+
+  // 유통기한 입력/수정 (상세 패널) — 반입 때 자동 설정된 기본값도 여기서 고칠 수 있다
+  const [expiryDraft, setExpiryDraft] = useState('');
+  const [expiryEditing, setExpiryEditing] = useState(false);
+  const [expirySaving, setExpirySaving] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -98,6 +127,9 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
     getJSON<User[]>('/api/users')
       .then(setUsers)
       .catch(() => undefined);
+    getJSON<{ months: number }>('/api/settings/default-expiry')
+      .then((r) => setDefaultMonths(r.months))
+      .catch(() => undefined);
     const timer = setInterval(() => {
       fetchData();
       refreshAlerts();
@@ -105,6 +137,49 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
     return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const selectedChem = chemicals.find((c) => c.id === selectedId) ?? null;
+
+  // 시약 선택이 바뀌면 편집 상태를 접고 입력값을 채운다 (기존 날짜 또는 기본값)
+  useEffect(() => {
+    setExpiryEditing(false);
+    if (selectedChem) {
+      setExpiryDraft(selectedChem.expiration_date ?? monthsFromToday(defaultMonths));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  const saveExpiry = async () => {
+    if (!selectedChem || !expiryDraft) return;
+    setExpirySaving(true);
+    try {
+      await postJSON(`/api/chemicals/${selectedChem.id}/expiration`, {
+        expiration_date: expiryDraft,
+      });
+      setExpiryEditing(false);
+      await fetchData();
+      refreshAlerts();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : '유통기한 저장에 실패했습니다.');
+    } finally {
+      setExpirySaving(false);
+    }
+  };
+
+  const saveDefaultMonths = async () => {
+    const months = Number(monthsInput);
+    if (!Number.isInteger(months) || months < 1 || months > 120) {
+      setMonthsError('1~120 사이의 개월 수를 입력해 주세요.');
+      return;
+    }
+    try {
+      await postJSON('/api/settings/default-expiry', { months });
+      setDefaultMonths(months);
+      setMonthsModalOpen(false);
+    } catch (err) {
+      setMonthsError(err instanceof Error ? err.message : '설정 저장에 실패했습니다.');
+    }
+  };
 
   const nicknameOf = useMemo(() => {
     const map = new Map(users.map((u) => [u.username, u.nickname]));
@@ -207,7 +282,23 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
               보유 시약 {chemicals.length}종 · 경고 {alertCount}건 · 마지막 동기화 방금 전
             </span>
           </div>
-          <SearchBar value={search} onChange={setSearch} placeholder="시약 이름·CAS 번호 검색" />
+          <div className="topbar-actions">
+            {user.role === '관리자' && (
+              <button
+                className="expiry-setting-btn"
+                title="유통기한 미인식 시 입력 기본값 설정"
+                onClick={() => {
+                  setMonthsInput(String(defaultMonths));
+                  setMonthsError('');
+                  setMonthsModalOpen(true);
+                }}
+              >
+                <CalendarClock size={16} />
+                기본 유통기한 {defaultMonths}개월
+              </button>
+            )}
+            <SearchBar value={search} onChange={setSearch} placeholder="시약 이름·CAS 번호 검색" />
+          </div>
         </div>
 
         {/* 상태 필터 칩 (design.pen web-inventory) */}
@@ -277,7 +368,7 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
                     </div>
                     <div className="t-cell" style={{ width: COL.expiry }}>
                       <div className={`exp-cell${expiryClass}`}>
-                        {chem.expiration_date ?? '-'}
+                        {chem.expiration_date ?? <span className="exp-missing">미입력</span>}
                         {expired && <ClockAlert size={15} />}
                       </div>
                     </div>
@@ -346,7 +437,37 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
             </div>
             <div className="info-row">
               <span className="info-key">유통기한</span>
-              <span className="info-val">{selected.expiration_date ?? '-'}</span>
+              {selected.expiration_date && !expiryEditing ? (
+                <span className="info-val expiry-val">
+                  {selected.expiration_date}
+                  <button
+                    className="expiry-edit-link"
+                    title="유통기한 수정 (반입 때 자동 설정된 기본값도 수정 가능)"
+                    onClick={() => {
+                      setExpiryDraft(selected.expiration_date ?? monthsFromToday(defaultMonths));
+                      setExpiryEditing(true);
+                    }}
+                  >
+                    수정
+                  </button>
+                </span>
+              ) : (
+                <span className="expiry-editor">
+                  <input
+                    type="date"
+                    className="expiry-date-input"
+                    value={expiryDraft}
+                    onChange={(e) => setExpiryDraft(e.target.value)}
+                  />
+                  <button
+                    className="expiry-save-btn"
+                    disabled={expirySaving || !expiryDraft}
+                    onClick={saveExpiry}
+                  >
+                    저장
+                  </button>
+                </span>
+              )}
             </div>
             <div className="info-row">
               <span className="info-key">현재 상태</span>
@@ -428,6 +549,39 @@ export default function Inventory({ alerts, refreshAlerts }: InventoryProps) {
             )}
           </div>
         </aside>
+      )}
+
+      {/* 기본 유통기한 설정 모달 (관리자) */}
+      {monthsModalOpen && (
+        <div className="modal-overlay" onClick={() => setMonthsModalOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">기본 유통기한 설정</h3>
+            <span className="modal-sub">
+              라벨에서 유통기한을 인식하지 못한 시약에 자동으로 설정되는 유통기한입니다.
+              (반입일로부터 N개월 뒤 — 개별 시약은 상세 패널에서 수정 가능)
+            </span>
+            <div className="input-group">
+              <span className="input-label">반입일로부터 (개월)</span>
+              <input
+                className="input-field"
+                type="number"
+                min={1}
+                max={120}
+                value={monthsInput}
+                onChange={(e) => setMonthsInput(e.target.value)}
+              />
+            </div>
+            {monthsError && <div className="form-error">{monthsError}</div>}
+            <div className="modal-actions">
+              <Button type="button" variant="outline" onClick={() => setMonthsModalOpen(false)}>
+                취소
+              </Button>
+              <Button type="button" onClick={saveDefaultMonths}>
+                저장
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

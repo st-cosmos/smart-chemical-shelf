@@ -4,7 +4,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#FF6200EE</color>
-    <color name="ic_launcher_background">#3F51B5</color>
+    <color name="ic_launcher_background">#3D6BF5</color> <!-- Smart Shelf primary -->
+
 
     <!-- ===== Smart Shelf 디자인 토큰 (design-spec-app.md §0.2) ===== -->
     <color name="bg">#F2F5FF</color>
