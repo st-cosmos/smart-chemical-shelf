@@ -198,6 +198,17 @@ def app_session_leave(event: AppSessionEvent):
     return shelf_power.leave(event.username)
 
 
+@app.post("/api/device-reset/{device_id}")
+def post_device_reset(device_id: str, db: Session = Depends(get_db)):
+    """게이트웨이가 노드 재부팅(리셋 버튼)을 감지해 알린다.
+
+    미등록 기기 식별용 recently_reset 블링크(앱/웹 선반 관리)에 쓰인다."""
+    device_status.mark_reset(device_id)
+    device_status.mark_seen(device_id)
+    _get_or_create_shelf(device_id, db)
+    return {"status": "success", "device_id": device_id}
+
+
 @app.get("/api/led/{device_id}")
 def get_led(device_id: str, db: Session = Depends(get_db)):
     """디바이스(선반 모듈)의 LED 상태를 반환합니다. 1초 주기 폴링 = 하트비트."""

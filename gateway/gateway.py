@@ -253,7 +253,10 @@ class Gateway:
             hwid = msg.uri_queries().get("id", "")
             if not hwid:
                 return shelfcoap.BAD_REQUEST, b""
-            self._node_for(hwid, addr)
+            node = self._node_for(hwid, addr)
+            # 이 질의는 부팅 직후에만 온다 = 리셋 버튼/전원 인가 신호.
+            # 서버에 알리면 앱/웹 미등록 기기 목록에서 해당 기기가 블링크된다.
+            self._spawn(self._post_reset(node))
             return shelfcoap.CONTENT, self.mode.encode()
 
         return shelfcoap.NOT_FOUND, b""
@@ -275,6 +278,12 @@ class Gateway:
         node = self._node_for(report["id"], addr)
         node.reports += 1
         node.last_report = time.time()
+        # seq 역행 = 노드 재부팅 (부팅 mode 질의를 놓쳤을 때의 보조 감지)
+        if (node.seq is not None and report["seq"] is not None
+                and report["seq"] < node.seq):
+            log.info("노드 %s('%s') seq 역행 (%s -> %s) — 재부팅으로 판단",
+                     node.hwid, node.device_id, node.seq, report["seq"])
+            self._spawn(self._post_reset(node))
         node.seq = report["seq"]
         node.raw = report["raw"]
         node.mg = report["mg"]
@@ -311,6 +320,22 @@ class Gateway:
                         node, False, f"POST {url} -> HTTP {rsp.status}")
         except Exception as e:  # aiohttp.ClientError, asyncio.TimeoutError, OSError...
             self._server_state(node, False, f"POST {url} 실패: {e!r}")
+
+    async def _post_reset(self, node: Node):
+        """노드 재부팅(리셋 버튼) 신호를 서버에 전달한다.
+
+        서버는 이 신호로 recently_reset 을 켜고, 앱/웹의 미등록 기기
+        목록에서 해당 기기를 블링크로 식별시킨다. 구버전 서버(404)는 무시."""
+        url = f"{self.base_url}/api/device-reset/{node.device_id}"
+        try:
+            async with self.http.post(url) as rsp:
+                if rsp.status == 200:
+                    log.info("리셋 신호 전달 %s('%s')", node.hwid, node.device_id)
+                else:
+                    log.debug("리셋 신호 응답 HTTP %s ('%s')",
+                              rsp.status, node.device_id)
+        except Exception as e:
+            log.debug("리셋 신호 전달 실패 ('%s'): %r", node.device_id, e)
 
     async def _refresh_led(self, node: Node):
         """서버의 LED 상태를 캐시로 당겨온다. 서버 쪽 하트비트(mark_seen)도 겸함."""
