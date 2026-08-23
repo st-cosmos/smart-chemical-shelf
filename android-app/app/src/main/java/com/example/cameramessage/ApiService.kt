@@ -73,6 +73,10 @@ interface ApiService {
     @POST("api/chemicals/match")
     suspend fun matchChemical(@Body request: MatchRequest): MatchResult
 
+    // 사전 매칭 실패가 지속될 때 1회 호출하는 LLM 폴백 (결과는 항상 확인 모달을 거침)
+    @POST("api/chemicals/match/llm")
+    suspend fun matchChemicalLlm(@Body request: MatchRequest): MatchResult
+
     // 사용자 확인/직접 선택 결과를 서버에 학습 (별칭·바코드 사전 갱신)
     @POST("api/chemicals/match/confirm")
     suspend fun confirmMatch(@Body request: MatchConfirmRequest): Map<String, Any>
@@ -99,6 +103,11 @@ interface ApiService {
 
     @GET("api/chemicals/alerts")
     suspend fun getAlerts(): ChemicalAlerts
+
+    // --- Settings ---
+    // 유통기한 직접 입력 달력의 기본값 (반입일 + N개월) — 웹 관리자 설정과 공유
+    @GET("api/settings/default-expiry")
+    suspend fun getDefaultExpiry(): DefaultExpirySetting
 
     // --- Logs ---
     @GET("api/logs")

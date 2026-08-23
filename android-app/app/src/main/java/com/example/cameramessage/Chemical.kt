@@ -162,6 +162,10 @@ data class DisposeRequest(
     val username: String
 )
 
+data class DefaultExpirySetting(
+    val months: Int
+)
+
 data class SelectLedResponse(
     val status: String,
     val shelf_id: String,
