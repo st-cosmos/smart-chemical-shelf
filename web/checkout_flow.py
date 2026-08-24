@@ -22,6 +22,35 @@ LED_PREFIX = "반출 대상"
 # 이 무게(kg) 미만이면 선반이 비어 있는 것으로 본다 (사후 스캔 즉시 확정 판정)
 EMPTY_SHELF_KG = 0.1
 
+# '병을 먼저 들고 와서 스캔'하는 자연스러운 순서 지원:
+# 반출 세션 없이 발생한 무게 감소를 칸별로 기억해 두고, 이 시간 안에 온
+# 스캔이 그 감소를 청구(claim)하면 대기 없이 즉시 반출을 확정한다.
+UNCLAIMED_DROP_TTL_S = 180.0
+_unclaimed_drops: dict = {}  # shelf_id -> (delta_kg, timestamp)
+
+
+def note_unclaimed_drop(shelf_id: str, delta_kg: float):
+    """세션이 소비하지 않은 무게 감소를 기억한다 (routes/shelves.update_weight)."""
+    _unclaimed_drops[shelf_id] = (round(delta_kg, 2), time.time())
+
+
+def clear_unclaimed_drop(shelf_id: str):
+    """무게가 다시 올라오면(병 복귀) 직전 감소 기록을 무효화한다."""
+    _unclaimed_drops.pop(shelf_id, None)
+
+
+def claim_recent_drop(shelf_id):
+    """이 칸의 최근(180초 이내) 미청구 감소량을 소비하고 반환한다. 없으면 None."""
+    if not shelf_id:
+        return None
+    entry = _unclaimed_drops.pop(shelf_id, None)
+    if entry is None:
+        return None
+    delta, at = entry
+    if time.time() - at > UNCLAIMED_DROP_TTL_S:
+        return None
+    return delta
+
 
 def weight_within_tolerance(expected_kg, measured_kg) -> bool:
     """허용 오차: ±20% 또는 최소 ±0.1kg. 기록 무게가 없으면 검증 생략."""
@@ -207,14 +236,16 @@ def force_finalize(db: Session, chem: models.Chemical, username: str):
     return finalize(db, chem, measured_delta=None, verified=None)
 
 
-def finalize_already_removed(db: Session, chem: models.Chemical, username: str):
-    """이미 선반에서 회수된(무게가 빠져 있는) 병의 사후 스캔 — 대기 없이 즉시 확정.
+def finalize_already_removed(db: Session, chem: models.Chemical, username: str,
+                             measured_delta=None):
+    """이미 선반에서 회수된 병의 사후 스캔 — 대기 없이 즉시 확정.
 
-    '반출 스캔 미완료' 알림에서 넘어온 흐름. 선반의 직전 무게(prev_weight)와의
-    차이가 남아 있으면 그 값으로 사후 검증까지 수행한다.
+    '병 먼저 들고 스캔' 흐름과 '반출 스캔 미완료' 알림 흐름 공용.
+    measured_delta(청구된 미청구 감소량)가 있으면 그 값으로, 없으면 선반의
+    직전 무게(prev_weight) 차이로 사후 검증까지 수행한다.
     """
-    delta = None
-    if chem.shelf_id:
+    delta = measured_delta
+    if delta is None and chem.shelf_id:
         shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
         if shelf and shelf.prev_weight:
             drop = round(shelf.prev_weight - shelf.weight, 2)

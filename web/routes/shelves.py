@@ -308,8 +308,14 @@ def update_weight(shelf_id: str, req: schemas.WeightUpdate, db: Session = Depend
     delta = req.weight - prev_w
     if delta >= MIN_EVENT_DELTA_KG:
         session_result = _handle_checkin_increase(db, shelf, delta)
+        # 병이 다시 올라왔으면 직전의 미청구 감소 기록은 무효
+        checkout_flow.clear_unclaimed_drop(shelf.id)
     elif delta <= -MIN_EVENT_DELTA_KG:
         session_result = checkout_flow.handle_weight_drop(db, shelf, -delta)
+        if session_result is None:
+            # 반출 세션이 소비하지 않은 감소 — 사용자가 병을 먼저 들고 온
+            # 경우다. 곧이어 올 스캔이 이 감소를 청구해 즉시 확정한다.
+            checkout_flow.note_unclaimed_drop(shelf.id, -delta)
 
     db.commit()
     db.refresh(shelf)

@@ -141,14 +141,22 @@ def scan_out(req: schemas.ScanOutRequest, db: Session = Depends(get_db)):
             detail=f"비치 중인 시약 목록에서 '{matched_std_name}'을(를) 찾을 수 없습니다."
         )
 
-    # 선반 무게가 이미 비어 있는 병 = 회수가 이미 일어난 사후 스캔
-    # ('반출 스캔 미완료' 알림 흐름) → 무게 감소를 기다리지 않고 즉시 확정
+    # 병을 먼저 들고 와서 스캔한 경우 = 회수가 이미 일어난 사후 스캔
+    # → 무게 감소를 다시 기다리지 않고 즉시 확정한다. 판정 두 갈래:
+    #  (a) 그 칸에서 방금(180초 내) 세션 없이 무게가 빠짐 — 칸에 다른 병이
+    #      남아 있어도 동작하며, 감소량으로 어느 병인지 식별·검증까지 된다
+    #  (b) 칸이 아예 비어 있음 (1병 1칸의 기존 판정, 백업)
     for chem in candidate_chems:
         if not chem.shelf_id:
             continue
         shelf = db.query(models.Shelf).filter(models.Shelf.id == chem.shelf_id).first()
-        if shelf and shelf.weight < checkout_flow.EMPTY_SHELF_KG:
-            result = checkout_flow.finalize_already_removed(db, chem, req.username)
+        if not shelf:
+            continue
+        drop = checkout_flow.claim_recent_drop(chem.shelf_id)
+        if drop is not None or shelf.weight < checkout_flow.EMPTY_SHELF_KG:
+            result = checkout_flow.finalize_already_removed(
+                db, chem, req.username, measured_delta=drop
+            )
             db.refresh(chem)
             return {
                 "status": "success",
