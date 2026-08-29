@@ -95,7 +95,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
 
         scanner = ChemicalScanner(lifecycleScope, this)
-        scanner.frameImageProvider = { frameCache.latestBase64 }
+        scanner.frameImageProvider = { frameCache.bestOrLatest() }
 
         // Header: 반입/반출 화면에서는 Bell 버튼 숨김 (design-spec §1.3)
         binding.appHeader.headerTitle.text = "시약 반입"
@@ -208,7 +208,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 val barcode = if (barcodeTask.isSuccessful) {
                     barcodeTask.result?.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
                 } else null
-                if (!isScanned) frameCache.offer(imageProxy, text.isNotBlank())
+                if (!isScanned) frameCache.offer(imageProxy, text.length)
                 runOnUiThread { if (!isScanned) scanner.onFrame(text, barcode) }
                 imageProxy.close()
             }
@@ -362,13 +362,17 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
     }
 
     /** 라벨 OCR/사진으로 병의 가득 총 무게를 서버가 추정하게 한다.
+     *  글자 최다 프레임 + 최신 프레임을 함께 보내 규격 인쇄와 병 형태를 모두 담는다.
      *  실패해도 무방 — 반입 실측 무게가 최소 하한을 보장한다. */
     private fun requestCapacityEstimate(name: String, ocrText: String) {
-        val image = frameCache.latestBase64
+        val images = frameCache.images()
         lifecycleScope.launch {
             try {
                 NetworkClient.api.estimateCapacity(
-                    CapacityEstimateRequest(chemical_name = name, ocr_text = ocrText, image_b64 = image)
+                    CapacityEstimateRequest(
+                        chemical_name = name, ocr_text = ocrText,
+                        images_b64 = images.ifEmpty { null }
+                    )
                 )
             } catch (e: Exception) {
                 // 추정 실패는 무시
@@ -417,6 +421,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun resumeScanning(cooldownMs: Long = 0L) {
         isScanned = false
+        frameCache.clear()  // 이전 병의 best 프레임이 새 스캔에 섞이지 않게
         scanner.resume(cooldownMs)
     }
 

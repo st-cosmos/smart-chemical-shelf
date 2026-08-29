@@ -99,35 +99,48 @@ def _estimate_from_label(chemical_name: str, ocr_text: str) -> Optional[dict]:
 
 
 def _estimate_from_llm(chemical_name: str, ocr_text: str,
-                       image_b64: Optional[str]) -> Optional[dict]:
-    """Gemini 비전으로 규격·용기 재질을 읽어 가득 총 무게를 추정한다."""
+                       images_b64: Optional[list]) -> Optional[dict]:
+    """Gemini 비전으로 규격·용기 재질을 읽어 가득 총 무게를 추정한다.
+
+    라벨에 규격 인쇄가 없어도 사진 속 병의 형태·비례로 표준 규격
+    (100/250/500/1000mL …)을 추정한다 — 단 confidence 가 medium 이상일 때만
+    채택해, 근거 없는 외형 추측(low)은 버린다.
+    """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return None
 
     prompt = f"""너는 실험실 시약병 전문가야. 시약 '{chemical_name}' 병의
-'가득 찼을 때 총 무게(내용물 + 용기, kg)'를 추정해줘.
+'가득 찼을 때 총 무게(내용물 + 용기, kg)'를 추정해줘. 사진이 여러 장이면 모두 참고해.
 
 --- 라벨 OCR 텍스트 ---
 {(ocr_text or "")[:1200]}
 ------------------------
 
-추정 방법:
-1. 라벨에서 규격(net content: 500mL, 1L, 500g 등)을 찾아. 사진이 있으면 사진을 우선 신뢰해.
-2. 시약의 밀도로 내용물 질량을 계산해. (몰농도 수용액이면 밀도 ≈ 1.0)
-3. 사진 속 용기 재질·형태(갈색 유리병/HDPE 플라스틱/캔 등)와 크기로 빈 용기 무게를 추정해.
-4. full_weight_kg = 내용물 질량 + 용기 무게.
+추정 방법 (우선순위 순):
+1. 라벨에 인쇄된 규격(net content: 500mL, 1L, 500g 등)을 찾아. 사진과 OCR이 다르면 사진을 신뢰해.
+   → estimated_from 을 "label" 로 해.
+2. 인쇄된 규격이 없으면 사진 속 병의 형태·비례·뚜껑 크기 대비 몸통 크기로 용량을 추정해.
+   실험실 시약병은 100/250/500/1000/2500 mL 표준 규격이 대부분이야 — 가장 가까운 규격을 골라.
+   → estimated_from 을 "appearance" 로 해.
+3. 시약의 밀도로 내용물 질량을 계산해. (몰농도 수용액이면 밀도 ≈ 1.0)
+4. 용기 재질·형태(갈색 유리병/HDPE 플라스틱/캔 등)와 크기로 빈 용기 무게를 추정해.
+5. full_weight_kg = 내용물 질량 + 용기 무게.
 
-규격을 전혀 알 수 없으면 full_weight_kg 를 null 로 해. 추측으로 아무 값이나 답하지 마.
+confidence 는 스스로 평가해: 규격 인쇄를 읽었으면 "high", 외형으로 규격이 꽤 분명하면 "medium",
+병이 잘 안 보이거나 크기 단서가 없으면 "low". 사진이 아예 없고 OCR에도 규격이 없으면
+full_weight_kg 를 null 로 해.
 
 마크다운 없이 순수 JSON만 출력해:
-{{"net_content": "500 mL", "container": "갈색 유리병", "full_weight_kg": 0.62}}"""
+{{"net_content": "500 mL", "container": "갈색 유리병", "estimated_from": "label",
+  "confidence": "high", "full_weight_kg": 0.62}}"""
 
     model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     parts = [{"text": prompt}]
-    if image_b64:
-        parts.append({"inline_data": {"mime_type": "image/jpeg", "data": image_b64}})
+    for img in (images_b64 or [])[:3]:
+        if img:
+            parts.append({"inline_data": {"mime_type": "image/jpeg", "data": img}})
     payload = {
         "contents": [{"parts": parts}],
         "generationConfig": {"response_mime_type": "application/json", "temperature": 0.1},
@@ -142,11 +155,19 @@ def _estimate_from_llm(chemical_name: str, ocr_text: str,
             res_json = json.loads(resp.read().decode("utf-8"))
             raw = res_json["candidates"][0]["content"]["parts"][0]["text"]
             data = json.loads(raw)
-            cap = data.get("full_weight_kg") if isinstance(data, dict) else None
+            if not isinstance(data, dict):
+                return None
+            cap = data.get("full_weight_kg")
+            confidence = (data.get("confidence") or "").lower()
+            if confidence == "low":
+                logger.info(f"용량 외형 추정 confidence=low — 폐기: '{chemical_name}'")
+                return None
             if isinstance(cap, (int, float)) and MIN_CAPACITY_KG <= cap <= MAX_CAPACITY_KG:
                 detail = " · ".join(
                     str(v) for v in (data.get("net_content"), data.get("container")) if v
                 )
+                if data.get("estimated_from") == "appearance":
+                    detail = f"{detail} (외형 추정)" if detail else "외형 추정"
                 return {"capacity_kg": round(float(cap), 2), "source": "llm",
                         "detail": detail or "LLM 추정"}
     except Exception as e:
@@ -155,10 +176,10 @@ def _estimate_from_llm(chemical_name: str, ocr_text: str,
 
 
 def estimate_capacity(chemical_name: str, ocr_text: str,
-                      image_b64: Optional[str] = None) -> Optional[dict]:
-    """가득 총 무게 추정. LLM(비전) 우선, 실패 시 라벨 정규식 휴리스틱.
+                      images_b64: Optional[list] = None) -> Optional[dict]:
+    """가득 총 무게 추정. LLM(비전, 사진 최대 3장) 우선, 실패 시 라벨 정규식 휴리스틱.
 
     반환: {"capacity_kg": float, "source": "llm"|"label", "detail": str} 또는 None.
     """
-    return (_estimate_from_llm(chemical_name, ocr_text, image_b64)
+    return (_estimate_from_llm(chemical_name, ocr_text, images_b64)
             or _estimate_from_label(chemical_name, ocr_text))

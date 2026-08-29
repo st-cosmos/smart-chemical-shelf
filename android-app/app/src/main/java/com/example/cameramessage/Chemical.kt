@@ -102,7 +102,8 @@ data class MatchRequest(
 data class CapacityEstimateRequest(
     val chemical_name: String,
     val ocr_text: String,
-    val image_b64: String? = null
+    val image_b64: String? = null,             // (구버전 호환) 단일 사진
+    val images_b64: List<String>? = null       // 글자 최다 프레임 + 최신 프레임
 )
 
 data class CapacityEstimateResponse(

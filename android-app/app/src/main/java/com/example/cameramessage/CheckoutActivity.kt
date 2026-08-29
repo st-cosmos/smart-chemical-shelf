@@ -111,7 +111,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
         exceptionHelper = ExceptionDialogHelper(this)
         scanner = ChemicalScanner(lifecycleScope, this)
-        scanner.frameImageProvider = { frameCache.latestBase64 }
+        scanner.frameImageProvider = { frameCache.bestOrLatest() }
 
         val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
@@ -385,7 +385,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 val barcode = if (barcodeTask.isSuccessful) {
                     barcodeTask.result?.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
                 } else null
-                if (!isScanned) frameCache.offer(imageProxy, text.isNotBlank())
+                if (!isScanned) frameCache.offer(imageProxy, text.length)
                 runOnUiThread { if (!isScanned) scanner.onFrame(text, barcode) }
                 imageProxy.close()
             }
@@ -652,6 +652,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
     private fun resumeScanning(cooldownMs: Long = 0L) {
         isScanned = false
+        frameCache.clear()  // 이전 병의 best 프레임이 새 스캔에 섞이지 않게
         scanner.resume(cooldownMs)
     }
 

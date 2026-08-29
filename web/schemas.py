@@ -83,7 +83,12 @@ class CapacityEstimateRequest(BaseModel):
     # 반입 스캔 직후 병의 가득 무게(용량) 추정 요청 — 잔량 % 분모
     chemical_name: str
     ocr_text: str = ""
-    image_b64: Optional[str] = None
+    image_b64: Optional[str] = None            # (구버전 호환) 단일 사진
+    images_b64: Optional[List[str]] = None     # 글자 최다 프레임 + 최신 프레임 등 여러 장
+
+class CapacityUpdateRequest(BaseModel):
+    # 웹 재고 관리에서 병 용량(가득 총 무게)을 수동 수정
+    capacity_kg: float = Field(..., gt=0.04, le=30)
 
 class MatchConfirmRequest(BaseModel):
     # 사용자 확인/직접 선택 결과 학습용

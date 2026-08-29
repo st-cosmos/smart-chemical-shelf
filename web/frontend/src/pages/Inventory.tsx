@@ -102,6 +102,11 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
   const [expiryEditing, setExpiryEditing] = useState(false);
   const [expirySaving, setExpirySaving] = useState(false);
 
+  // 용량(가득 총 무게, g) 수동 수정 — 자동 추정이 틀리거나 실패한 병을 바로잡는다
+  const [capDraft, setCapDraft] = useState('');
+  const [capEditing, setCapEditing] = useState(false);
+  const [capSaving, setCapSaving] = useState(false);
+
   const fetchData = async () => {
     try {
       const [chems, logList, devs] = await Promise.all([
@@ -145,8 +150,10 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
   // 시약 선택이 바뀌면 편집 상태를 접고 입력값을 채운다 (기존 날짜 또는 기본값)
   useEffect(() => {
     setExpiryEditing(false);
+    setCapEditing(false);
     if (selectedChem) {
       setExpiryDraft(selectedChem.expiration_date ?? monthsFromToday(defaultMonths));
+      setCapDraft(String(Math.round((selectedChem.capacity_kg || CAPACITY_KG) * 1000)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);
@@ -165,6 +172,23 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
       window.alert(err instanceof Error ? err.message : '유통기한 저장에 실패했습니다.');
     } finally {
       setExpirySaving(false);
+    }
+  };
+
+  const saveCapacity = async () => {
+    const grams = Number(capDraft);
+    if (!selectedChem || !Number.isFinite(grams) || grams <= 0) return;
+    setCapSaving(true);
+    try {
+      await postJSON(`/api/chemicals/${selectedChem.id}/capacity`, {
+        capacity_kg: grams / 1000,
+      });
+      setCapEditing(false);
+      await fetchData();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : '용량 저장에 실패했습니다.');
+    } finally {
+      setCapSaving(false);
     }
   };
 
@@ -433,11 +457,45 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
             </div>
             <div className="info-row">
               <span className="info-key">잔량</span>
-              <span className="info-val">
-                {percentOf(selected.weight, selected.capacity_kg)}% (
-                {Math.round(selected.weight * 1000)}g / 가득{' '}
-                {Math.round((selected.capacity_kg || CAPACITY_KG) * 1000)}g)
-              </span>
+              {!capEditing ? (
+                <span className="info-val expiry-val">
+                  {percentOf(selected.weight, selected.capacity_kg)}% (
+                  {Math.round(selected.weight * 1000)}g / 가득{' '}
+                  {Math.round((selected.capacity_kg || CAPACITY_KG) * 1000)}g)
+                  <button
+                    className="expiry-edit-link"
+                    title="가득 무게 수정 (자동 추정이 틀렸을 때 바로잡기)"
+                    onClick={() => {
+                      setCapDraft(
+                        String(Math.round((selected.capacity_kg || CAPACITY_KG) * 1000)),
+                      );
+                      setCapEditing(true);
+                    }}
+                  >
+                    수정
+                  </button>
+                </span>
+              ) : (
+                <span className="expiry-editor">
+                  <input
+                    type="number"
+                    className="expiry-date-input"
+                    style={{ width: 90 }}
+                    min={50}
+                    step={10}
+                    value={capDraft}
+                    onChange={(e) => setCapDraft(e.target.value)}
+                  />
+                  <span style={{ alignSelf: 'center' }}>g</span>
+                  <button
+                    className="expiry-save-btn"
+                    disabled={capSaving || !capDraft || Number(capDraft) <= 0}
+                    onClick={saveCapacity}
+                  >
+                    저장
+                  </button>
+                </span>
+              )}
             </div>
             <div className="info-row">
               <span className="info-key">유통기한</span>

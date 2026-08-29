@@ -77,7 +77,8 @@ def estimate_capacity(req: schemas.CapacityEstimateRequest, db: Session = Depend
     import services.capacity as capacity
     from session_store import checkin_session
 
-    est = capacity.estimate_capacity(req.chemical_name, req.ocr_text, req.image_b64)
+    images = req.images_b64 or ([req.image_b64] if req.image_b64 else [])
+    est = capacity.estimate_capacity(req.chemical_name, req.ocr_text, images)
     if not est:
         return {"status": "no_estimate", "capacity_kg": None}
 
@@ -266,6 +267,20 @@ def set_chemical_expiration(chem_id: str, req: schemas.ExpirationRequest, db: Se
     chem.expiration_date = req.expiration_date
     db.commit()
     return {"status": "success", "chemical_id": chem_id, "expiration_date": req.expiration_date}
+
+
+@router.post("/{chem_id}/capacity")
+def set_chemical_capacity(chem_id: str, req: schemas.CapacityUpdateRequest,
+                          db: Session = Depends(get_db)):
+    """병 용량(가득 총 무게)을 웹에서 수동 수정 — 자동 추정이 틀리거나 실패한
+    병을 바로잡는 최종 수단. 실측 래칫과 달리 하향 수정도 허용하지 않으면
+    의미가 없으므로 그대로 덮어쓴다."""
+    chem = db.query(models.Chemical).filter(models.Chemical.id == chem_id).first()
+    if not chem:
+        raise HTTPException(status_code=404, detail="시약을 찾을 수 없습니다.")
+    chem.capacity_kg = round(req.capacity_kg, 2)
+    db.commit()
+    return {"status": "success", "chemical_id": chem_id, "capacity_kg": chem.capacity_kg}
 
 
 @router.post("/{chem_id}/dispose")
