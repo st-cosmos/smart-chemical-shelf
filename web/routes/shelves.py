@@ -28,7 +28,9 @@ def get_shelves(db: Session = Depends(get_db)):
 
 @router.get("/configs")
 def get_shelf_configs(db: Session = Depends(get_db)):
-    configs = db.query(models.ShelfConfig).all()
+    # id(생성 순서: A, B, C…) 기준 고정 정렬 — 정렬이 없으면 Postgres 가 UPDATE 된
+    # 행을 뒤로 보내서, 방금 수정한 선반이 화면 뒤쪽으로 튀는 문제가 있었다
+    configs = db.query(models.ShelfConfig).order_by(models.ShelfConfig.id).all()
     return configs
 
 @router.post("/configs/{shelf_id}")
@@ -235,6 +237,13 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
         db.refresh(chem)
         details = f"신규 반입 완료: {shelf_desc}에 적재됨 (실측 {measured}kg)"
 
+    # 병별 용량(가득 총 무게) 래칫 — 라벨/사진 추정치와 실측 무게 중 큰 값.
+    # 가득 병이 반입되면 실측이 곧 용량이고, 반쯤 쓴 병 재반입은 기존 값을 유지한다.
+    est_cap = checkin_session.get("capacity_kg")
+    chem.capacity_kg = round(
+        max(v for v in (est_cap, measured, chem.capacity_kg) if v), 2
+    )
+
     # LLM 기반 혼재 금지 시약 정보 분석 및 저장
     llm_safety.ensure_chemical_incompatibility_info(chem, db)
 
@@ -270,6 +279,8 @@ def _handle_checkin_increase(db: Session, shelf: models.Shelf, delta_kg: float):
     checkin_session["chemical_name"] = ""
     checkin_session["start_time"] = 0.0
     checkin_session["username"] = ""
+    checkin_session["expiration_date"] = None
+    checkin_session["capacity_kg"] = None
     db.commit()
 
     return {

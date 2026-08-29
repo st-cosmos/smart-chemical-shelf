@@ -14,7 +14,9 @@ data class ChemicalData(
     val time_in: String?,
     val time_out: String?,
     val expiration_date: String?,
-    val manufacturer: String?
+    val manufacturer: String?,
+    // 가득 찼을 때 총 무게(kg) — 라벨/사진 추정 + 반입 실측 래칫. 없으면 500g 폴백.
+    val capacity_kg: Double? = null
 )
 
 data class TransactionLog(
@@ -90,7 +92,25 @@ data class ScanOutRequest(
 
 data class MatchRequest(
     val ocr_text: String,
-    val barcode: String? = null
+    val barcode: String? = null,
+    // LLM 폴백용 라벨 사진 (JPEG base64) — 비전 모델이 OCR 오독을 바로잡는다
+    val image_b64: String? = null
+)
+
+// --- 병별 용량(가득 총 무게) 추정 (POST /api/chemicals/estimate-capacity) ---
+
+data class CapacityEstimateRequest(
+    val chemical_name: String,
+    val ocr_text: String,
+    val image_b64: String? = null,             // (구버전 호환) 단일 사진
+    val images_b64: List<String>? = null       // 글자 최다 프레임 + 최신 프레임
+)
+
+data class CapacityEstimateResponse(
+    val status: String,
+    val capacity_kg: Double? = null,
+    val source: String? = null,   // llm | label
+    val detail: String? = null
 )
 
 data class MatchCandidate(

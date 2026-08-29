@@ -7,7 +7,6 @@ import {
   FlaskConical,
   HardDrive,
   Lightbulb,
-  Minus,
   Pencil,
   Plus,
   Trash2,
@@ -155,9 +154,7 @@ function ShelfCard({
                     className="line-del-btn"
                     title={`${i + 1}열 삭제`}
                     onClick={() => deleteCol(i + 1)}
-                  >
-                    <Minus size={14} />
-                  </button>
+                  />
                 </div>
               ))}
             </div>
@@ -209,32 +206,39 @@ function ShelfCard({
                         <X size={14} />
                       </button>
                     )}
-                    <div className="slot-chem-row">
-                      {/* 슬롯 제목 = 기기 등록 시 작성한 식별 이름 (시약 내역은 클릭 모달에서) */}
-                      <span className="slot-chem-name">{device.name ?? device.id}</span>
-                      {slotChems.length === 0 && <span className="slot-chem-more">비어 있음</span>}
-                    </div>
-                    <div className="slot-remain">
-                      <span className="slot-remain-val">
-                        {device.weight.toFixed(1)}kg
-                      </span>
-                    </div>
-                    <span className="slot-pos">
-                      {config.id}
-                      {(row - 1) * config.cols + col} · {device.id}
-                    </span>
-                    <div className="slot-meta">
-                      <span
-                        className={`slot-meta-item battery${device.battery <= 20 ? ' low' : ''}`}
-                      >
-                        <BatteryFull size={16} />
-                        {device.battery}%
-                      </span>
-                      {device.led_on && (
-                        <span className="slot-meta-item led" title="LED 점등 중">
-                          <Lightbulb size={15} />
+                    <div className="slot-top-row">
+                      <div className="slot-top-left">
+                        <div className="slot-chem-row">
+                          {/* 슬롯 제목 = 기기 등록 시 작성한 식별 이름 (시약 내역은 클릭 모달에서) */}
+                          <span className="slot-chem-name">{device.name ?? device.id}</span>
+                          {slotChems.length === 0 && (
+                            <span className="slot-chem-more">비어 있음</span>
+                          )}
+                        </div>
+                        <span className="slot-pos">
+                          {config.id}
+                          {(row - 1) * config.cols + col} · {device.id}
                         </span>
+                      </div>
+                      {/* 수정 모드에서는 우상단이 등록 해제 배지 자리 — 배터리 숨김 */}
+                      {!editing && (
+                        <div className="slot-top-right">
+                          {device.led_on && (
+                            <span className="slot-meta-item led" title="LED 점등 중">
+                              <Lightbulb size={15} />
+                            </span>
+                          )}
+                          <span
+                            className={`slot-meta-item battery${device.battery <= 20 ? ' low' : ''}`}
+                          >
+                            <BatteryFull size={15} />
+                            {device.battery}%
+                          </span>
+                        </div>
                       )}
+                    </div>
+                    <div className="slot-info">
+                      <span className="slot-remain-val">{device.weight.toFixed(1)}kg</span>
                     </div>
                   </div>
                 );
@@ -272,9 +276,7 @@ function ShelfCard({
                   className="line-del-btn"
                   title={`${i + 1}행 삭제`}
                   onClick={() => deleteRow(i + 1)}
-                >
-                  <Minus size={14} />
-                </button>
+                />
               </div>
             ))}
           </div>
@@ -318,7 +320,8 @@ export default function Shelves() {
         getJSON<Chemical[]>('/api/chemicals'),
       ]);
       setDevices(devs);
-      setConfigs(cfgs);
+      // 생성 순서(id) 고정 — 서버/네트워크 순서가 흔들려도 카드 위치가 유지된다
+      setConfigs([...cfgs].sort((a, b) => a.id.localeCompare(b.id)));
       setChemicals(chems);
     } catch {
       // 폴링 실패 무시

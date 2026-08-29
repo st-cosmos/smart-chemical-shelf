@@ -14,9 +14,12 @@ from typing import Optional
 logger = logging.getLogger("llm_match")
 
 
-def identify_chemical_from_ocr(ocr_text: str, known_names: list) -> Optional[dict]:
-    """OCR 텍스트에서 시약명을 식별한다. 실패/키 미설정 시 None.
+def identify_chemical_from_ocr(ocr_text: str, known_names: list,
+                               image_b64: Optional[str] = None) -> Optional[dict]:
+    """OCR 텍스트(+선택적 라벨 사진)에서 시약명을 식별한다. 실패/키 미설정 시 None.
 
+    image_b64(JPEG)가 있으면 비전 입력으로 함께 보낸다 — ML Kit OCR 이 깨뜨린
+    글자를 모델이 원본 이미지에서 직접 읽어 정확도가 크게 오른다.
     반환: {"name": 표준 시약명, "label_text": 라벨 원문 문구(별칭 학습용)}
     """
     api_key = os.getenv("GEMINI_API_KEY")
@@ -24,9 +27,13 @@ def identify_chemical_from_ocr(ocr_text: str, known_names: list) -> Optional[dic
         logger.info("GEMINI_API_KEY 미설정 — LLM 시약 식별 폴백 비활성")
         return None
 
+    image_note = (
+        "라벨 사진도 첨부했어. OCR 텍스트와 사진이 다르면 사진에 인쇄된 글자를 우선 신뢰해.\n"
+        if image_b64 else ""
+    )
     prompt = f"""너는 화학 시약 라벨 판독 전문가야.
 아래는 시약병 라벨을 카메라 OCR로 읽은 텍스트야. 오인식된 글자가 섞여 있을 수 있어.
-
+{image_note}
 --- OCR 텍스트 ---
 {ocr_text[:1500]}
 ------------------
@@ -38,6 +45,7 @@ def identify_chemical_from_ocr(ocr_text: str, known_names: list) -> Optional[dic
 2. 목록에 없는 시약이면 널리 쓰이는 한국어 시약명을 name 으로 사용해.
 3. label_text 에는 OCR 텍스트에서 시약명을 나타내는 원문 문구를 그대로 담아줘. (별칭 학습용)
 4. 시약명을 확실히 식별할 수 없으면 name 을 null 로 해. 추측으로 아무 시약이나 답하지 마.
+5. 메탄올/에탄올처럼 한 글자 차이 이름은 특히 주의해서 구분해. (methanol=메탄올, ethanol=에탄올)
 
 연구실 보유 시약 목록: {json.dumps(known_names, ensure_ascii=False)}
 
@@ -47,8 +55,11 @@ def identify_chemical_from_ocr(ocr_text: str, known_names: list) -> Optional[dic
     # 1초대에 답하는 lite 가 적합 (실측: 3.1-flash-lite 1.0s vs 3.6-flash 21s)
     model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    parts = [{"text": prompt}]
+    if image_b64:
+        parts.append({"inline_data": {"mime_type": "image/jpeg", "data": image_b64}})
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
+        "contents": [{"parts": parts}],
         "generationConfig": {
             "response_mime_type": "application/json",
             "temperature": 0.1,

@@ -45,6 +45,42 @@ FALLBACK_RULES = [
 ]
 
 
+# LLM 이 "강산", "강염기성 물질" 같은 카테고리명으로 답하면 실제 병 이름과
+# 부분 문자열이 겹치지 않아 혼재 매칭이 빗나간다. 카테고리명 → 해당하는
+# 대표 시약 이름 키워드로 확장해 매칭한다. (검사 순서 중요:
+# "강산화제"가 "강산"으로 오인되지 않도록 산화제를 먼저 검사한다)
+_OXIDIZERS = ["과산화수소", "과망간산칼륨", "질산", "과염소산", "질산나트륨"]
+_ACIDS = ["염산", "질산", "황산", "아세트산", "초산", "과염소산"]
+_BASES = ["수산화나트륨", "수산화칼륨", "암모니아", "가성소다"]
+_FLAMMABLES = ["에탄올", "메탄올", "아세톤", "톨루엔", "헥산", "이소프로판올",
+               "자일렌", "벤젠", "에틸아세테이트", "포름알데히드"]
+_CYANIDES = ["시안화칼륨", "시안화나트륨"]
+
+
+def _category_keywords(item: str) -> list:
+    if "산화제" in item:
+        return _OXIDIZERS
+    if "강산" in item or "산성" in item or "유기산" in item:
+        return _ACIDS
+    if "염기" in item or "알칼리" in item:
+        return _BASES
+    if "가연" in item or "인화" in item or "유기용" in item or "환원제" in item:
+        return _FLAMMABLES
+    if "시안" in item:
+        return _CYANIDES
+    return []
+
+
+def names_match(item: str, name: str) -> bool:
+    """혼재 금지 목록 항목 ↔ 시약 이름 매칭.
+    직접 부분 문자열 + 카테고리명 확장("강산" → 염산/질산/황산…)."""
+    if not item or not name:
+        return False
+    if item in name or name in item:
+        return True
+    return any(kw in name for kw in _category_keywords(item))
+
+
 def get_fallback_incompatibility(chemical_name: str) -> Dict[str, Any]:
     """LLM 미사용 또는 오류 시 작동하는 룰 기반 대체 분석기"""
     name_clean = chemical_name.strip()
@@ -80,6 +116,17 @@ def fetch_incompatible_chemicals_from_llm(chemical_name: str) -> Dict[str, Any]:
     시약명 '{chemical_name}'이(가) 최초 반입되었어.
 
     이 시약과 같은 선반이나 인접한 수납칸에 '절대 함께 두면 안 되는(혼재 금지)' 대표적인 시약 이름이나 물질 종류(한국어) 목록을 조사해줘.
+
+    포함 기준 — 오직 '치명적 조합'만:
+    - 혼합·접촉 시 폭발, 발화, 격렬한 발열 반응이 일어나는 조합 (예: 강산화제 + 인화성 유기용매)
+    - 맹독성 가스가 즉시 발생하는 조합 (예: 시안화물 + 산, 차아염소산염 + 산)
+    - 금수성 물질처럼 소량 접촉만으로 급격히 반응하는 조합
+
+    제외 기준 — 다음은 목록에 넣지 마:
+    - 보관 등급 분리가 '권장'될 뿐 접촉해도 급성 위험이 없는 조합 (예: 케톤 ↔ 강염기, 인화성 ↔ 부식성 일반론)
+    - 장기 보관·품질 저하 수준의 상성 문제
+
+    목록은 위험이 가장 큰 것부터 최대 7개까지만.
     반드시 다음 요구사항에 맞는 유효한 JSON 형식으로만 응답해야 해. 마크다운 태그(```json 등)는 제외하고 순수 JSON만 출력해줘.
 
     JSON 포맷:
@@ -163,7 +210,7 @@ def find_recommended_safe_shelf(chem, db):
             if s.parent_shelf and other_shelf.parent_shelf and s.parent_shelf == other_shelf.parent_shelf:
                 # 혼재 판정 범위와 동일: 같은 선반의 같은 행에 혼재 금지 시약이 없어야 안전
                 if (s.row or 1) == (other_shelf.row or 1):
-                    if any(item in other.name or other.name in item for item in incomp_list):
+                    if any(names_match(item, other.name) for item in incomp_list):
                         is_safe = False
                         break
         if is_safe:

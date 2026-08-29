@@ -41,6 +41,9 @@ class ChemicalScanner(
         private const val LLM_MIN_TEXT = 6             // LLM 호출에 필요한 최소 누적 글자 수
     }
 
+    /** LLM 폴백에 라벨 사진을 첨부하기 위한 최신 프레임 JPEG(base64) 공급자 */
+    var frameImageProvider: (() -> String?)? = null
+
     private val textWindow = ArrayDeque<String>()
     private var lastBarcode: String? = null
     private var lastBarcodeAt = 0L
@@ -144,10 +147,11 @@ class ChemicalScanner(
         llmInFlight = true
         lastLlmAt = now
         val code = activeBarcode
+        val image = frameImageProvider?.invoke()  // 라벨 사진 — 비전으로 오독 교정
         scope.launch {
             try {
                 val result = NetworkClient.api.matchChemicalLlm(
-                    MatchRequest(ocr_text = ocr, barcode = code)
+                    MatchRequest(ocr_text = ocr, barcode = code, image_b64 = image)
                 )
                 llmAnswered = true  // 응답을 받았으면(no_match 포함) 이번 세션엔 재호출 안 함
                 if (frozen) return@launch

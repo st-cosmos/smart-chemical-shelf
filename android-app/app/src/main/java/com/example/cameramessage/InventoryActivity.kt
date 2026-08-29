@@ -25,7 +25,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-// 잔량 % 환산 기준: 가득 = 500g (시연 약품 최대 무게, web Inventory.tsx 와 동일)
+// 잔량 % 환산: 병별 capacity_kg(라벨/사진 추정 + 실측 래칫)을 우선 쓰고,
+// 미추정 병은 가득 = 500g 폴백 (web Inventory.tsx 와 동일 기준)
 private const val CAPACITY_KG = 0.5
 private const val DANGER_PCT = 25
 
@@ -248,7 +249,8 @@ class InventoryActivity : AppCompatActivity() {
             b.invExpiry.setTextColor(c)
         }
 
-        val pct = ((chem.weight / CAPACITY_KG) * 100).roundToInt().coerceIn(0, 100)
+        val cap = chem.capacity_kg?.takeIf { it > 0 } ?: CAPACITY_KG
+        val pct = ((chem.weight / cap) * 100).roundToInt().coerceIn(0, 100)
         val low = pct <= DANGER_PCT
         b.invFill.backgroundTintList = ColorStateList.valueOf(
             color(if (low) R.color.danger else R.color.primary)
