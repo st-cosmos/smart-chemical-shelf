@@ -207,10 +207,18 @@ function ShelfCard({
                       </button>
                     )}
                     <div className="slot-top-row">
-                      <div className="slot-chem-row">
-                        {/* 슬롯 제목 = 기기 등록 시 작성한 식별 이름 (시약 내역은 클릭 모달에서) */}
-                        <span className="slot-chem-name">{device.name ?? device.id}</span>
-                        {slotChems.length === 0 && <span className="slot-chem-more">비어 있음</span>}
+                      <div className="slot-top-left">
+                        <div className="slot-chem-row">
+                          {/* 슬롯 제목 = 기기 등록 시 작성한 식별 이름 (시약 내역은 클릭 모달에서) */}
+                          <span className="slot-chem-name">{device.name ?? device.id}</span>
+                          {slotChems.length === 0 && (
+                            <span className="slot-chem-more">비어 있음</span>
+                          )}
+                        </div>
+                        <span className="slot-pos">
+                          {config.id}
+                          {(row - 1) * config.cols + col} · {device.id}
+                        </span>
                       </div>
                       {/* 수정 모드에서는 우상단이 등록 해제 배지 자리 — 배터리 숨김 */}
                       {!editing && (
@@ -231,10 +239,6 @@ function ShelfCard({
                     </div>
                     <div className="slot-info">
                       <span className="slot-remain-val">{device.weight.toFixed(1)}kg</span>
-                      <span className="slot-pos">
-                        {config.id}
-                        {(row - 1) * config.cols + col} · {device.id}
-                      </span>
                     </div>
                   </div>
                 );
