@@ -375,10 +375,11 @@ def get_alerts(db: Session = Depends(get_db)):
             incomp1 = json.loads(c1.incompatible_chemicals) if c1.incompatible_chemicals else []
             incomp2 = json.loads(c2.incompatible_chemicals) if c2.incompatible_chemicals else []
 
+            # 직접 이름 매칭 + 카테고리명("강산"·"강염기" 등) 확장 매칭
             is_incompatible = False
-            if any(item in c2.name or c2.name in item for item in incomp1):
+            if any(llm_safety.names_match(item, c2.name) for item in incomp1):
                 is_incompatible = True
-            elif any(item in c1.name or c1.name in item for item in incomp2):
+            elif any(llm_safety.names_match(item, c1.name) for item in incomp2):
                 is_incompatible = True
 
             if is_incompatible:
