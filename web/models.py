@@ -47,6 +47,9 @@ class Chemical(Base):
     time_out = Column(String, nullable=True)
     expiration_date = Column(String, nullable=True)     # YYYY-MM-DD
     manufacturer = Column(String, nullable=True)
+    # 가득 찼을 때 총 무게(내용물+용기, kg) — 잔량 % 의 분모.
+    # 라벨 규격/사진으로 추정하고 반입 실측 무게로 래칫된다. 없으면 클라이언트가 0.5 폴백.
+    capacity_kg = Column(Float, nullable=True)
     incompatible_chemicals = Column(String, nullable=True)  # JSON 문자열 (LLM 추출 혼재 금지 시약 목록)
     incompatible_reason = Column(String, nullable=True)     # LLM 반응 위험 원인 설명
 

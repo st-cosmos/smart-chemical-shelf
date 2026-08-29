@@ -52,7 +52,9 @@ def match_chemical_llm(req: schemas.MatchRequest, db: Session = Depends(get_db))
     """사전 매칭 실패가 지속될 때의 LLM 폴백 — 결과는 항상 사용자 확인을 거친다.
     확인되면 /match/confirm 이 label 문구를 별칭으로 학습해 다음부터 즉시 인식된다."""
     import services.llm_match as llm_match
-    result = llm_match.identify_chemical_from_ocr(req.ocr_text, matching.known_names(db))
+    result = llm_match.identify_chemical_from_ocr(
+        req.ocr_text, matching.known_names(db), image_b64=req.image_b64
+    )
     if not result:
         return {
             "status": "no_match", "method": "llm", "chemical_name": None,
@@ -65,6 +67,32 @@ def match_chemical_llm(req: schemas.MatchRequest, db: Session = Depends(get_db))
         "candidates": [{"name": name, "score": 0.75}],
         "matched_token": result.get("label_text"),
     }
+
+
+@router.post("/estimate-capacity")
+def estimate_capacity(req: schemas.CapacityEstimateRequest, db: Session = Depends(get_db)):
+    """반입 스캔 직후 앱이 백그라운드로 호출 — 라벨 OCR/사진으로 병의 가득
+    총 무게(capacity_kg, 잔량 % 분모)를 추정한다. 결과는 진행 중인 반입 세션에
+    실리고, 세션이 이미 끝났으면 방금 반입된 같은 이름의 병에 바로 반영한다."""
+    import services.capacity as capacity
+    from session_store import checkin_session
+
+    est = capacity.estimate_capacity(req.chemical_name, req.ocr_text, req.image_b64)
+    if not est:
+        return {"status": "no_estimate", "capacity_kg": None}
+
+    if checkin_session["active"] and checkin_session["chemical_name"] == req.chemical_name:
+        checkin_session["capacity_kg"] = est["capacity_kg"]
+    else:
+        chem = db.query(models.Chemical).filter(
+            models.Chemical.name == req.chemical_name
+        ).order_by(models.Chemical.time_in.desc()).first()
+        if chem:
+            chem.capacity_kg = round(
+                max(est["capacity_kg"], chem.weight or 0.0, chem.capacity_kg or 0.0), 2
+            )
+            db.commit()
+    return {"status": "success", **est}
 
 
 @router.post("/match/confirm")
@@ -105,7 +133,10 @@ def scan_in(req: schemas.ScanInRequest, db: Session = Depends(get_db)):
     checkin_session["chemical_name"] = matched_std_name
     checkin_session["start_time"] = time.time()
     checkin_session["username"] = req.username
-    
+    # 직전 세션의 잔재가 새 병에 붙지 않도록 초기화 (앱이 스캔 후 별도 등록)
+    checkin_session["expiration_date"] = None
+    checkin_session["capacity_kg"] = None
+
     return {
         "status": "success",
         "chemical_name": matched_std_name,

@@ -31,7 +31,8 @@ function monthsFromToday(m: number): string {
   ).padStart(2, '0')}`;
 }
 
-// 잔량 % 환산 기준: 가득 = 500g (시연 약품 최대 무게)
+// 잔량 % 환산: 병별 capacity_kg(라벨/사진 추정 + 실측 래칫)을 우선 쓰고,
+// 미추정 병은 가득 = 500g 폴백 (시연 약품 최대 무게)
 const CAPACITY_KG = 0.5;
 const DANGER_PCT = 25;
 
@@ -55,8 +56,9 @@ const FILTER_LABELS: { key: StatusFilter; label: string }[] = [
   { key: 'co', label: '인접 보관' },
 ];
 
-function percentOf(weightKg: number): number {
-  return Math.max(0, Math.min(100, Math.round((weightKg / CAPACITY_KG) * 100)));
+function percentOf(weightKg: number, capacityKg?: number | null): number {
+  const cap = capacityKg && capacityKg > 0 ? capacityKg : CAPACITY_KG;
+  return Math.max(0, Math.min(100, Math.round((weightKg / cap) * 100)));
 }
 
 function formatLogTime(ts: string): string {
@@ -330,7 +332,7 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
               <div className="t-empty">검색 결과가 없습니다.</div>
             ) : (
               filtered.map((chem) => {
-                const pct = percentOf(chem.weight);
+                const pct = percentOf(chem.weight, chem.capacity_kg);
                 const danger = pct <= DANGER_PCT;
                 const expired = expiredAlertOf(chem.id);
                 const co = coAlertOf(chem.id);
@@ -432,7 +434,9 @@ export default function Inventory({ alerts, refreshAlerts, user }: InventoryProp
             <div className="info-row">
               <span className="info-key">잔량</span>
               <span className="info-val">
-                {percentOf(selected.weight)}% ({Math.round(selected.weight * 1000)} mL)
+                {percentOf(selected.weight, selected.capacity_kg)}% (
+                {Math.round(selected.weight * 1000)}g / 가득{' '}
+                {Math.round((selected.capacity_kg || CAPACITY_KG) * 1000)}g)
               </span>
             </div>
             <div className="info-row">

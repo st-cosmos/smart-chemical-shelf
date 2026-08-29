@@ -63,6 +63,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
             .build()
     )
     private lateinit var scanner: ChemicalScanner
+    private val frameCache = ScanFrameCache()  // LLM 비전·용량 추정용 라벨 사진
 
     private var camera: Camera? = null
     private var torchOn = false
@@ -94,6 +95,7 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
 
         scanner = ChemicalScanner(lifecycleScope, this)
+        scanner.frameImageProvider = { frameCache.latestBase64 }
 
         // Header: 반입/반출 화면에서는 Bell 버튼 숨김 (design-spec §1.3)
         binding.appHeader.headerTitle.text = "시약 반입"
@@ -200,11 +202,13 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
             val textTask = recognizer.process(image)
             val barcodeTask = barcodeScanner.process(image)
-            Tasks.whenAllComplete(textTask, barcodeTask).addOnCompleteListener {
+            // 완료 콜백을 카메라 스레드에서 실행 — 프레임 JPEG 변환(offer)이 UI를 막지 않는다
+            Tasks.whenAllComplete(textTask, barcodeTask).addOnCompleteListener(cameraExecutor) {
                 val text = if (textTask.isSuccessful) textTask.result?.text?.trim().orEmpty() else ""
                 val barcode = if (barcodeTask.isSuccessful) {
                     barcodeTask.result?.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
                 } else null
+                if (!isScanned) frameCache.offer(imageProxy, text.isNotBlank())
                 runOnUiThread { if (!isScanned) scanner.onFrame(text, barcode) }
                 imageProxy.close()
             }
@@ -278,6 +282,8 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                     showScanResult(response)
                     startSessionPolling()
                     learnMatch(name, barcode, learnToken)
+                    // 라벨 규격/사진으로 병의 가득 무게(잔량 % 분모)를 백그라운드 추정
+                    requestCapacityEstimate(response.chemical_name, ocrText)
                     if (currentNewItem) {
                         promptExpirationDate(ocrText)
                     }
@@ -351,6 +357,21 @@ class CheckinActivity : AppCompatActivity(), ChemicalScanner.Listener {
                 )
             } catch (e: Exception) {
                 Toast.makeText(this@CheckinActivity, "유통기한 등록 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    /** 라벨 OCR/사진으로 병의 가득 총 무게를 서버가 추정하게 한다.
+     *  실패해도 무방 — 반입 실측 무게가 최소 하한을 보장한다. */
+    private fun requestCapacityEstimate(name: String, ocrText: String) {
+        val image = frameCache.latestBase64
+        lifecycleScope.launch {
+            try {
+                NetworkClient.api.estimateCapacity(
+                    CapacityEstimateRequest(chemical_name = name, ocr_text = ocrText, image_b64 = image)
+                )
+            } catch (e: Exception) {
+                // 추정 실패는 무시
             }
         }
     }

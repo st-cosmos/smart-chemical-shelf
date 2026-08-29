@@ -67,8 +67,15 @@ DEFAULT_ALIASES = {
     # 영문/한글 동의어 — methyl↔ethyl 하이재킹 방지를 위해 반드시 전체 구절로 등록
     "methyl alcohol": "메탄올",
     "메틸알코올": "메탄올",
+    "메틸알콜": "메탄올",
     "ethyl alcohol": "에탄올 95%",
     "에틸알코올": "에탄올 95%",
+    "에틸알콜": "에탄올 95%",
+    # 라벨의 화학식/실험실 약어 표기 (fuzzy 가 ch3cooh 등 비슷한 식을 오인하는 것 방지)
+    "ch3oh": "메탄올",
+    "meoh": "메탄올",
+    "c2h5oh": "에탄올 95%",
+    "etoh": "에탄올 95%",
     # 실험실 상용 시약 어휘 확장
     "benzene": "벤젠",
     "벤젠": "벤젠",
@@ -114,6 +121,44 @@ DEFAULT_ALIASES = {
     "tetrahydrofuran": "THF",
     "thf": "THF",
 }
+
+# OCR 이 유난히 자주 뒤바꾸는 시약 쌍. 한글 '메'/'에'는 한 획 차이라 한 프레임만
+# 잘못 읽혀도 별칭 정확 일치(0.95)로 즉시 오확정된다. 누적 텍스트 전체에서 각
+# 시약의 고유 마커 출현 횟수를 세어 증거가 많은 쪽으로 정정하고, 증거가 없거나
+# 갈리면 자동 확정을 막아 사용자 확인을 거치게 한다. (마커는 normalize() 된
+# 문자열 기준 — 소문자, 한글/영문/숫자만. "(?<![a-z])eth"는 methanol 속 ethan 오탐 방지)
+CONFUSABLE_GROUPS = [
+    {
+        "메탄올": [r"메탄", r"메틸", r"(?<![a-z])meth", r"ch3oh", r"(?<![a-z])meoh"],
+        "에탄올 95%": [r"에탄", r"에틸", r"(?<![a-z])ethan", r"(?<![a-z])ethyl",
+                     r"c2h5oh", r"(?<![a-z])etoh"],
+    },
+]
+
+
+def _apply_confusable_guard(scores: dict, norm_full: str):
+    """혼동 쌍이 매칭 결과에 끼어 있으면 텍스트 증거로 판정을 정정한다."""
+    for group in CONFUSABLE_GROUPS:
+        if not any(m in scores for m in group):
+            continue
+        hits = {
+            m: sum(len(re.findall(p, norm_full)) for p in patterns)
+            for m, patterns in group.items()
+        }
+        best = max(group, key=lambda m: hits[m])
+        rivals = [m for m in group if m != best]
+        if hits[best] > 0 and all(hits[best] > hits[r] for r in rivals):
+            # 증거 우세 — 열세 후보 제거, 우세 후보는 최소 확인 수준으로 보장
+            for r in rivals:
+                scores.pop(r, None)
+            if best not in scores:
+                scores[best] = (0.85, "alias", best)
+        else:
+            # 증거 없음/동률 — 어느 쪽도 자동 확정하지 않는다 (사용자 확인 강제)
+            for m in group:
+                if m in scores and scores[m][0] > 0.85:
+                    scores[m] = (0.85,) + scores[m][1:]
+
 
 CAS_RE = re.compile(r"(\d{2,7})-(\d{2})-(\d)")
 TOKEN_RE = re.compile(r"[0-9A-Za-z가-힣%.]+")
@@ -247,6 +292,8 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
             continue
         put(std, max(scores.get(std, (0,))[0], 0.85), "alias", na)
 
+    _apply_confusable_guard(scores, norm_full)
+
     if not scores:
         return {
             "status": "no_match", "method": None, "chemical_name": None,
@@ -258,7 +305,8 @@ def match(db: Session, ocr_text: str, barcode: Optional[str] = None) -> dict:
     best_name, (best_score, best_method, best_token) = ranked[0]
 
     # 서로 다른 시약이 동시에 정확 일치하면(라벨에 두 이름) 자동 확정하지 않음
-    ambiguous = len(exact_names) > 1
+    # (혼동 가드가 오독 후보를 제거했으면 그 항목은 중복으로 세지 않는다)
+    ambiguous = len([n for n in exact_names if n in scores]) > 1
 
     if best_score >= AUTO_ACCEPT and not ambiguous:
         status = "matched"

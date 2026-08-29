@@ -76,6 +76,14 @@ class MatchRequest(BaseModel):
     # 앱이 스캔 중 주기적으로 보내는 인식 시도 (OCR 누적 텍스트 + 병의 바코드/QR)
     ocr_text: str = ""
     barcode: Optional[str] = None
+    # LLM 폴백용 라벨 사진 (JPEG base64) — 비전 모델이 OCR 오독을 바로잡는다
+    image_b64: Optional[str] = None
+
+class CapacityEstimateRequest(BaseModel):
+    # 반입 스캔 직후 병의 가득 무게(용량) 추정 요청 — 잔량 % 분모
+    chemical_name: str
+    ocr_text: str = ""
+    image_b64: Optional[str] = None
 
 class MatchConfirmRequest(BaseModel):
     # 사용자 확인/직접 선택 결과 학습용
@@ -142,6 +150,7 @@ class ChemicalResponse(BaseModel):
     manufacturer: Optional[str] = None
     incompatible_chemicals: Optional[str] = None
     incompatible_reason: Optional[str] = None
+    capacity_kg: Optional[float] = None
 
     class Config:
         from_attributes = True

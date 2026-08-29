@@ -90,6 +90,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
     private var checkoutPollJob: Job? = null
     private var pendingName: String? = null
     private var pendingChemicalId: String? = null
+    private val frameCache = ScanFrameCache()  // LLM 비전 매칭용 라벨 사진
     private lateinit var exceptionHelper: ExceptionDialogHelper
 
     // 세션 완료를 폴링 루프와 WebSocket 트리거가 동시에 감지해 완료 모달이
@@ -110,6 +111,7 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
 
         exceptionHelper = ExceptionDialogHelper(this)
         scanner = ChemicalScanner(lifecycleScope, this)
+        scanner.frameImageProvider = { frameCache.latestBase64 }
 
         val prefs = getSharedPreferences("smart_shelf", Context.MODE_PRIVATE)
         currentUser = prefs.getString("username", "kim.lab") ?: "kim.lab"
@@ -377,11 +379,13 @@ class CheckoutActivity : AppCompatActivity(), ChemicalScanner.Listener {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
             val textTask = recognizer.process(image)
             val barcodeTask = barcodeScanner.process(image)
-            Tasks.whenAllComplete(textTask, barcodeTask).addOnCompleteListener {
+            // 완료 콜백을 카메라 스레드에서 실행 — 프레임 JPEG 변환(offer)이 UI를 막지 않는다
+            Tasks.whenAllComplete(textTask, barcodeTask).addOnCompleteListener(cameraExecutor) {
                 val text = if (textTask.isSuccessful) textTask.result?.text?.trim().orEmpty() else ""
                 val barcode = if (barcodeTask.isSuccessful) {
                     barcodeTask.result?.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
                 } else null
+                if (!isScanned) frameCache.offer(imageProxy, text.isNotBlank())
                 runOnUiThread { if (!isScanned) scanner.onFrame(text, barcode) }
                 imageProxy.close()
             }

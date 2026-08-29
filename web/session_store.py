@@ -6,7 +6,8 @@ checkin_session = {
     "start_time": 0.0,
     "timeout_seconds": 15.0,
     "username": "",
-    "expiration_date": None
+    "expiration_date": None,
+    "capacity_kg": None,     # 라벨/사진으로 추정한 가득 총 무게 — 안착 시 병에 기록
 }
 
 # 반출 세션: 스캔 → 선반 무게 감소 감지로 확정 (checkout_flow.py 에서 관리)

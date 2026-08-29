@@ -48,6 +48,7 @@ def cancel_checkin_session():
     checkin_session["start_time"] = 0.0
     checkin_session["username"] = ""
     checkin_session["expiration_date"] = None
+    checkin_session["capacity_kg"] = None
     return {"status": "success"}
 
 @router.post("/expiration")
