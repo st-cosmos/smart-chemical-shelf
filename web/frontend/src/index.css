@@ -1302,13 +1302,29 @@ select.input-field {
   border-radius: 16px;
 }
 
+/* 배지 구성: 상단(이름 좌 · 배터리 우) ↔ 하단(무게·위치 우측 정렬) */
 .slot-occupied {
   background: var(--bg);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  justify-content: space-between;
   overflow: hidden;
+}
+
+.slot-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.slot-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .slot-chem-row {
@@ -1334,14 +1350,16 @@ select.input-field {
   color: var(--text-muted);
 }
 
-.slot-remain {
+.slot-info {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 4px;
+  min-width: 0;
 }
 
 .slot-remain-val {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--primary);
 }
@@ -1354,19 +1372,11 @@ select.input-field {
   text-overflow: ellipsis;
 }
 
-.slot-meta {
-  padding-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 .slot-meta-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 15px;
+  gap: 4px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-body);
 }

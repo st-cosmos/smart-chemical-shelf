@@ -24773,6 +24773,232 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "uxAsS",
+      "x": 7960,
+      "y": 6532,
+      "name": "web-slot-badge",
+      "fill": "$bg",
+      "cornerRadius": 24,
+      "layout": "vertical",
+      "gap": 20,
+      "padding": 32,
+      "children": [
+        {
+          "type": "text",
+          "id": "x8dhJ",
+          "name": "Preview Title",
+          "fill": "$text-strong",
+          "content": "수납칸 배지 개편안 — 배터리 우측 상단 · 정보 우측 정렬",
+          "fontFamily": "$font",
+          "fontSize": 15,
+          "fontWeight": "700"
+        },
+        {
+          "type": "frame",
+          "id": "f4S1s",
+          "name": "Slot Samples",
+          "gap": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "uaH3n",
+              "name": "Slot 수납칸 B1",
+              "width": 248,
+              "height": 176,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "padding": [
+                14,
+                16
+              ],
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "s96Zt",
+                  "name": "Top Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jKB2K",
+                      "name": "Slot Name",
+                      "fill": "$text-strong",
+                      "content": "수납칸 B1",
+                      "fontFamily": "$font",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "n7NzMN",
+                      "name": "Battery",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "B2kUF5",
+                          "name": "Bat Icon",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "battery-full",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "npeNd",
+                          "name": "Bat Text",
+                          "fill": "$text-body",
+                          "content": "72%",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JOW2c",
+                  "name": "Info Block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "a788a",
+                      "name": "Remain",
+                      "fill": "$primary",
+                      "content": "3.5kg",
+                      "fontFamily": "$font",
+                      "fontSize": 17,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Vx7II",
+                      "name": "Pos",
+                      "fill": "$text-muted",
+                      "content": "B1 · SHELF-04F8",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "J3iBq",
+              "name": "Slot 수납칸 B5",
+              "width": 248,
+              "height": 176,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "padding": [
+                14,
+                16
+              ],
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UauWa",
+                  "name": "Top Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zEhRe",
+                      "name": "Slot Name",
+                      "fill": "$text-strong",
+                      "content": "수납칸 B5",
+                      "fontFamily": "$font",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AlO9x",
+                      "name": "Battery",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "o19z3",
+                          "name": "Bat Icon",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "battery-low",
+                          "library": "lucide",
+                          "fill": "$danger"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Boq0D",
+                          "name": "Bat Text",
+                          "fill": "$text-body",
+                          "content": "18%",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "H7GVFC",
+                  "name": "Info Block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pQ0pf",
+                      "name": "Remain",
+                      "fill": "$primary",
+                      "content": "4.8kg",
+                      "fontFamily": "$font",
+                      "fontSize": 17,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "T0GXN",
+                      "name": "Pos",
+                      "fill": "$text-muted",
+                      "content": "B5 · SHELF-08D5",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
