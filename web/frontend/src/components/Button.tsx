@@ -8,7 +8,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: LucideIcon;
   /** 폭 100% · 48px 높이 CTA (로그인/등록 제출) */
   cta?: boolean;
-  /** App-Primary 대형 필 버튼 (선반 관리 "새 선반 추가") */
+  /** 컴팩트 필 버튼 (선반 관리 "새 선반 추가") */
   pill?: boolean;
   iconSize?: number;
 }
@@ -35,7 +35,7 @@ export default function Button({
 
   return (
     <button className={classes} {...rest}>
-      {Icon && <Icon size={iconSize ?? (pill ? 28 : 16)} />}
+      {Icon && <Icon size={iconSize ?? (pill ? 15 : 16)} />}
       {children}
     </button>
   );

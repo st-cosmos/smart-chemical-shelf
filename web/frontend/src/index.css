@@ -157,11 +157,13 @@ select {
 }
 
 /* App-Primary 대형 필 버튼 (선반 관리 "새 선반 추가") */
+/* 컴팩트 필 버튼 ("새 선반 추가" — design.pen web-shelf-manage-edit) */
 .btn-pill {
-  gap: 12px;
-  padding: 22px 44px;
+  gap: 6px;
+  padding: 8px 16px;
   border-radius: 999px;
-  font-size: 24px;
+  font-size: 13px;
+  font-weight: 600;
   box-shadow: var(--shadow-pill);
 }
 
@@ -1205,16 +1207,19 @@ select.input-field {
   flex-wrap: wrap;
 }
 
+/* 카드 높이 고정 — 수정 모드에서 열 삭제 줄·행/열 추가 버튼이 생겨도
+   뷰포트(flex)가 줄어들 뿐 카드 크기는 변하지 않는다 (선반 간 높이 통일) */
 .shelf-card {
   flex: 1;
   min-width: 480px;
+  height: 454px;
   border-radius: 28px;
   background: var(--surface);
   box-shadow: var(--shadow-shelf);
-  padding: 28px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .shelf-card-head {
@@ -1251,17 +1256,19 @@ select.input-field {
 }
 
 .shelf-grid-wrap {
+  flex: 1;
+  min-height: 0;
   display: flex;
   gap: 12px;
   position: relative;
 }
 
-/* 3행(150px × 3 + 간격 12px × 2 = 474px)만 보이는 스크롤 뷰포트.
-   높이를 고정해 모든 선반 카드의 세로 길이를 통일한다 — 4행 이상은 세로 스크롤 */
+/* 카드의 남는 세로 공간을 전부 쓰는 스크롤 뷰포트 (일반 3행 = 112px × 3 + 간격 12px × 2 = 360px).
+   수정 모드에서는 삭제 줄·추가 버튼만큼 자동으로 줄어든다 — 넘치는 행은 세로 스크롤 */
 .shelf-grid-viewport {
   flex: 1;
   min-width: 0;
-  height: 474px;
+  height: 100%;
   overflow: auto;
   border-radius: 16px;
 }
@@ -1290,16 +1297,16 @@ select.input-field {
 .slot {
   position: relative;
   min-width: 0;
-  height: 150px;
+  height: 112px;
   border-radius: 16px;
 }
 
 .slot-occupied {
   background: var(--bg);
-  padding: 14px 16px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   overflow: hidden;
 }
 
@@ -1311,7 +1318,7 @@ select.input-field {
 }
 
 .slot-chem-name {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-strong);
   white-space: nowrap;
@@ -1347,7 +1354,7 @@ select.input-field {
 }
 
 .slot-meta {
-  padding-top: 6px;
+  padding-top: 4px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1492,16 +1499,17 @@ select.input-field {
 }
 
 .line-del-cell {
-  height: 30px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* 삭제 버튼 — 수납칸 모서리와 같은 계열의 라운드 사각형 (원형 → 사각) */
 .line-del-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
   background: var(--danger-soft);
   color: var(--danger);
   display: flex;
@@ -1515,14 +1523,14 @@ select.input-field {
   color: #fff;
 }
 
-/* 행 삭제 버튼 레일 — 카드 왼쪽 여백(패딩 28px)에 겹쳐 배치해
+/* 행 삭제 버튼 레일 — 카드 왼쪽 여백(패딩 22px)에 겹쳐 배치해
    수납칸 크기에 영향을 주지 않는다. 뷰포트와 같은 높이로 클리핑 */
 .row-del-col {
   position: absolute;
-  left: -28px;
+  left: -22px;
   top: 0;
-  width: 26px;
-  height: 474px;
+  width: 22px;
+  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1530,11 +1538,18 @@ select.input-field {
 }
 
 .row-del-cell {
-  height: 150px;
+  height: 112px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 왼쪽 여백(22px) 안에 완전히 들어가도록 행 삭제 버튼만 한 단계 작게 */
+.row-del-cell .line-del-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
 }
 
 /* 셀 등록 해제 배지 (수정 모드에서 등록된 셀 우상단) */
@@ -1543,9 +1558,9 @@ select.input-field {
   top: 6px;
   right: 6px;
   z-index: 1;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
   background: var(--danger);
   color: #fff;
   display: flex;
