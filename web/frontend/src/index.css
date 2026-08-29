@@ -1287,26 +1287,27 @@ select.input-field {
   background: transparent;
 }
 
-/* 열은 항상 3개 폭 기준 — 4열 이상이면 가로 스크롤 */
+/* 열은 항상 2개 폭 기준 — 3열 이상이면 가로 스크롤 (2×2가 카드에 꽉 차는 크기) */
 .shelf-grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols, 3), calc((100% - 24px) / 3));
+  grid-template-columns: repeat(var(--cols, 2), calc((100% - 12px) / 2));
   gap: 12px;
 }
 
+/* 2행이 뷰포트(약 364px)에 꽉 차는 높이 */
 .slot {
   position: relative;
   min-width: 0;
-  height: 112px;
+  height: 176px;
   border-radius: 16px;
 }
 
 .slot-occupied {
   background: var(--bg);
-  padding: 10px 12px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
   overflow: hidden;
 }
 
@@ -1354,7 +1355,7 @@ select.input-field {
 }
 
 .slot-meta {
-  padding-top: 4px;
+  padding-top: 6px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1499,28 +1500,24 @@ select.input-field {
 }
 
 .line-del-cell {
-  height: 24px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 삭제 버튼 — 수납칸 모서리와 같은 계열의 라운드 사각형 (원형 → 사각) */
+/* 행/열 삭제 — 해당 줄을 따라 길게 놓인 '-' 바. 그 줄 전체가 지워짐을 형태로 보여준다 */
 .line-del-btn {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
+  width: 70%;
+  height: 9px;
+  border-radius: 999px;
   background: var(--danger-soft);
-  color: var(--danger);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
+  transition: background-color 0.15s ease;
 }
 
 .line-del-btn:hover {
   background: var(--danger);
-  color: #fff;
 }
 
 /* 행 삭제 버튼 레일 — 카드 왼쪽 여백(패딩 22px)에 겹쳐 배치해
@@ -1538,18 +1535,17 @@ select.input-field {
 }
 
 .row-del-cell {
-  height: 112px;
+  height: 176px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 왼쪽 여백(22px) 안에 완전히 들어가도록 행 삭제 버튼만 한 단계 작게 */
+/* 행 삭제 바는 세로로 길게 (왼쪽 여백 레일 안) */
 .row-del-cell .line-del-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
+  width: 9px;
+  height: 70%;
 }
 
 /* 셀 등록 해제 배지 (수정 모드에서 등록된 셀 우상단) */

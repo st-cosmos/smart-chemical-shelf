@@ -7,7 +7,6 @@ import {
   FlaskConical,
   HardDrive,
   Lightbulb,
-  Minus,
   Pencil,
   Plus,
   Trash2,
@@ -155,9 +154,7 @@ function ShelfCard({
                     className="line-del-btn"
                     title={`${i + 1}열 삭제`}
                     onClick={() => deleteCol(i + 1)}
-                  >
-                    <Minus size={14} />
-                  </button>
+                  />
                 </div>
               ))}
             </div>
@@ -272,9 +269,7 @@ function ShelfCard({
                   className="line-del-btn"
                   title={`${i + 1}행 삭제`}
                   onClick={() => deleteRow(i + 1)}
-                >
-                  <Minus size={14} />
-                </button>
+                />
               </div>
             ))}
           </div>
@@ -318,7 +313,8 @@ export default function Shelves() {
         getJSON<Chemical[]>('/api/chemicals'),
       ]);
       setDevices(devs);
-      setConfigs(cfgs);
+      // 생성 순서(id) 고정 — 서버/네트워크 순서가 흔들려도 카드 위치가 유지된다
+      setConfigs([...cfgs].sort((a, b) => a.id.localeCompare(b.id)));
       setChemicals(chems);
     } catch {
       // 폴링 실패 무시

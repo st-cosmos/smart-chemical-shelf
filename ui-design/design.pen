@@ -15181,8 +15181,8 @@
                     "blur": 28
                   },
                   "layout": "vertical",
-                  "gap": 18,
-                  "padding": 28,
+                  "gap": 14,
+                  "padding": 22,
                   "children": [
                     {
                       "type": "frame",
@@ -15259,7 +15259,7 @@
                           "name": "Grid Viewport A",
                           "clip": true,
                           "width": "fill_container",
-                          "height": 474,
+                          "height": 360,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
@@ -15282,14 +15282,14 @@
                                       "name": "Slot 수납칸 A1",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -15396,14 +15396,14 @@
                                       "name": "Slot 수납칸 A2",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -15497,14 +15497,14 @@
                                       "name": "Slot 수납칸 A3",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -15597,7 +15597,7 @@
                                       "id": "aJPu7",
                                       "name": "Slot Empty 03",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -15632,14 +15632,14 @@
                                       "name": "Slot 수납칸 A5",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -15732,7 +15732,7 @@
                                       "id": "bD9dK",
                                       "name": "Slot Drop",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$primary-soft",
                                       "cornerRadius": 16,
                                       "stroke": "$primary",
@@ -15769,7 +15769,7 @@
                                       "id": "jKQlv",
                                       "name": "Slot Empty 12",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -15796,14 +15796,14 @@
                                       "name": "Slot 수납칸 A8",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -15904,7 +15904,7 @@
                                       "id": "xLPus",
                                       "name": "Slot Empty 20",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -15931,14 +15931,14 @@
                                       "name": "Slot 수납칸 A10",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -16031,7 +16031,7 @@
                                       "id": "irHOc",
                                       "name": "Slot Empty 22",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16057,7 +16057,7 @@
                                       "id": "GBWKT",
                                       "name": "Slot Empty 23",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16091,7 +16091,7 @@
                                       "id": "B8eqvT",
                                       "name": "Slot Empty 30",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16117,7 +16117,7 @@
                                       "id": "wnjxS",
                                       "name": "Slot Empty 31",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16143,7 +16143,7 @@
                                       "id": "nkkDZ",
                                       "name": "Slot Empty 32",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16169,7 +16169,7 @@
                                       "id": "adVs3",
                                       "name": "Slot Empty 33",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16204,7 +16204,7 @@
                               "name": "VScrollbar A",
                               "fill": "$bg-deep",
                               "width": 5,
-                              "height": 350
+                              "height": 260
                             },
                             {
                               "type": "rectangle",
@@ -16212,7 +16212,7 @@
                               "id": "ngkpC",
                               "layoutPosition": "absolute",
                               "x": 8,
-                              "y": 463,
+                              "y": 347,
                               "name": "HScrollbar A",
                               "fill": "$bg-deep",
                               "width": 300,
@@ -16242,8 +16242,8 @@
                     "blur": 28
                   },
                   "layout": "vertical",
-                  "gap": 18,
-                  "padding": 28,
+                  "gap": 14,
+                  "padding": 22,
                   "children": [
                     {
                       "type": "frame",
@@ -16320,7 +16320,7 @@
                           "name": "Grid Viewport B",
                           "clip": true,
                           "width": "fill_container",
-                          "height": 474,
+                          "height": 360,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
@@ -16343,14 +16343,14 @@
                                       "name": "Slot 수납칸 B1",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -16444,14 +16444,14 @@
                                       "name": "Slot 수납칸 B2",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -16544,7 +16544,7 @@
                                       "id": "C0heXX",
                                       "name": "Slot Empty B02",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16578,7 +16578,7 @@
                                       "id": "UJhv7",
                                       "name": "Slot Empty B10",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16605,14 +16605,14 @@
                                       "name": "Slot 수납칸 B5",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -16705,7 +16705,7 @@
                                       "id": "X9Wro",
                                       "name": "Slot Empty B12",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16740,14 +16740,14 @@
                                       "name": "Slot 수납칸 B7",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -16840,7 +16840,7 @@
                                       "id": "H0Swj",
                                       "name": "Slot Empty B21",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -16866,7 +16866,7 @@
                                       "id": "fMZwv",
                                       "name": "Slot Empty B22",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -19240,18 +19240,39 @@
                   ]
                 },
                 {
-                  "id": "f4kWZv",
-                  "type": "ref",
-                  "ref": "mlWhZ",
+                  "type": "frame",
+                  "id": "bGmyN",
                   "name": "Add Shelf Btn",
-                  "descendants": {
-                    "EALDX": {
-                      "icon": "plus"
+                  "fill": "$primary",
+                  "cornerRadius": 999,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zKdvU",
+                      "name": "Add Shelf Icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
                     },
-                    "HJoNQ": {
-                      "content": "새 선반 추가"
+                    {
+                      "type": "text",
+                      "id": "zu7k9",
+                      "name": "Add Shelf Text",
+                      "fill": "#FFFFFF",
+                      "content": "새 선반 추가",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
                     }
-                  }
+                  ]
                 }
               ]
             },
@@ -19387,8 +19408,8 @@
                     "blur": 28
                   },
                   "layout": "vertical",
-                  "gap": 18,
-                  "padding": 28,
+                  "gap": 14,
+                  "padding": 22,
                   "children": [
                     {
                       "type": "frame",
@@ -19539,7 +19560,7 @@
                           "name": "Col Delete Clip",
                           "clip": true,
                           "width": "fill_container",
-                          "height": 30,
+                          "height": 24,
                           "gap": 12,
                           "children": [
                             {
@@ -19547,7 +19568,7 @@
                               "id": "BCU5E",
                               "name": "Col Del 1",
                               "width": 134,
-                              "height": 30,
+                              "height": 24,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -19555,10 +19576,10 @@
                                   "type": "frame",
                                   "id": "W7na6",
                                   "name": "Col Del Btn 1",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -19581,7 +19602,7 @@
                               "id": "v2MqOF",
                               "name": "Col Del 2",
                               "width": 134,
-                              "height": 30,
+                              "height": 24,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -19589,10 +19610,10 @@
                                   "type": "frame",
                                   "id": "TlZF7",
                                   "name": "Col Del Btn 2",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -19615,7 +19636,7 @@
                               "id": "M1qXq",
                               "name": "Col Del 3",
                               "width": 134,
-                              "height": 30,
+                              "height": 24,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -19623,10 +19644,10 @@
                                   "type": "frame",
                                   "id": "EEIRH",
                                   "name": "Col Del Btn 3",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -19649,7 +19670,7 @@
                               "id": "cqWUB",
                               "name": "Col Del 4",
                               "width": 134,
-                              "height": 30,
+                              "height": 24,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -19657,10 +19678,10 @@
                                   "type": "frame",
                                   "id": "k8Ppvw",
                                   "name": "Col Del Btn 4",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -19695,7 +19716,7 @@
                           "name": "Grid Viewport A",
                           "clip": true,
                           "width": "fill_container",
-                          "height": 356,
+                          "height": 270,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
@@ -19718,14 +19739,14 @@
                                       "name": "Slot 수납칸 A1",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -19828,13 +19849,13 @@
                                           "type": "frame",
                                           "id": "YaSXe",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A1",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -19858,14 +19879,14 @@
                                       "name": "Slot 수납칸 A2",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -19955,13 +19976,13 @@
                                           "type": "frame",
                                           "id": "FLiVM",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A2",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -19985,14 +20006,14 @@
                                       "name": "Slot 수납칸 A3",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -20082,13 +20103,13 @@
                                           "type": "frame",
                                           "id": "mLh0h",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A3",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -20111,7 +20132,7 @@
                                       "id": "T7IBZT",
                                       "name": "Slot Empty 03",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20146,14 +20167,14 @@
                                       "name": "Slot 수납칸 A5",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -20243,13 +20264,13 @@
                                           "type": "frame",
                                           "id": "Z5K1ll",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A5",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -20272,7 +20293,7 @@
                                       "id": "zDoGa",
                                       "name": "Slot Drop",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20312,7 +20333,7 @@
                                       "id": "THBk0",
                                       "name": "Slot Empty 12",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20339,14 +20360,14 @@
                                       "name": "Slot 수납칸 A8",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -20436,13 +20457,13 @@
                                           "type": "frame",
                                           "id": "TPqnE",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A8",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -20473,7 +20494,7 @@
                                       "id": "M58Unb",
                                       "name": "Slot Empty 20",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20500,14 +20521,14 @@
                                       "name": "Slot 수납칸 A10",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -20597,13 +20618,13 @@
                                           "type": "frame",
                                           "id": "MDCRd",
                                           "layoutPosition": "absolute",
-                                          "x": 102,
+                                          "x": 104,
                                           "y": 6,
                                           "name": "Slot Del A10",
-                                          "width": 26,
-                                          "height": 26,
+                                          "width": 24,
+                                          "height": 24,
                                           "fill": "$danger",
-                                          "cornerRadius": 999,
+                                          "cornerRadius": 8,
                                           "justifyContent": "center",
                                           "alignItems": "center",
                                           "children": [
@@ -20626,7 +20647,7 @@
                                       "id": "sC1sc",
                                       "name": "Slot Empty 22",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20652,7 +20673,7 @@
                                       "id": "Y4I2bJ",
                                       "name": "Slot Empty 23",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20686,7 +20707,7 @@
                                       "id": "rfAdu",
                                       "name": "Slot Empty 30",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20712,7 +20733,7 @@
                                       "id": "kZTFb",
                                       "name": "Slot Empty 31",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20738,7 +20759,7 @@
                                       "id": "wweF8",
                                       "name": "Slot Empty 32",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20764,7 +20785,7 @@
                                       "id": "rAp5n",
                                       "name": "Slot Empty 33",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -20799,7 +20820,7 @@
                               "name": "VScrollbar A",
                               "fill": "$bg-deep",
                               "width": 5,
-                              "height": 200
+                              "height": 150
                             },
                             {
                               "type": "rectangle",
@@ -20807,7 +20828,7 @@
                               "id": "E146HM",
                               "layoutPosition": "absolute",
                               "x": 8,
-                              "y": 345,
+                              "y": 257,
                               "name": "HScrollbar A",
                               "fill": "$bg-deep",
                               "width": 300,
@@ -20823,7 +20844,7 @@
                           "y": 0,
                           "name": "Row Delete Col",
                           "clip": true,
-                          "height": 356,
+                          "height": 270,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
@@ -20832,7 +20853,7 @@
                               "id": "O8YRCN",
                               "name": "Row Del 1",
                               "width": 26,
-                              "height": 150,
+                              "height": 112,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -20840,10 +20861,10 @@
                                   "type": "frame",
                                   "id": "Uz0gK",
                                   "name": "Row Del Btn 1",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -20866,7 +20887,7 @@
                               "id": "KEOq8",
                               "name": "Row Del 2",
                               "width": 26,
-                              "height": 150,
+                              "height": 112,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -20874,10 +20895,10 @@
                                   "type": "frame",
                                   "id": "rmrGz",
                                   "name": "Row Del Btn 2",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -20900,7 +20921,7 @@
                               "id": "IQHNe",
                               "name": "Row Del 3",
                               "width": 26,
-                              "height": 150,
+                              "height": 112,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -20908,10 +20929,10 @@
                                   "type": "frame",
                                   "id": "I3RYHq",
                                   "name": "Row Del Btn 3",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -20934,7 +20955,7 @@
                               "id": "N1IarS",
                               "name": "Row Del 4",
                               "width": 26,
-                              "height": 150,
+                              "height": 112,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
@@ -20942,10 +20963,10 @@
                                   "type": "frame",
                                   "id": "ZMvPS",
                                   "name": "Row Del Btn 4",
-                                  "width": 26,
-                                  "height": 26,
+                                  "width": 24,
+                                  "height": 24,
                                   "fill": "$danger-soft",
-                                  "cornerRadius": 999,
+                                  "cornerRadius": 8,
                                   "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
@@ -21067,8 +21088,8 @@
                     "blur": 28
                   },
                   "layout": "vertical",
-                  "gap": 18,
-                  "padding": 28,
+                  "gap": 14,
+                  "padding": 22,
                   "children": [
                     {
                       "type": "frame",
@@ -21145,7 +21166,7 @@
                           "name": "Grid Viewport B",
                           "clip": true,
                           "width": "fill_container",
-                          "height": 474,
+                          "height": 360,
                           "layout": "vertical",
                           "gap": 12,
                           "children": [
@@ -21168,14 +21189,14 @@
                                       "name": "Slot 수납칸 B1",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -21269,14 +21290,14 @@
                                       "name": "Slot 수납칸 B2",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -21369,7 +21390,7 @@
                                       "id": "QyrcE",
                                       "name": "Slot Empty B02",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -21403,7 +21424,7 @@
                                       "id": "vwL2j",
                                       "name": "Slot Empty B10",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -21430,14 +21451,14 @@
                                       "name": "Slot 수납칸 B5",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -21530,7 +21551,7 @@
                                       "id": "Q37ta",
                                       "name": "Slot Empty B12",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -21565,14 +21586,14 @@
                                       "name": "Slot 수납칸 B7",
                                       "clip": true,
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "$bg",
                                       "cornerRadius": 16,
                                       "layout": "vertical",
                                       "gap": 3,
                                       "padding": [
-                                        12,
-                                        14
+                                        10,
+                                        12
                                       ],
                                       "children": [
                                         {
@@ -21665,7 +21686,7 @@
                                       "id": "e9ZQ4i",
                                       "name": "Slot Empty B21",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",
@@ -21691,7 +21712,7 @@
                                       "id": "x2eqYG",
                                       "name": "Slot Empty B22",
                                       "width": 134,
-                                      "height": 150,
+                                      "height": 112,
                                       "fill": "#FFFFFF00",
                                       "cornerRadius": 16,
                                       "stroke": "$border",

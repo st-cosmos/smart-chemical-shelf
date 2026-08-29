@@ -28,7 +28,9 @@ def get_shelves(db: Session = Depends(get_db)):
 
 @router.get("/configs")
 def get_shelf_configs(db: Session = Depends(get_db)):
-    configs = db.query(models.ShelfConfig).all()
+    # id(생성 순서: A, B, C…) 기준 고정 정렬 — 정렬이 없으면 Postgres 가 UPDATE 된
+    # 행을 뒤로 보내서, 방금 수정한 선반이 화면 뒤쪽으로 튀는 문제가 있었다
+    configs = db.query(models.ShelfConfig).order_by(models.ShelfConfig.id).all()
     return configs
 
 @router.post("/configs/{shelf_id}")
