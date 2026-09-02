@@ -74,26 +74,24 @@ west build -b nrf52840dk/nrf52840 --sysbuild -p always .
 
 ## 4. Android Application (`android-app`)
 
-CameraX와 ML Kit OCR(KoreanTextRecognizer)을 이용하여 시약병의 라벨 텍스트를 인식하고, 특정 시약 키워드가 감지되면 FastAPI 기반의 LED 제어 서버에 PUT 요청을 보냅니다.
+CameraX 프레임을 ML Kit(한국어 OCR + 바코드)으로 읽어 시약병 라벨의 **원문 텍스트와 바코드를 그대로 서버로 보내고**, 매칭·판정은 전부 서버(`web/matching.py`)가 담당합니다. 앱에는 고정 키워드 리스트가 없어 새 시약도 코드 수정 없이 인식 대상에 들어옵니다.
 
-### 주요 기능
-- **CameraX Preview & Image Analysis**: 실시간으로 카메라 프레임을 읽어옵니다.
-- **ML Kit Text Recognition**: 한국어/영어/숫자를 실시간으로 인식합니다.
-- **특정 키워드 감지**: 
-  - 감지 키워드 리스트: `ETHANOL`, `METHANOL`, `ACETONE`, `ACID`, `WATER`, `SODIUM`, `에탄올`, `메탄올`, `아세톤`, `염산`, `황산`, `질산`, `수산화나트륨`
-  - 키워드가 인식되면 서버에 `on = true` 상태를 전송하여 LED를 켭니다.
-  - 키워드가 감지되지 않으면 `on = false` 상태를 전송하여 LED를 끕니다.
-- **Retrofit 통신**: `PUT /api/led` 엔드포인트를 통해 LED 상태 변경 명령을 전송합니다.
+### 인식 파이프라인
+- **온디바이스 신호 추출**: CameraX ImageAnalysis 프레임마다 ML Kit KoreanTextRecognizer(OCR)와 BarcodeScanning(QR/DataMatrix/EAN/Code128 등)을 동시에 실행합니다. 기기에서는 이름을 판정하지 않고 신호만 모읍니다.
+- **스캔 안정화** (`ChemicalScanner.kt`): OCR 텍스트를 5프레임 슬라이딩 윈도우로 누적하고, 바코드는 4초 TTL 유지, 서버 매칭 호출은 900ms 간격으로 제한합니다.
+- **서버 매칭** (`POST /api/chemicals/match`): 바코드 > CAS 번호(체크섬 검증) > 별칭 정확일치 > 부분일치 > 퍼지 순으로 DB 등록 시약과 대조합니다. 확신도에 따라 자동 확정(≥0.9) / "이 시약이 맞나요?" 확인 모달(≥0.65) / 계속 스캔으로 나뉩니다.
+- **학습 루프** (`POST /api/chemicals/match/confirm`): 사용자가 확인·수동 선택한 결과가 별칭/바코드 사전(`ChemicalAlias`, `BarcodeMap`)에 저장되어, 처음 보는 시약도 한 번 알려주면 다음부터 자동 인식됩니다.
+- **반입/반출 확정**: 매칭 후 `scan-in`/`scan-out` 세션을 열고, 선반 로드셀의 무게 증감으로 실제 놓기/집기를 검증합니다.
 
 ### 연동 서버 설정
-`MainActivity.kt` 의 `BASE_URL`을 LED 제어 서버 주소로 변경하여 빌드하십시오.
+`NetworkClient.kt` 의 `BASE_URL`을 웹 서버 주소로 변경하여 빌드하십시오.
 (예: 에뮬레이터 `http://10.0.2.2:8000/`, 실제 기기 `http://<PC-IP>:8000/`)
 
 ---
 
 ## 주요 기능 흐름
 
-1. **전력 모드** ([docs/power-modes.md](docs/power-modes.md)): 앱 PIN 로그인 시 서버가 세션을 등록하고, 게이트웨이가 이를 감지해 모든 선반 노드를 깨웁니다(ACTIVE: 수신 상시 ON + 0.2초 측정). 로그아웃(또는 30분 TTL)하면 노드들은 IDLE 로 돌아가 슬립합니다(SED 1초 폴 + 2초 측정 + LED 소등) — 평균 소모 약 5 mA → 1 mA 급.
+1. **전력 모드** ([docs/power-modes.md](docs/power-modes.md)): 앱 PIN 로그인 시 서버가 세션을 등록하고, 게이트웨이가 이를 감지해 모든 선반 노드를 깨웁니다(ACTIVE: 수신 상시 ON + 0.2초 측정). 로그아웃(또는 30분 TTL)하면 노드들은 IDLE 로 돌아가 슬립합니다(SED 3초 폴 + 2초 측정 + LED 소등) — 평균 소모 약 5 mA → 1 mA 급.
 2. **LED 상태 동기화**: 웹 대시보드에서 LED 상태를 제어(`PUT /api/led/{id}`)하거나 안드로이드 앱에서 라벨 인식을 수행하면, 게이트웨이가 `GET /api/led/{id}` 폴링으로 변화를 감지해(서버 쪽 온라인 하트비트 겸용) ACTIVE 노드에 `PUT shelf/led` 로 즉시 푸시합니다 (노드에는 5초 백업 폴만 남음).
 3. **무게 업로드**: 노드가 모드별 주기(IDLE 2초 게이트 측정 / ACTIVE 0.2초 상시 측정)로 CS1237 을 읽고, 직전 보고 대비 임계값 이상 변하고 연속 측정이 10g 이내로 안정됐을 때만 CoAP 로 게이트웨이에 보고합니다 (변화가 없어도 30초/10초 하트비트). 게이트웨이는 이를 `POST /api/weight/{id}` (그램 + 배터리 %) 로 전달하고, 웹 페이지는 무게 그래프·잔량 및 반입/반출 세션 판정에 사용합니다.
 4. **배터리 잔량**: 노드가 보고마다 SAADC 내부 VDDH/5 탭으로 배터리 전압을 함께 보내고, 게이트웨이가 % 로 환산해 서버 `battery` 필드로 올립니다 (USB 전원 중에는 미보고로 마지막 값 유지).

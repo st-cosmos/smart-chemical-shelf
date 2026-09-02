@@ -52,8 +52,5 @@
             android:name=".InventoryActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
     </application>
 </manifest>

@@ -3,7 +3,6 @@ package com.example.cameramessage
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 
 /**
@@ -133,16 +132,4 @@ interface ApiService {
 
     @POST("api/checkout-session/cancel")
     suspend fun cancelCheckoutSession(): Map<String, String>
-
-    // --- LED (ESP8266 로드셀 모듈 LED 제어) ---
-    @GET("api/led/{device_id}")
-    suspend fun getDevice(
-        @Path("device_id") deviceId: String
-    ): DeviceState
-
-    @PUT("api/led/{device_id}")
-    suspend fun setDevice(
-        @Path("device_id") deviceId: String,
-        @Body command: DeviceCommand
-    ): DeviceState
 }
